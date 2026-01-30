@@ -1,0 +1,72 @@
+name: vChat
+version: ${version}
+main: me.marti.vchat.VChat
+api-version: 1.21
+authors: [mtynnn]
+depend: [LuckPerms]
+softdepend: [PlaceholderAPI]
+commands:
+  vchat:
+    description: Main command for vChat
+    usage: /vchat help
+  showitem:
+    description: Show your item in chat
+    usage: /showitem
+    permission: vchat.showitem
+permissions:
+  vchat.admin:
+    description: Permiso de administrador completo.
+    default: op
+  vchat.reload:
+    description: Permite recargar la configuración.
+    default: op
+  vchat.notify:
+    description: Permite ver comandos de notificación.
+    default: op
+  vchat.notify.auto:
+    description: Recibe notificaciones automáticamente al entrar.
+    default: op
+  vchat.showitem:
+    description: Permite usar /showitem.
+    default: true
+
+  # Bypass Filters
+  vchat.bypass.spam:
+    description: Bypass del filtro de spam.
+    default: op
+  vchat.bypass.caps:
+    description: Bypass del filtro de mayúsculas.
+    default: op
+  vchat.bypass.ads:
+    description: Bypass del filtro de publicidad.
+    default: op
+  vchat.bypass.profanity:
+    description: Bypass del filtro de groserías.
+    default: op
+  vchat.bypass.all:
+    description: Bypass de todos los filtros.
+    default: op
+    children:
+      vchat.bypass.spam: true
+      vchat.bypass.caps: true
+      vchat.bypass.ads: true
+      vchat.bypass.profanity: true
+
+  # Formatting Permissions
+  vchat.format.color.basic:
+    description: Permite usar colores básicos (&a-f, 0-9) y tags MiniMessage básicos (<red>).
+    default: op
+  vchat.format.color.hex:
+    description: Permite usar colores HEX (&#, <#>) y gradientes.
+    default: op
+  vchat.format.style.basic:
+    description: Permite estilos básicos (&l,n,o,m) y tags (<bold>, etc).
+    default: op
+  vchat.format.style.magic:
+    description: Permite estilo mágico (&k, <obfuscated>).
+    default: op
+
+  # Mention Permission
+  vchat.mention:
+    description: Permite mencionar a otros jugadores.
+    default: true
