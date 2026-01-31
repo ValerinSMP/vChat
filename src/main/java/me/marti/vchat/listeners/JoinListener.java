@@ -15,8 +15,10 @@ public class JoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        // Load persistences
+        // Load data async or sync? PDC is sync usually but fast.
         plugin.getAdminManager().loadData(event.getPlayer());
         plugin.getMentionManager().loadData(event.getPlayer());
+        plugin.getPrivateMessageManager().loadData(event.getPlayer());
+        plugin.getIgnoreManager().loadData(event.getPlayer());
     }
 }

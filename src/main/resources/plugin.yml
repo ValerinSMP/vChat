@@ -13,6 +13,44 @@ commands:
     description: Show your item in chat
     usage: /showitem
     permission: vchat.showitem
+  msg:
+    description: Send a private message
+    usage: /msg <player> <message>
+    aliases: [w, tell, whisper, dm]
+    permission: vchat.msg
+  reply:
+    description: Reply to the last message
+    usage: /reply <message>
+    aliases: [r]
+    permission: vchat.reply
+  togglemsg:
+    description: Toggle private messages
+    usage: /togglemsg
+    aliases: [tmsg]
+    permission: vchat.togglemsg
+  spychat:
+    description: Toggle social spy
+    usage: /spychat
+    aliases: [spy]
+    permission: vchat.spychat
+  togglechat:
+    description: Toggle YOUR view of global chat
+    usage: /togglechat
+    permission: vchat.togglechat
+  mutechat:
+    description: Mute global chat for everyone
+    usage: /mutechat
+    aliases: [globalmute]
+    permission: vchat.mutechat
+  ignore:
+    description: Toggle ignoring a player
+    usage: /ignore <player>
+    permission: vchat.ignore
+  togglementions:
+    description: Alternar menciones
+    usage: /togglementions
+    permission: vchat.togglementions
+
 permissions:
   vchat.admin:
     description: Permiso de administrador completo.
@@ -29,6 +67,36 @@ permissions:
   vchat.showitem:
     description: Permite usar /showitem.
     default: true
+  vchat.msg:
+    description: Permite enviar mensajes privados.
+    default: true
+  vchat.reply:
+    description: Permite responder mensajes privados.
+    default: true
+  vchat.togglemsg:
+    description: Permite activar/desactivar mensajes privados.
+    default: true
+  vchat.spychat:
+    description: Permite ver mensajes privados ajenos.
+    default: op
+  vchat.bypass.msg:
+    description: Permite enviar mensajes a quien los tenga desactivados.
+    default: op
+  vchat.togglechat:
+    description: Permite activar/desactivar el chat para uno mismo.
+    default: true
+  vchat.mutechat:
+    description: Permite silenciar el chat global para todos.
+    default: op
+  vchat.bypass.togglechat:
+    description: Permite hablar cuando el chat está desactivado.
+    default: op
+  vchat.ignore:
+    description: Permite ignorar jugadores.
+    default: true
+  vchat.bypass.ignore:
+    description: Evita ser ignorado.
+    default: op
 
   # Bypass Filters
   vchat.bypass.spam:
@@ -69,4 +137,7 @@ permissions:
   # Mention Permission
   vchat.mention:
     description: Permite mencionar a otros jugadores.
+    default: true
+  vchat.togglementions:
+    description: Permite activar/desactivar menciones.
     default: true

@@ -1,0 +1,55 @@
+# ---------------------------------------------------------
+# vChat - Formatos de Chat
+# ---------------------------------------------------------
+
+# Formato de chat por defecto si no se encuentra grupo
+chat-format: "%vteams_display%{prefix} <#a2a9b5>{displayname}%supremetags_tag%<#a2a9b5>: {message}"
+
+# Hover del Nombre (Tooltip al pasar el mouse sobre {name} o {displayname})
+# Soporta PAPI y MiniMessage.
+# Si lo dejas vacío [], se desactiva.
+name-hover:
+  - '%luckperms_primary_group_name% &f%player_name%'
+  - '&8&m0                                           0&r'
+  - '&#fc0000✔ &fIngreso: &#fc0000%player_first_join_date%'
+  - '&#2ECC71$ &fDinero: &#2ECC71%royaleeconomy_balance_purse%⛃ &#FFCA28(%royaleeconomy_balance_bank%)'
+  - '&#FF55AA★ &fShards: &#FF55AA%reconomy-shards_balance%◎'
+  - '&#fce300⌚ &fHoras Jugadas: &#fce300%statistic_hours_played%h %statistic_minutes_played%m'
+  - '&#fc8c00⚔ &fClan: &8%justteams_plain_name%'
+  - '&8&m0                                           0&r'
+  - '&7Clic para enviar mensaje privado'
+
+# Formato de Ítem al usar [item] o [i]
+# {amount} = Cantidad, {item} = Nombre del ítem (con hover nativo)
+item-format: "<dark_gray>[</dark_gray><aqua>{amount}x {item}</aqua><dark_gray>]</dark_gray>"
+
+# Mensaje del comando /showitem
+show-item-message: "{prefix} <gray>{name}</gray> <white>está sosteniendo</white> {item}"
+show-item-error: "<red>Debes sostener un ítem para enseñarlo.</red>"
+
+# Título de la GUI de Item View
+item-view-title: "Inspeccionar Ítem"
+
+# Establece el formato por grupo.
+# Nota: Los grupos se toman de LuckPerms (group.<nombre>).
+group-formats:
+  # Default / Miembro
+  default: "%vteams_display%<#a2a9b5>{displayname}%supremetags_tag%<reset><white>: <#bbc6d5>{message}"
+  # Guardian
+  guardian: "%vteams_display%{prefix} <#50b5e8>{displayname}%supremetags_tag%<reset>: {message}"
+  # Ascendido
+  ascendido: "%vteams_display%{prefix} <#9ce942>{displayname}%supremetags_tag%<reset>: {message}"
+  # Arcano
+  arcano: "%vteams_display%{prefix} <#d97db3>{displayname}%supremetags_tag%<reset>: {message}"
+  # Elite
+  elite: "%vteams_display%{prefix} <#f6558e>{displayname}%supremetags_tag%<reset>: {message}"
+  # Leyenda
+  leyenda: "%vteams_display%{prefix} <gradient:#ffba60:#cf4b15>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
+  # Helper
+  helper: "%vteams_display%{prefix} <gradient:#50ffc5:#009985>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
+  # Moderador
+  mod: "%vteams_display%{prefix} <gradient:#ffaf20:#a03005>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
+  # Admin
+  admin: "%vteams_display%{prefix} <gradient:#ff7a40:#b02000>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
+  # Owner
+  owner: "%vteams_display%{prefix} <gradient:#e03535:#651520>{displayname}</gradient>%supremetags_tag%<reset>: {message}"

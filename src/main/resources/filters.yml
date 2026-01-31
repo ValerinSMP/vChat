@@ -1,0 +1,64 @@
+# ---------------------------------------------------------
+# vChat - Filtros de Chat
+# ---------------------------------------------------------
+
+# Check de Spam (Repetición y Similitud)
+spam:
+  enabled: true
+  similarity-threshold: 80 # Porcentaje de similitud para considerar spam
+  cooldown: 3 # Segundos minímos entre mensajes idénticos
+  lines:
+    - ""
+    - "&#FF6961No hagas spam en el chat, espera %time%s."
+    - ""
+
+# Check de Mayúsculas (Caps)
+caps:
+  enabled: true
+  percentage: 50 # % máximo de mayúsculas permitido
+  min-length: 5 # Longitud mínima del mensaje para revisar caps
+  # No hay mensaje de bloqueo porque se corrige automáticamente a minúsculas
+
+# Check de Publicidad (IPs y Dominios)
+ads:
+  enabled: true
+  whitelist:
+    - "tiktok\\.com/@valerinsmp_oficial"
+    - "instagram\\.com/valerinsmp"
+    - "youtube\\.com/@valerinnetwork"
+    - "discord\\.valerinsmp\\.com"
+    - "tienda\\.valerinsmp\\.com"
+    - "play\\.valerinsmp\\.com"
+    # Common Socials (allow generic domain but can be strict if needed)
+    - "youtube\\.com"
+    - "tiktok\\.com"
+    - "instagram\\.com"
+  lines:
+    - ""
+    - "&#FF6961Prohibido enviar publicidad de otros servidores."
+    - ""
+
+# Check de Lenguaje Ofensivo (Groserías)
+profanity:
+  enabled: true
+  words: 
+    - "nigger"
+    - "fuck"
+    - "shit"
+    - "bitch"
+    - "asshole"
+    - "motherfucker"
+    - "cunt"
+    - "bastard"
+    - "hell"
+    - "damn"
+    - "goddamn"
+    - "bitch"
+    - "asshole"
+    - "motherfucker"
+    - "cunt"
+    - "bastard"
+    - "hell"
+    - "damn"
+    - "goddamn"
+  # Se reemplaza por ****

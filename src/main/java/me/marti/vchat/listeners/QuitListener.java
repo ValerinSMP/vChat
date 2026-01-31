@@ -17,5 +17,7 @@ public class QuitListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         plugin.getAdminManager().unloadData(event.getPlayer());
         plugin.getMentionManager().unloadData(event.getPlayer());
+        plugin.getPrivateMessageManager().unloadData(event.getPlayer());
+        plugin.getIgnoreManager().unloadData(event.getPlayer());
     }
 }

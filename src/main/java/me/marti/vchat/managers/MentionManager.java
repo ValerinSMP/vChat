@@ -58,10 +58,10 @@ public class MentionManager {
         setMentionsEnabled(player, newState);
 
         if (newState) {
-            plugin.getAdminManager().sendConfigMessage(player, "messages.mentions-enabled");
+            plugin.getAdminManager().sendConfigActionBar(player, "messages.mentions-enabled");
             plugin.getAdminManager().playSound(player, "sounds.toggle-on");
         } else {
-            plugin.getAdminManager().sendConfigMessage(player, "messages.mentions-disabled");
+            plugin.getAdminManager().sendConfigActionBar(player, "messages.mentions-disabled");
             plugin.getAdminManager().playSound(player, "sounds.toggle-off");
         }
     }
@@ -69,7 +69,7 @@ public class MentionManager {
     private final java.util.Map<java.util.UUID, Long> cooldowns = new java.util.HashMap<>();
 
     public String processMentions(Player sender, String message) {
-        if (!plugin.getConfig().getBoolean("mentions.enabled"))
+        if (!plugin.getConfigManager().getMentions().getBoolean("enabled")) // Removed 'mentions.' prefix as root is mentions.yml
             return message;
         if (!sender.hasPermission("vchat.mention"))
             return message;
@@ -87,7 +87,7 @@ public class MentionManager {
 
             // Check if target exists, can be seen, AND has mentions enabled
             if (target != null && !target.equals(sender) && sender.canSee(target) && areMentionsEnabled(target)) {
-                String color = plugin.getConfig().getString("mentions.color", "&e");
+                String color = plugin.getConfigManager().getMentions().getString("color", "&e");
                 String replacement = color + "@" + targetName + "&r";
 
                 matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
@@ -117,7 +117,7 @@ public class MentionManager {
         if (sender.hasPermission("vchat.bypass.cooldown"))
             return false;
         long last = cooldowns.getOrDefault(sender.getUniqueId(), 0L);
-        int cooldownSec = plugin.getConfig().getInt("mentions.cooldown", 5);
+        int cooldownSec = plugin.getConfigManager().getMentions().getInt("cooldown", 5);
         return (System.currentTimeMillis() - last) < (cooldownSec * 1000L);
     }
 
@@ -127,7 +127,7 @@ public class MentionManager {
 
     private void notifyTarget(Player sender, Player target) {
         // Sound
-        String soundName = plugin.getConfig().getString("mentions.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
+        String soundName = plugin.getConfigManager().getMentions().getString("sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
         try {
             Sound sound = Sound.valueOf(soundName.toUpperCase());
             target.playSound(target.getLocation(), sound, 1.0f, 1.0f);
@@ -136,7 +136,7 @@ public class MentionManager {
         }
 
         // Actionbar
-        String actionMsg = plugin.getConfig().getString("mentions.actionbar");
+        String actionMsg = plugin.getConfigManager().getMentions().getString("actionbar");
         if (actionMsg != null && !actionMsg.isEmpty()) {
             actionMsg = actionMsg.replace("%player%", sender.getName());
             target.sendActionBar(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacyAmpersand()

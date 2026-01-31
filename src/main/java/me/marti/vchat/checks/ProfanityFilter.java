@@ -11,29 +11,33 @@ public class ProfanityFilter implements ChatFilter {
 
     private final VChat plugin;
 
+    private final java.util.List<Pattern> cachedPatterns = new java.util.ArrayList<>();
+
     public ProfanityFilter(VChat plugin) {
         this.plugin = plugin;
+        loadPatterns();
     }
 
-    private final java.util.Map<String, Pattern> patternCache = new java.util.HashMap<>();
+    private void loadPatterns() {
+        cachedPatterns.clear();
+        List<String> badWords = plugin.getConfig().getStringList("filters.profanity.words");
+        for (String word : badWords) {
+            cachedPatterns.add(createRobustPattern(word));
+        }
+    }
 
     @Override
     public FilterResult check(Player player, String message) {
-        List<String> badWords = plugin.getConfig().getStringList("filters.profanity.words");
-        if (badWords.isEmpty())
+        if (cachedPatterns.isEmpty())
             return FilterResult.allowed();
 
         boolean modified = false;
         String tempMessage = message;
 
-        for (String word : badWords) {
-            // Get or create robust pattern
-            Pattern p = patternCache.computeIfAbsent(word, this::createRobustPattern);
-
+        for (Pattern p : cachedPatterns) {
             Matcher m = p.matcher(tempMessage);
             if (m.find()) {
                 // Replace with ****
-                // reset matcher to start to handle multiple
                 m.reset();
                 StringBuffer sb = new StringBuffer();
                 while (m.find()) {

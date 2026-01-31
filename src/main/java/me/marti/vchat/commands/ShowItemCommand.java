@@ -41,14 +41,14 @@ public class ShowItemCommand implements CommandExecutor {
 
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType() == Material.AIR) {
-            String errorMsg = plugin.getConfig().getString("show-item-error",
+            String errorMsg = plugin.getConfigManager().getFormats().getString("show-item-error",
                     "<red>You must be holding an item to show it.</red>");
             player.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(errorMsg));
             return true;
         }
 
         // Get format
-        String format = plugin.getConfig().getString("show-item-message",
+        String format = plugin.getConfigManager().getFormats().getString("show-item-message",
                 "{prefix}<gray>{name}</gray> <white>is holding</white> {item}");
 
         // 0. Get LuckPerms Data (Same logic as MessageProcessor)

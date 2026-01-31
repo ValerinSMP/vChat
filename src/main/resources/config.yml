@@ -1,168 +1,17 @@
-# vChat Configuración Principal
-# Soporta tanto formato Legacy (&a, &#FF0000) como MiniMessage (<red>, <gradient:red:blue>)
-
-# Formato de chat por defecto si no se encuentra grupo
-chat-format: "%vteams_display%{prefix}<#a2a9b5>{displayname}%supremetags_tag%<#a2a9b5>: {message}"
-
-# Hover del Nombre (Tooltip al pasar el mouse sobre {name} o {displayname})
-# Soporta PAPI y MiniMessage.
-# Si lo dejas vacío [], se desactiva.
-name-hover:
-  - '%luckperms_primary_group_name% &f%player_name%'
-  - '&8&m0                                           0&r'
-  - '&#fc0000✔ &fIngreso: &#fc0000%player_first_join_date%'
-  - '&#2ECC71$ &fDinero: &#2ECC71%royaleeconomy_balance_purse%⛃ &#FFCA28(%royaleeconomy_balance_bank%)'
-  - '&#FF55AA★ &fShards: &#FF55AA%reconomy-shards_balance%◎'
-  - '&#fce300⌚ &fHoras Jugadas: &#fce300%statistic_hours_played%h %statistic_minutes_played%m'
-  - '&#fc8c00⚔ &fClan: &8%justteams_plain_name%'
-  - '&8&m0                                           0&r'
-  - '&7Clic para enviar mensaje privado'
-
-# Formato de Ítem al usar [item] o [i]
-# {amount} = Cantidad, {item} = Nombre del ítem (con hover nativo)
-item-format: "<dark_gray>[</dark_gray><aqua>{amount}x {item}</aqua><dark_gray>]</dark_gray>"
-
-# Mensaje del comando /showitem
-show-item-message: "{prefix}<gray>{name}</gray> <white>está sosteniendo</white> {item}"
-show-item-error: "<red>Debes sostener un ítem para enseñarlo.</red>"
-
-# Título de la GUI de Item View
-item-view-title: "Inspeccionar Ítem"
-
-# Establece el formato por grupo.
-# Nota: Los grupos se toman de LuckPerms (group.<nombre>).
-group-formats:
-  # Default / Miembro
-  default: "%vteams_display%<#a2a9b5>{displayname}%supremetags_tag%<reset><white>: <#bbc6d5>{message}"
-  # Guardian
-  guardian: "%vteams_display%{prefix}<#50b5e8>{displayname}%supremetags_tag%<reset>: {message}"
-  # Ascendido
-  ascendido: "%vteams_display%{prefix}<#9ce942>{displayname}%supremetags_tag%<reset>: {message}"
-  # Arcano
-  arcano: "%vteams_display%{prefix}<#d97db3>{displayname}%supremetags_tag%<reset>: {message}"
-  # Elite
-  elite: "%vteams_display%{prefix}<#f6558e>{displayname}%supremetags_tag%<reset>: {message}"
-  # Leyenda
-  leyenda: "%vteams_display%{prefix}<gradient:#ffba60:#cf4b15>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
-  # Helper
-  helper: "%vteams_display%{prefix}<gradient:#50ffc5:#009985>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
-  # Moderador
-  mod: "%vteams_display%{prefix}<gradient:#ffaf20:#a03005>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
-  # Admin
-  admin: "%vteams_display%{prefix}<gradient:#ff7a40:#b02000>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
-  # Owner
-  owner: "%vteams_display%{prefix}<gradient:#e03535:#651520>{displayname}</gradient>%supremetags_tag%<reset>: {message}"
-
 # ---------------------------------------------------------
-# Módulo de Filtros de Chat
+# vChat - Configuración Principal
 # ---------------------------------------------------------
-filters:
-  # Check de Spam (Repetición y Similitud)
-  spam:
-    enabled: true
-    similarity-threshold: 80 # Porcentaje de similitud para considerar spam
-    cooldown: 3 # Segundos minímos entre mensajes idénticos
-    lines:
-      - ""
-      - "&#FF6961No hagas spam en el chat, espera %time%s."
-      - ""
 
-  # Check de Mayúsculas (Caps)
-  caps:
-    enabled: true
-    percentage: 50 # % máximo de mayúsculas permitido
-    min-length: 5 # Longitud mínima del mensaje para revisar caps
-    # No hay mensaje de bloqueo porque se corrige automáticamente a minúsculas
-
-  # Check de Publicidad (IPs y Dominios)
-  ads:
-    enabled: true
-    whitelist:
-      - "tiktok\\.com/@valerinsmp_oficial"
-      - "instagram\\.com/valerinsmp"
-      - "youtube\\.com/@valerinnetwork"
-      - "discord\\.valerinsmp\\.com"
-      - "tienda\\.valerinsmp\\.com"
-      - "play\\.valerinsmp\\.com"
-      # Common Socials (allow generic domain but can be strict if needed)
-      - "youtube\\.com"
-      - "tiktok\\.com"
-      - "instagram\\.com"
-    lines:
-      - ""
-      - "&#FF6961Prohibido enviar publicidad de otros servidores."
-      - ""
-
-  # Check de Lenguaje Ofensivo (Groserías)
-  profanity:
-    enabled: true
-    words: 
-      - "nigger"
-      - "fuck"
-      - "shit"
-      - "bitch"
-      - "asshole"
-      - "motherfucker"
-      - "cunt"
-      - "bastard"
-      - "hell"
-      - "damn"
-      - "goddamn"
-      - "bitch"
-      - "asshole"
-      - "motherfucker"
-      - "cunt"
-      - "bastard"
-      - "hell"
-      - "damn"
-      - "goddamn"
-    # Se reemplaza por ****
-
-# ---------------------------------------------------------
-# Módulo de Menciones (@Usuario)
-# ---------------------------------------------------------
-mentions:
-  enabled: true
-  color: "&e"
-  sound: "ENTITY_EXPERIENCE_ORB_PICKUP" # Sonido para el mencionado
-  actionbar: "&e¡%player% te ha mencionado!"
-  cooldown: 5 # Segundos de espera para volver a mencionar al mismo usuario
-
-# ---------------------------------------------------------
 # Logging (Registro de Violaciones)
-# ---------------------------------------------------------
 logging:
   enabled: true
   file: "violations.log"
   # Variables: %date%, %player%, %reason%, %message%
   format: "[%date%] Player: %player% | Reason: %reason% | Original: %message%"
 
-# ---------------------------------------------------------
-# Mensajes del Sistema
-# ---------------------------------------------------------
-messages:
-  prefix: "&8[&bvChat&8] "
-  reload: "&aConfiguración recargada correctamente."
-  no-permission: "&cNo tienes permiso para esto."
-  notify-enabled: "&aNotificaciones de admin activadas."
-  notify-disabled: "&cNotificaciones de admin desactivadas."
-  mentions-enabled: "&aHas activado las menciones."
-  mentions-disabled: "&cHas desactivado las menciones."
-  admin-notify:
-    - ""
-    - "&#FF6961%player% fue marcado por: %reason%."
-    - "&cMensaje: &r%message%"
-    - ""
-  count-message: "&e%player% tiene %count% violaciones en esta sesión."
-  placeholders:
-    enabled: "&aActivado"
-    disabled: "&cDesactivado"
-
-# ---------------------------------------------------------
-# Sonidos
-# ---------------------------------------------------------
+# Sonidos Generales
 sounds:
   reload: "ENTITY_PLAYER_LEVELUP"
-  blocked: "ENTITY_VILLAGER_NO"
+  blocked: "BLOCK_NOTE_BLOCK_BASS"
   toggle-on: "BLOCK_NOTE_BLOCK_PLING"
   toggle-off: "BLOCK_NOTE_BLOCK_BASS"

@@ -1,0 +1,25 @@
+# ---------------------------------------------------------
+# vChat - Mensajes Privados
+# ---------------------------------------------------------
+
+# Formatos de Mensaje Privado
+# Soporta MiniMessage (gradientes, colores hex) y Legacy.
+# Variables: {sender}, {receiver}, {message}
+
+# Formato para el que ENVÍA (Tú -> Él)
+outgoing: "<#FDFD96>Tú <gray>-> <#FDFD96><receiver>: <white><message>"
+
+# Formato para el que RECIBE (Él -> Tú)
+incoming: "<#FDFD96><sender> <gray>-> <#FDFD96>Tú: <white><message>"
+
+# SpyChat (Formato visto por admins) - Purple/Pink
+spy-format: "<gradient:#D8BFD8:#FFB7C5>[Spy] <sender> -> <receiver>: <message></gradient>"
+
+sounds:
+  message-send: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  message-receive: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  toggle-on: "BLOCK_NOTE_BLOCK_PLING"
+  toggle-off: "BLOCK_NOTE_BLOCK_BASS"
+  blocked: "BLOCK_NOTE_BLOCK_BASS"
+  ignore: "BLOCK_NOTE_BLOCK_BASS"
+  unignore: "BLOCK_NOTE_BLOCK_PLING"

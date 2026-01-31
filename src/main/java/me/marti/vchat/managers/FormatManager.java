@@ -23,15 +23,15 @@ public class FormatManager {
         String group = user.getPrimaryGroup();
 
         // Check for group-specific format
-        String format = plugin.getConfig().getString("group-formats." + group);
+        String format = plugin.getConfigManager().getFormats().getString("group-formats." + group);
 
         // Fallback to default format
         if (format == null) {
-            format = plugin.getConfig().getString("chat-format");
+            format = plugin.getConfigManager().getFormats().getString("chat-format");
         }
 
         if (format == null) {
-            return "<red>Error: Chat format not defined in config!</red>";
+            return "<red>Error: Chat format not defined in formats.yml!</red>";
         }
 
         return format;

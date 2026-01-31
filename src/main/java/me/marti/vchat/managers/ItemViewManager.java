@@ -42,7 +42,7 @@ public class ItemViewManager {
             return;
         }
 
-        String title = plugin.getConfig().getString("item-view-title", "Item View");
+        String title = plugin.getConfigManager().getFormats().getString("item-view-title", "Item View");
         Inventory inv = Bukkit.createInventory(new ItemViewHolder(), org.bukkit.event.inventory.InventoryType.DISPENSER,
                 MiniMessage.miniMessage().deserialize(title));
 

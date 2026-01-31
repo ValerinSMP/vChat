@@ -22,21 +22,21 @@ public class FilterManager {
 
     public void loadFilters() {
         filters.clear();
-        boolean enableAll = plugin.getConfig().getBoolean("filters.enable-all", true);
+        boolean enableAll = plugin.getConfigManager().getFilters().getBoolean("filters.enable-all", true);
         if (!enableAll)
             return;
 
         // Register Filters (Instantiation happens here later)
-        if (plugin.getConfig().getBoolean("filters.spam.enabled", true)) {
+        if (plugin.getConfigManager().getFilters().getBoolean("filters.spam.enabled", true)) {
             filters.add(new me.marti.vchat.checks.SpamFilter(plugin));
         }
-        if (plugin.getConfig().getBoolean("filters.caps.enabled", true)) {
+        if (plugin.getConfigManager().getFilters().getBoolean("filters.caps.enabled", true)) {
             filters.add(new me.marti.vchat.checks.CapsFilter(plugin));
         }
-        if (plugin.getConfig().getBoolean("filters.ads.enabled", true)) {
+        if (plugin.getConfigManager().getFilters().getBoolean("filters.ads.enabled", true)) {
             filters.add(new me.marti.vchat.checks.AdsFilter(plugin));
         }
-        if (plugin.getConfig().getBoolean("filters.profanity.enabled", true)) {
+        if (plugin.getConfigManager().getFilters().getBoolean("filters.profanity.enabled", true)) {
             filters.add(new me.marti.vchat.checks.ProfanityFilter(plugin));
         }
     }

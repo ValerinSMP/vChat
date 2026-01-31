@@ -35,8 +35,16 @@ public class ChatListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
+
+        // Check Global Mute
+        if (plugin.getAdminManager().isGlobalChatMuted() && !player.hasPermission("vchat.bypass.togglechat")) {
+             event.setCancelled(true);
+             plugin.getAdminManager().sendConfigMessage(player, "moderation.chat-muted");
+             return;
+        }
+
         Component originalMessageComp = event.message();
-        String message = PlainTextComponentSerializer.plainText().serialize(originalMessageComp);
+        String message = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(originalMessageComp);
 
         // 1. SANITIZATION (Permission Checks)
         message = MessageSanitizer.sanitize(player, message);
@@ -65,5 +73,22 @@ public class ChatListener implements Listener {
         Component formatted = messageProcessor.process(player, format, message);
 
         event.renderer((source, sourceDisplayName, messageComp, viewer) -> formatted);
+
+        // Handle Ignored Players and Personal Mute
+        event.viewers().removeIf(viewer -> {
+            if (viewer instanceof Player audience) {
+                // Check Ignored
+                if (plugin.getIgnoreManager().isIgnored(audience.getUniqueId(), player.getUniqueId()) 
+                       && !audience.hasPermission("vchat.bypass.ignore")) {
+                    return true;
+                }
+                
+                // Check Personal Chat Toggle
+                if (plugin.getAdminManager().isPersonalChatMuted(audience)) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 }

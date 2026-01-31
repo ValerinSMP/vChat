@@ -1,0 +1,8 @@
+# ---------------------------------------------------------
+# vChat - Configuración de Menciones
+# ---------------------------------------------------------
+enabled: true
+color: "&e"
+sound: "ENTITY_EXPERIENCE_ORB_PICKUP" # Sonido para el mencionado
+actionbar: "&e¡%player% te ha mencionado!"
+cooldown: 5 # Segundos de espera para volver a mencionar al mismo usuario

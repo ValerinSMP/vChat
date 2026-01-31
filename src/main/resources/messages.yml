@@ -1,0 +1,39 @@
+# ---------------------------------------------------------
+# vChat - Mensajes del Sistema
+# ---------------------------------------------------------
+prefix: "&8[&bvChat&8] "
+messages:
+  reload: "&aConfiguración recargada correctamente."
+  no-permission: "&cNo tienes permiso para esto."
+  notify-enabled: "&aNotificaciones de admin activadas."
+  notify-disabled: "&cNotificaciones de admin desactivadas."
+  mentions-enabled: "&aHas activado las menciones."
+  mentions-disabled: "&cHas desactivado las menciones."
+
+# Formato de notificación admin
+admin-notify:
+  - ""
+  - "&#FF6961%player% fue marcado por: %reason%."
+  - "&cMensaje: &r%message%"
+  - ""
+
+count-message: "&e%player% tiene %count% violaciones en esta sesión."
+
+placeholders:
+  enabled: "true"
+  disabled: "false"
+
+private:
+  disabled-target: "&c%player% no está aceptando mensajes privados."
+  disabled-self: "&cHas desactivado tus mensajes privados."
+  toggled-on: "&aMensajes privados activados."
+  toggled-off: "&cMensajes privados desactivados."
+  no-reply: "&cNo tienes a nadie a quien responder."
+  no-self: "&cNo puedes enviarte mensajes a ti mismo."
+
+moderation:
+  chat-muted: "&cEl chat ha sido desactivado por un administrador."
+  chat-unmuted: "&aEl chat ha sido activado por un administrador."
+  chat-is-muted: "&cEl chat está desactivado."
+  personal-chat-enabled: "&aHas activado el chat global."
+  personal-chat-disabled: "&cHas ocultado el chat global."

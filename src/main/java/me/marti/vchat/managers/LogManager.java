@@ -63,10 +63,10 @@ public class LogManager {
     }
 
     public void logViolation(String player, String reason, String message) {
-        if (!plugin.getConfig().getBoolean("logging.enabled", true))
+        if (!plugin.getConfigManager().getMainConfig().getBoolean("logging.enabled", true))
             return;
 
-        String format = plugin.getConfig().getString("logging.format", "[%date%] %player%: %reason% | %message%");
+        String format = plugin.getConfigManager().getMainConfig().getString("logging.format", "[%date%] %player%: %reason% | %message%");
         String date = dateFormat.format(new Date());
 
         String entry = format

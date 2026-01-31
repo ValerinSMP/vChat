@@ -41,17 +41,46 @@ public class PAPIExpansion extends PlaceholderExpansion {
         // %vchat_notify_status%
         if (params.equalsIgnoreCase("notify_status")) {
             boolean enabled = plugin.getAdminManager().isNotifyEnabled(player);
-            return enabled ? plugin.getConfig().getString("messages.placeholders.enabled", "&aActivado")
-                    : plugin.getConfig().getString("messages.placeholders.disabled", "&cDesactivado");
+            return getStatusString(enabled);
         }
 
         // %vchat_mentions_status%
-        if (params.equalsIgnoreCase("mentions_status")) {
+        if (params.equalsIgnoreCase("mentions_status") || params.equalsIgnoreCase("toggle_mentions")) {
             boolean enabled = plugin.getMentionManager().areMentionsEnabled(player);
-            return enabled ? plugin.getConfig().getString("messages.placeholders.enabled", "&aActivado")
-                    : plugin.getConfig().getString("messages.placeholders.disabled", "&cDesactivado");
+            return getStatusString(enabled);
+        }
+        
+        // %vchat_toggle_msg%
+        if (params.equalsIgnoreCase("toggle_msg")) {
+             boolean enabled = plugin.getPrivateMessageManager().isMsgEnabled(player);
+             return getStatusString(enabled);
+        }
+
+        // %vchat_toggle_spy%
+        if (params.equalsIgnoreCase("toggle_spy")) {
+             boolean enabled = plugin.getPrivateMessageManager().isSpyEnabled(player);
+             return getStatusString(enabled);
+        }
+        
+        // %vchat_toggle_chat%
+        if (params.equalsIgnoreCase("toggle_chat")) {
+             // isPersonalChatMuted = true means chat is HIDDEN (disabled) for this player.
+             // We return "Enabled" if NOT muted.
+             boolean isMuted = plugin.getAdminManager().isPersonalChatMuted(player);
+             return getStatusString(!isMuted); 
+        }
+        
+        // %vchat_toggle_notify%
+        if (params.equalsIgnoreCase("toggle_notify")) {
+             boolean enabled = plugin.getAdminManager().isNotifyEnabled(player);
+             return getStatusString(enabled);
         }
 
         return null;
+    }
+
+    private String getStatusString(boolean enabled) {
+        return enabled ? plugin.getConfigManager().getMessages().getString("placeholders.enabled", "true")
+                       : plugin.getConfigManager().getMessages().getString("placeholders.disabled", "false");
     }
 }

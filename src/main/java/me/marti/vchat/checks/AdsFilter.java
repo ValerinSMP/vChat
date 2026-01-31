@@ -18,25 +18,45 @@ public class AdsFilter implements ChatFilter {
     private static final Pattern URL_PATTERN = Pattern.compile("([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}");
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
+    private final java.util.List<Pattern> cachedWhitelist = new java.util.ArrayList<>();
+    private final java.util.List<String> simpleWhitelist = new java.util.ArrayList<>();
+
     public AdsFilter(VChat plugin) {
         this.plugin = plugin;
+        loadWhitelist();
+    }
+
+    private void loadWhitelist() {
+        cachedWhitelist.clear();
+        simpleWhitelist.clear();
+        List<String> whitelist = plugin.getConfig().getStringList("filters.ads.whitelist");
+        for (String w : whitelist) {
+            // Heuristic to decide if regex or simple
+            // For safety, let's assume everything is a regex if it compiles, else string?
+            // User code previously allowed simple contains fallback.
+            // We'll store string for contains check, and Pattern for regex check.
+            simpleWhitelist.add(w.toLowerCase());
+            try {
+                cachedWhitelist.add(Pattern.compile(w, Pattern.CASE_INSENSITIVE));
+            } catch (Exception e) {
+                // Not a valid regex, just rely on simple contains
+            }
+        }
     }
 
     @Override
     public FilterResult check(Player player, String message) {
         // Whitelist check first
-        List<String> whitelist = plugin.getConfig().getStringList("filters.ads.whitelist");
-        for (String w : whitelist) {
-            try {
-                // Use case-insensitive matching for whitelist patterns
-                if (Pattern.compile(w, Pattern.CASE_INSENSITIVE).matcher(message).find()) {
-                    return FilterResult.allowed();
-                }
-            } catch (Exception e) {
-                // Fallback to simple contains if regex fails or simple string intended
-                if (message.toLowerCase().contains(w.toLowerCase()))
-                    return FilterResult.allowed();
-            }
+        String msgLower = message.toLowerCase();
+        
+        // Simple Check
+        for (String w : simpleWhitelist) {
+            if (msgLower.contains(w)) return FilterResult.allowed();
+        }
+        
+        // Regex Check
+        for (Pattern p : cachedWhitelist) {
+            if (p.matcher(message).find()) return FilterResult.allowed();
         }
 
         Matcher ipMatcher = IP_PATTERN.matcher(message);

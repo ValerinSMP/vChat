@@ -5,11 +5,9 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
-import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import me.marti.vchat.VChat;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -128,7 +126,6 @@ public class MentionsTabInjector implements Listener {
                 actionEnumClass = Class.forName("net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket$Action");
             } catch (ClassNotFoundException e) {
                 // If NMS is remapped or different, we can try ProtocolLib packet field inspection
-                // But specifically for this user's log, the name is confirmed.
                 throw new ClassNotFoundException("Could not find NMS Action Enum. Environment mismatch?", e);
             }
 

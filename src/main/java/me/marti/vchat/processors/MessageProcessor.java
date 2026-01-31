@@ -52,14 +52,14 @@ public class MessageProcessor {
         }
 
         // 2. Prepare Name Components with Hover
-        java.util.List<String> hoverLines = plugin.getConfig().getStringList("name-hover");
+        java.util.List<String> hoverLines = plugin.getConfigManager().getFormats().getStringList("name-hover");
         String hoverFormat;
 
         if (!hoverLines.isEmpty()) {
             hoverFormat = String.join("<newline>", hoverLines);
         } else {
             // Fallback for single string or if list is empty but key exists as string
-            hoverFormat = plugin.getConfig().getString("name-hover", "");
+            hoverFormat = plugin.getConfigManager().getFormats().getString("name-hover", "");
         }
 
         Component hoverComponent = null;
@@ -116,7 +116,7 @@ public class MessageProcessor {
     }
 
     public Component getItemComponent(ItemStack item) {
-        String format = plugin.getConfig().getString("item-format",
+        String format = plugin.getConfigManager().getFormats().getString("item-format",
                 "<dark_gray>[</dark_gray><aqua>{amount}x {item}</aqua><dark_gray>]</dark_gray>");
 
         // Convert config placeholders {} to MiniMessage tags <>
