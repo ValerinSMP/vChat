@@ -1,103 +1,101 @@
-# 📘 vChat - Wiki de Documentación
+# vChat - Documentación Técnica
 
-Bienvenido a **vChat**, un plugin de chat avanzado para servidores modernos de Minecraft, diseñado para ser estético, funcional y altamente configurable.
+vChat es una solución integral de chat para servidores de Minecraft, diseñada para ofrecer una experiencia de usuario moderna, estética y altamente optimizada. Este plugin reemplaza los sistemas de chat tradicionales con funcionalidades avanzadas de formateo, moderación y feedback visual.
 
----
+## Requisitos y Dependencias
 
-## 🛠 Instalación
+Para el correcto funcionamiento del plugin, asegúrese de contar con las siguientes dependencias:
 
-1. Descarga el archivo `vChat-x.x.x.jar`.
-2. Colócalo en la carpeta `/plugins` de tu servidor.
-3. Asegúrate de tener **LuckPerms** instalado (Dependencia requerida) y **PlaceholderAPI** (Opcional, pero recomendado).
-4. Reinicia tu servidor.
+- **Java**: 17 o superior.
+- **LuckPerms** (Requerido): Para la gestión de prefijos, sufijos y permisos.
+- **PlaceholderAPI** (Opcional): Para el uso de variables en el chat y scoreboards.
+- **ProtocolLib** (Opcional): Para mejorar la compatibilidad del autocompletado de menciones.
 
----
+## Compilación
 
-## 🚀 Características Principales
+Este proyecto utiliza **Gradle** como sistema de construcción. Como no se distribuyen binarios públicos, debe compilar el código fuente manualmente.
 
-### 📨 Mensajería Privada (Aesthetic)
+### Instrucciones de Compilación
 
-Envía mensajes privados con un diseño visualmente atractivo y feedback instantáneo.
+1.  Clone el repositorio en su entorno local:
+    ```bash
+    git clone https://github.com/ValerinSMP/vChat.git
+    ```
+2.  Navegue al directorio del proyecto y ejecute el comando de construcción:
+    - **Windows**:
+      ```powershell
+      .\gradlew.bat clean build
+      ```
+    - **Linux/macOS**:
+      ```bash
+      ./gradlew clean build
+      ```
+3.  El archivo compilado (`vChat-1.0.0-SNAPSHOT.jar`) se generará en la carpeta `build/libs`.
 
-- **Comandos**:
-  - `/msg <jugador> <mensaje>` (Alias: `/w`, `/tell`, `/dm`)
-  - `/reply <mensaje>` (Alias: `/r`)
-- **Feedback**:
-  - Sonidos personalizados al enviar/recibir.
-  - Actionbar visual para no perder ningún mensaje.
-  - Colores pastel (Amarillo para mejor legibilidad).
-- **Control**:
-  - `/togglemsg`: Activa/Desactiva recibir mensajes privados.
+## Características
 
-### 🕵️ SpyChat (Moderación)
+### Sistema de Mensajería
 
-Los administradores pueden supervisar conversaciones privadas.
+- **Mensajes Privados**: Soporte completo para MiniMessage (gradientes, colores hex) con feedback en ActionBar.
+- **SpyChat**: Sistema de monitoreo para administradores con formato diferenciado.
+- **Ignore**: Permite a los usuarios bloquear mensajes privados y menciones de jugadores específicos.
 
-- **Comando**: `/spychat` (Alias: `/spy`)
-- **Visualización**: Formato diferenciado en tonos morados/rosas para identificar rápidamente mensajes espiados.
-- **Toggle**: Activa/Desactiva el modo espía individualmente.
+### Chat Global
 
-### 🚫 Sistema de Ignore
+- **Formato Dinámico**: Integración con LuckPerms para formatos de chat basados en rangos.
+- **Menciones**: Sistema de menciones (`@Usuario`) con alertas sonoras y visuales.
+- **Item Display**: Funcionalidad `[item]` o `/showitem` para compartir ítems con tooltips interactivos.
+- **Moderación Automática**: Filtros configurables (Anti-Spam, Anti-Caps, Groserías, Anti-Anuncios/IPs) con optimización de caché Regex.
 
-Permite a los jugadores bloquear la comunicación con usuarios molestos.
+### Feedback Visual y Sonoro
 
-- **Comando**: `/ignore <jugador>`
-  - Funciona como un interruptor (Toggle): Si ya lo ignoras, lo dejará de ignorar.
-- **Efecto**:
-  - Bloquea mensajes en el **Chat Público**.
-  - Bloquea **Mensajes Privados** (/msg).
+- **ActionBar**: Todas las confirmaciones de comandos (toggles) se muestran en la ActionBar para reducir el ruido en el chat.
+- **Sonidos Agradables**: Se utilizan sonidos de bloques de nota (`BLOCK_NOTE_BLOCK_PLING/BASS`) para un feedback auditivo no intrusivo.
 
-### 📢 Chat Global & Moderación
+## Comandos y Permisos
 
-- **Menciones**: Usa `@Jugador` para mencionar.
-  - Alerta sonora para el mencionado.
-  - Color destacado en el chat.
-  - Comandos:
-    - `/togglementions`: Activa/Desactiva recibir menciones.
-- **Visualización de Ítems**: Usa `[item]` o `/showitem` para mostrar el ítem de tu mano en el chat con tooltip interactivo.
-- **Filtros**: Anti-Spam, Anti-Caps, Anti-Groserías y Anti-Anuncios integrados.
-- **Control Global**:
-  - `/togglechat`: Oculta el chat global solo para ti (Personal).
-  - `/mutechat`: Silencia el chat global para **todos** los usuarios (Admin).
+### Comandos de Usuario
 
----
+| Comando                | Alias             | Descripción                           | Permiso                |
+| :--------------------- | :---------------- | :------------------------------------ | :--------------------- |
+| `/msg <jugador> <msg>` | `w`, `tell`, `dm` | Enviar mensaje privado.               | `vchat.msg`            |
+| `/reply <msg>`         | `r`               | Responder al último mensaje.          | `vchat.reply`          |
+| `/ignore <jugador>`    | N/A               | Ignorar a un jugador.                 | `vchat.ignore`         |
+| `/showitem`            | N/A               | Mostrar ítem en mano.                 | `vchat.showitem`       |
+| `/togglemsg`           | N/A               | Activar/Desactivar mensajes privados. | `vchat.togglemsg`      |
+| `/togglementions`      | N/A               | Activar/Desactivar menciones.         | `vchat.togglementions` |
+| `/togglechat`          | N/A               | Ocultar chat global (Personal).       | `vchat.togglechat`     |
 
-## 📜 Permisos (Permissions)
+### Comandos de Administración
 
-### Usuario (Default: True)
+| Comando         | Descripción                                    | Permiso          |
+| :-------------- | :--------------------------------------------- | :--------------- |
+| `/vchat reload` | Recarga toda la configuración y cachés.        | `vchat.admin`    |
+| `/vchat notify` | Activa/Desactiva notificaciones de moderación. | `vchat.notify`   |
+| `/mutechat`     | Silencia el chat global para todos.            | `vchat.mutechat` |
+| `/spychat`      | Activa/Desactiva el espionaje de mensajes.     | `vchat.spychat`  |
 
-| Permiso           | Descripción                   |
-| :---------------- | :---------------------------- |
-| `vchat.msg`       | Enviar mensajes privados.     |
-| `vchat.reply`     | Responder mensajes privados.  |
-| `vchat.togglemsg` | Usar /togglemsg.              |
-| `vchat.mention`   | Mencionar a otros (@Usuario). |
-| `vchat.showitem`  | Usar [item] o /showitem.      |
-| `vchat.ignore`    | Usar /ignore.                 |
+## Placeholders (PlaceholderAPI)
 
-### Administrador (Default: OP)
+El plugin exporta los siguientes placeholders para su uso en mensajes, scoreboards o menús:
 
-| Permiso            | Descripción                       |
-| :----------------- | :-------------------------------- |
-| `vchat.admin`      | Acceso total.                     |
-| `vchat.reload`     | Usar `/vchat reload`.             |
-| `vchat.spychat`    | Usar `/spychat`.                  |
-| `vchat.togglechat` | Usar `/togglechat` (Chat Global). |
-| `vchat.bypass.*`   | Ignorar filtros y restricciones.  |
+| Placeholder               | Retorno (Ejemplo)          | Descripción                               |
+| :------------------------ | :------------------------- | :---------------------------------------- |
+| `%vchat_notify_status%`   | `Activado` / `Desactivado` | Estado de notificaciones admin.           |
+| `%vchat_mentions_status%` | `Activado` / `Desactivado` | Estado de recepción de menciones.         |
+| `%vchat_toggle_msg%`      | `Activado` / `Desactivado` | Estado de recepción de mensajes privados. |
+| `%vchat_toggle_chat%`     | `Activado` / `Desactivado` | Estado de visibilidad del chat global.    |
+| `%vchat_toggle_spy%`      | `Activado` / `Desactivado` | Estado del SpyChat.                       |
 
----
+_Nota: Los textos de retorno ("Activado"/"Desactivado") son configurables en `messages.yml`._
 
-## 🎨 Configuración (Archivos)
+## Configuración
 
-El plugin genera carpetas separadas para una organización limpia:
+La configuración se divide en múltiples archivos para facilitar su gestión:
 
-- **config.yml**: Opciones generales.
-- **messages.yml**: Todos los textos del sistema (Traducible).
-- **formats.yml**: Diseño del chat público (Rangos, Prefijos).
-- **private.yml**: Diseño de mensajes privados y sonidos.
-- **mentions.yml**: Configuración de menciones.
-- **filters.yml**: Configuración de filtros de chat.
-
----
-
-_Desarrollado con ❤️ para servidores que buscan calidad visual._
+- `config.yml`: Configuración general y sonidos globales.
+- `messages.yml`: Mensajes del sistema y feedback.
+- `private.yml`: Formatos de mensajes privados (`<sender>`, `<receiver>`, `<message>`) y SpyChat.
+- `formats.yml`: Formatos de chat global por grupo de LuckPerms.
+- `filters.yml`: Configuración de filtros de moderación y listas blanca/negra.
+- `mentions.yml`: Configuración de colores y sonidos de menciones.
