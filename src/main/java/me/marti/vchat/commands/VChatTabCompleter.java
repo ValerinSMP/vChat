@@ -23,9 +23,10 @@ public class VChatTabCompleter implements TabCompleter {
             if (sender.hasPermission("vchat.admin") || sender.hasPermission("vchat.notify")) {
                 suggestions.add("notify");
             }
-            suggestions.add("mentions"); // Available to all usually
-            // Help is usually accessible to basic, but we check if we want to show it
-            // explicitly
+            suggestions.add("mentions");
+            suggestions.add("chat");
+            suggestions.add("spy");
+            suggestions.add("msg_toggle");
             suggestions.add("help");
 
             return filter(suggestions, args[0]);

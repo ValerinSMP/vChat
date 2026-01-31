@@ -9,28 +9,41 @@ commands:
   vchat:
     description: Main command for vChat
     usage: /vchat help
+    aliases: [vc, vcchat]
   showitem:
     description: Show your item in chat
     usage: /showitem
+    permission: vchat.showitem
+    permission-message: "&cNo tienes permisos."
   msg:
     description: Send a private message
     usage: /msg <player> <message>
     aliases: [w, tell, whisper, dm]
+    permission: vchat.msg
+    permission-message: "&cNo tienes permisos."
   reply:
     description: Reply to the last message
     usage: /reply <message>
     aliases: [r]
+    permission: vchat.reply
+    permission-message: "&cNo tienes permisos."
   togglemsg:
     description: Toggle private messages
     usage: /togglemsg
     aliases: [tmsg]
+    permission: vchat.togglemsg
+    permission-message: "&cNo tienes permisos."
   spychat:
     description: Toggle social spy
     usage: /spychat
-    aliases: [spy]
+    aliases: [spy, vspy, socialspy, vchatspy, vspychat]
+    permission: vchat.spychat
+    permission-message: "&cNo tienes permisos."
   togglechat:
     description: Toggle YOUR view of global chat
     usage: /togglechat
+    permission: vchat.togglechat
+    permission-message: "&cNo tienes permisos."
   mutechat:
     description: Mute global chat for everyone
     usage: /mutechat
@@ -38,9 +51,13 @@ commands:
   ignore:
     description: Toggle ignoring a player
     usage: /ignore <player>
+    permission: vchat.ignore
+    permission-message: "&cNo tienes permisos."
   togglementions:
     description: Alternar menciones
     usage: /togglementions
+    permission: vchat.togglementions
+    permission-message: "&cNo tienes permisos."
 
 permissions:
   vchat.admin:

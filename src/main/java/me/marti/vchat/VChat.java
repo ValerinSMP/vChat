@@ -48,30 +48,8 @@ public final class VChat extends JavaPlugin {
         this.privateMessageManager = new me.marti.vchat.managers.PrivateMessageManager(this);
         this.ignoreManager = new me.marti.vchat.managers.IgnoreManager(this);
 
-        // Register Commands (Deferred by 1 tick to prevent
-        // ConcurrentModificationException with Paper's Async Command Builder during
-        // reloads)
-        getServer().getScheduler().runTaskLater(this, () -> {
-            getCommand("vchat").setExecutor(
-                    new me.marti.vchat.commands.VChatCommand(this, itemViewManager, adminManager));
-            getCommand("vchat").setTabCompleter(new me.marti.vchat.commands.VChatTabCompleter());
-
-            getCommand("showitem").setExecutor(
-                    new me.marti.vchat.commands.ShowItemCommand(this, messageProcessor, luckPerms));
-
-            getCommand("msg").setExecutor(new me.marti.vchat.commands.PrivateMessageCommand(this));
-            getCommand("reply").setExecutor(new me.marti.vchat.commands.ReplyCommand(this));
-            getCommand("togglemsg").setExecutor(new me.marti.vchat.commands.ToggleMsgCommand(this));
-            getCommand("spychat").setExecutor(new me.marti.vchat.commands.SocialSpyCommand(this));
-
-            getCommand("togglechat").setExecutor(new me.marti.vchat.commands.ToggleChatCommand(this));
-            getCommand("mutechat").setExecutor(new me.marti.vchat.commands.MuteChatCommand(this));
-
-            getCommand("ignore").setExecutor(new me.marti.vchat.commands.IgnoreCommand(this));
-            getCommand("togglementions").setExecutor(new me.marti.vchat.commands.ToggleMentionsCommand(this));
-
-            getLogger().info("Commands registered successfully.");
-        }, 1L);
+        // Register Commands
+        registerCommands();
 
         // Register Listeners
         getServer().getPluginManager().registerEvents(
@@ -81,6 +59,14 @@ public final class VChat extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.ChatTabListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.JoinListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.QuitListener(this), this);
+
+        // Load data for online players (for hot-reloads)
+        for (org.bukkit.entity.Player online : getServer().getOnlinePlayers()) {
+            adminManager.loadData(online);
+            mentionManager.loadData(online);
+            privateMessageManager.loadData(online);
+            ignoreManager.loadData(online);
+        }
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new me.marti.vchat.placeholders.PAPIExpansion(this).register();
@@ -142,6 +128,28 @@ public final class VChat extends JavaPlugin {
         }
 
         getLogger().info("vChat has been disabled!");
+    }
+
+    private void registerCommands() {
+        getCommand("vchat").setExecutor(
+                new me.marti.vchat.commands.VChatCommand(this, itemViewManager, adminManager));
+        getCommand("vchat").setTabCompleter(new me.marti.vchat.commands.VChatTabCompleter());
+
+        getCommand("showitem").setExecutor(
+                new me.marti.vchat.commands.ShowItemCommand(this, messageProcessor, luckPerms));
+
+        getCommand("msg").setExecutor(new me.marti.vchat.commands.PrivateMessageCommand(this));
+        getCommand("reply").setExecutor(new me.marti.vchat.commands.ReplyCommand(this));
+        getCommand("togglemsg").setExecutor(new me.marti.vchat.commands.ToggleMsgCommand(this));
+        getCommand("spychat").setExecutor(new me.marti.vchat.commands.SocialSpyCommand(this));
+
+        getCommand("togglechat").setExecutor(new me.marti.vchat.commands.ToggleChatCommand(this));
+        getCommand("mutechat").setExecutor(new me.marti.vchat.commands.MuteChatCommand(this));
+
+        getCommand("ignore").setExecutor(new me.marti.vchat.commands.IgnoreCommand(this));
+        getCommand("togglementions").setExecutor(new me.marti.vchat.commands.ToggleMentionsCommand(this));
+
+        getLogger().info("Commands registered successfully.");
     }
 
     private void printStartupBanner() {

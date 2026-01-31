@@ -25,8 +25,9 @@ public class SocialSpyCommand implements CommandExecutor {
             return true;
         }
 
-        if (!player.hasPermission("vchat.spychat")) {
+        if (!player.hasPermission("vchat.spychat") && !player.hasPermission("vchat.admin")) {
             plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
+            plugin.getLogger().info("Permiso vchat.spychat denegado para el jugador: " + player.getName());
             return true;
         }
 
