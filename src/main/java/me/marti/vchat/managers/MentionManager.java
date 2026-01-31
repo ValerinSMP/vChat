@@ -69,7 +69,8 @@ public class MentionManager {
     private final java.util.Map<java.util.UUID, Long> cooldowns = new java.util.HashMap<>();
 
     public String processMentions(Player sender, String message) {
-        if (!plugin.getConfigManager().getMentions().getBoolean("enabled")) // Removed 'mentions.' prefix as root is mentions.yml
+        if (!plugin.getConfigManager().getMentions().getBoolean("enabled")) // Removed 'mentions.' prefix as root is
+                                                                            // mentions.yml
             return message;
         if (!sender.hasPermission("vchat.mention"))
             return message;
@@ -87,8 +88,14 @@ public class MentionManager {
 
             // Check if target exists, can be seen, AND has mentions enabled
             if (target != null && !target.equals(sender) && sender.canSee(target) && areMentionsEnabled(target)) {
-                String color = plugin.getConfigManager().getMentions().getString("color", "&e");
-                String replacement = color + "@" + targetName + "&r";
+                String color = plugin.getConfigManager().getMentions().getString("color", "<yellow>");
+                // Ensure color is in tag format if it was legacy
+                if (color.startsWith("&")) {
+                    color = color.replace("&e", "<yellow>").replace("&a", "<green>").replace("&b", "<aqua>")
+                            .replace("&c", "<red>").replace("&d", "<light_purple>").replace("&f", "<white>")
+                            .replace("&r", "<reset>");
+                }
+                String replacement = color + "@" + targetName + "<reset>";
 
                 matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
 

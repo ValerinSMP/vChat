@@ -18,9 +18,15 @@ public class ToggleMsgCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+            @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("Solo jugadores.", NamedTextColor.RED));
+            return true;
+        }
+
+        if (!player.hasPermission("vchat.togglemsg")) {
+            plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
             return true;
         }
 

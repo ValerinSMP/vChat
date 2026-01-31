@@ -48,15 +48,17 @@ public class AdsFilter implements ChatFilter {
     public FilterResult check(Player player, String message) {
         // Whitelist check first
         String msgLower = message.toLowerCase();
-        
+
         // Simple Check
         for (String w : simpleWhitelist) {
-            if (msgLower.contains(w)) return FilterResult.allowed();
+            if (msgLower.contains(w))
+                return FilterResult.allowed();
         }
-        
+
         // Regex Check
         for (Pattern p : cachedWhitelist) {
-            if (p.matcher(message).find()) return FilterResult.allowed();
+            if (p.matcher(message).find())
+                return FilterResult.allowed();
         }
 
         Matcher ipMatcher = IP_PATTERN.matcher(message);

@@ -35,7 +35,7 @@ public class ShowItemCommand implements CommandExecutor {
         }
 
         if (!player.hasPermission("vchat.showitem")) {
-            player.sendMessage(Component.text("You do not have permission to use this command.", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
             return true;
         }
 

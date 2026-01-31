@@ -28,6 +28,11 @@ public class PrivateMessageCommand implements CommandExecutor {
             return true;
         }
 
+        if (!player.hasPermission("vchat.msg")) {
+            plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
+            return true;
+        }
+
         if (args.length < 2) {
             player.sendMessage(Component.text("Uso: /msg <jugador> <mensaje>", NamedTextColor.RED));
             return true;

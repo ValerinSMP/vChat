@@ -38,23 +38,34 @@ public class ChatListener implements Listener {
 
         // Check Global Mute
         if (plugin.getAdminManager().isGlobalChatMuted() && !player.hasPermission("vchat.bypass.togglechat")) {
-             event.setCancelled(true);
-             plugin.getAdminManager().sendConfigMessage(player, "moderation.chat-muted");
-             return;
+            event.setCancelled(true);
+            plugin.getAdminManager().sendConfigMessage(player, "moderation.chat-muted");
+            return;
         }
 
         Component originalMessageComp = event.message();
-        String message = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(originalMessageComp);
+        String message = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
+                .serialize(originalMessageComp);
 
-        // 1. SANITIZATION (Permission Checks)
-        message = MessageSanitizer.sanitize(player, message);
+        // 1. PRE-SANITIES (Escape & Transition)
+        message = MessageSanitizer.prepare(player, message);
 
         // 2. MENTIONS
         message = mentionManager.processMentions(player, message);
 
-        // 3. FILTERS
-        FilterResult result = filterManager.process(player, message);
+        // 3. ITEM PLACEHOLDER
+        boolean hasItemPlaceholder = message.toLowerCase().contains("[item]") || message.toLowerCase().contains("[i]");
+        Component itemComp = null;
+        if (hasItemPlaceholder) {
+            org.bukkit.inventory.ItemStack hand = player.getInventory().getItemInMainHand();
+            if (hand.getType() != org.bukkit.Material.AIR) {
+                itemComp = messageProcessor.getItemComponent(hand);
+                message = message.replaceAll("(?i)\\[item]|(?i)\\[i]", "<item_tag>");
+            }
+        }
 
+        // 4. FILTERS (on string result)
+        FilterResult result = filterManager.process(player, message);
         if (result.state() == FilterResult.State.BLOCKED) {
             event.setCancelled(true);
             if (result.reasonMessage() != null) {
@@ -62,15 +73,16 @@ public class ChatListener implements Listener {
             }
             return;
         }
-
         if (result.state() == FilterResult.State.MODIFIED) {
             message = result.modifiedMessage();
         }
 
-        // 4. FORMATTING
-        String format = formatManager.getFormat(player);
+        // 5. PARSE TO COMPONENT (Enforces Permissions)
+        Component messageComponent = MessageSanitizer.parse(player, message, itemComp);
 
-        Component formatted = messageProcessor.process(player, format, message);
+        // 6. FORMATTING
+        String format = formatManager.getFormat(player);
+        Component formatted = messageProcessor.process(player, format, messageComponent);
 
         event.renderer((source, sourceDisplayName, messageComp, viewer) -> formatted);
 
@@ -78,11 +90,11 @@ public class ChatListener implements Listener {
         event.viewers().removeIf(viewer -> {
             if (viewer instanceof Player audience) {
                 // Check Ignored
-                if (plugin.getIgnoreManager().isIgnored(audience.getUniqueId(), player.getUniqueId()) 
-                       && !audience.hasPermission("vchat.bypass.ignore")) {
+                if (plugin.getIgnoreManager().isIgnored(audience.getUniqueId(), player.getUniqueId())
+                        && !audience.hasPermission("vchat.bypass.ignore")) {
                     return true;
                 }
-                
+
                 // Check Personal Chat Toggle
                 if (plugin.getAdminManager().isPersonalChatMuted(audience)) {
                     return true;

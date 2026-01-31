@@ -79,13 +79,31 @@ public class VChatCommand implements CommandExecutor {
             return true;
         }
 
+        // View Item Command (Internal use for chat clicks)
+        if (subCommand.equals("viewitem")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("Solo jugadores.");
+                return true;
+            }
+            if (args.length < 2)
+                return true;
+            try {
+                UUID itemId = UUID.fromString(args[1]);
+                itemViewManager.openView(player, itemId);
+            } catch (IllegalArgumentException e) {
+                // Ignore malformed UUID
+            }
+            return true;
+        }
+
         sender.sendMessage(Component.text("Subcomando desconocido. Usa /vchat help.", NamedTextColor.RED));
         return true;
     }
 
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Component.text(" ", NamedTextColor.GRAY));
-        sender.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(" <gradient:#50ffc5:#009985>vChat Help</gradient> "));
+        sender.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+                .deserialize(" <gradient:#50ffc5:#009985>vChat Help</gradient> "));
         sender.sendMessage(Component.text(" ", NamedTextColor.GRAY));
 
         // Basic Commands
@@ -93,7 +111,7 @@ public class VChatCommand implements CommandExecutor {
         sender.sendMessage(formatCommand("/reply <msg>", "Responder mensaje privado"));
         sender.sendMessage(formatCommand("/ignore <player>", "Ignorar a un jugador"));
         sender.sendMessage(formatCommand("/showitem", "Mostrar ítem en mano"));
-        
+
         // Toggles
         sender.sendMessage(formatCommand("/togglechat", "Ocultar/Mostrar chat global"));
         sender.sendMessage(formatCommand("/togglementions", "Activar/Desactivar menciones"));
@@ -110,13 +128,14 @@ public class VChatCommand implements CommandExecutor {
             sender.sendMessage(formatCommand("/vchat reload", "Recargar configuración"));
             sender.sendMessage(formatCommand("/vchat notify", "Notificaciones de admin"));
         }
-        
+
         sender.sendMessage(Component.text(" ", NamedTextColor.GRAY));
     }
 
     private Component formatCommand(String command, String description) {
         return net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
-            "<click:suggest_command:'" + command + "'><hover:show_text:'<gray>Click para escribir</gray>'><#50b5e8>" + command + "</#50b5e8> <dark_gray>-</dark_gray> <gray>" + description + "</gray></hover></click>"
-        );
+                "<click:suggest_command:'" + command + "'><hover:show_text:'<gray>Click para escribir</gray>'><#50b5e8>"
+                        + command + "</#50b5e8> <dark_gray>-</dark_gray> <gray>" + description
+                        + "</gray></hover></click>");
     }
 }

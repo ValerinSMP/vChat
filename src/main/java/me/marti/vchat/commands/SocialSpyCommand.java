@@ -18,15 +18,16 @@ public class SocialSpyCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+            @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("Solo jugadores.", NamedTextColor.RED));
             return true;
         }
 
-        if (!player.hasPermission("vchat.socialspy")) {
-             plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
-             return true;
+        if (!player.hasPermission("vchat.spychat")) {
+            plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
+            return true;
         }
 
         plugin.getPrivateMessageManager().toggleSpy(player);

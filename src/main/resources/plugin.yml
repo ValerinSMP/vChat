@@ -12,44 +12,35 @@ commands:
   showitem:
     description: Show your item in chat
     usage: /showitem
-    permission: vchat.showitem
   msg:
     description: Send a private message
     usage: /msg <player> <message>
     aliases: [w, tell, whisper, dm]
-    permission: vchat.msg
   reply:
     description: Reply to the last message
     usage: /reply <message>
     aliases: [r]
-    permission: vchat.reply
   togglemsg:
     description: Toggle private messages
     usage: /togglemsg
     aliases: [tmsg]
-    permission: vchat.togglemsg
   spychat:
     description: Toggle social spy
     usage: /spychat
     aliases: [spy]
-    permission: vchat.spychat
   togglechat:
     description: Toggle YOUR view of global chat
     usage: /togglechat
-    permission: vchat.togglechat
   mutechat:
     description: Mute global chat for everyone
     usage: /mutechat
     aliases: [globalmute]
-    permission: vchat.mutechat
   ignore:
     description: Toggle ignoring a player
     usage: /ignore <player>
-    permission: vchat.ignore
   togglementions:
     description: Alternar menciones
     usage: /togglementions
-    permission: vchat.togglementions
 
 permissions:
   vchat.admin:

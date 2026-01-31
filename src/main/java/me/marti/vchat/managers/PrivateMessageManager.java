@@ -82,11 +82,11 @@ public class PrivateMessageManager {
         player.getPersistentDataContainer().set(spyToggleKey, PersistentDataType.BYTE, newState ? (byte) 1 : (byte) 0);
 
         if (newState) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#d4af37:#f0e68c>SpyChat activado.</gradient>")); // Gold/Yellow ish
-            player.sendActionBar(MiniMessage.miniMessage().deserialize("<gradient:#d4af37:#f0e68c>SpyChat activado.</gradient>"));
+            player.sendActionBar(
+                    MiniMessage.miniMessage().deserialize("<gradient:#d4af37:#f0e68c>SpyChat activado.</gradient>")); // Gold/Yellow
+                                                                                                                      // ish
             playSound(player, "sounds.toggle-on");
         } else {
-            player.sendMessage(MiniMessage.miniMessage().deserialize("<red>SpyChat desactivado.</red>"));
             player.sendActionBar(MiniMessage.miniMessage().deserialize("<red>SpyChat desactivado.</red>"));
             playSound(player, "sounds.toggle-off");
         }
@@ -104,7 +104,8 @@ public class PrivateMessageManager {
         }
 
         // Check if target ignores sender
-        if (plugin.getIgnoreManager().isIgnored(target.getUniqueId(), sender.getUniqueId()) && !sender.hasPermission("vchat.bypass.ignore")) {
+        if (plugin.getIgnoreManager().isIgnored(target.getUniqueId(), sender.getUniqueId())
+                && !sender.hasPermission("vchat.bypass.ignore")) {
             sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>Este jugador te ha ignorado.</red>"));
             return;
         }
@@ -122,9 +123,10 @@ public class PrivateMessageManager {
 
         sender.sendMessage(outgoing);
         target.sendMessage(incoming);
-        
-        sender.sendActionBar(outgoing);
-        target.sendActionBar(incoming);
+
+        // Premium Feedback: Notify target in ActionBar that they got a message
+        target.sendActionBar(
+                miniMessage.deserialize("<gray>✉ Nuevo mensaje de <white>" + sender.getName() + "</white></gray>"));
 
         // Sounds
         playSound(sender, "sounds.message-send");
@@ -143,7 +145,8 @@ public class PrivateMessageManager {
 
         Player target = Bukkit.getPlayer(targetId);
         if (target == null || !target.isOnline()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>El jugador ya no est\u00e1 en l\u00ednea.</red>"));
+            sender.sendMessage(
+                    MiniMessage.miniMessage().deserialize("<red>El jugador ya no est\u00e1 en l\u00ednea.</red>"));
             return;
         }
 
@@ -152,20 +155,21 @@ public class PrivateMessageManager {
 
     private Component formatData(String format, Player sender, Player target, String message) {
         return miniMessage.deserialize(format,
-            Placeholder.component("sender", Component.text(sender.getName())),
-            Placeholder.component("receiver", Component.text(target.getName())),
-            Placeholder.component("message", Component.text(message))
-        );
+                Placeholder.component("sender", Component.text(sender.getName())),
+                Placeholder.component("receiver", Component.text(target.getName())),
+                Placeholder.component("message", Component.text(message)));
     }
 
     private void notifySocialSpy(Player sender, Player target, String message) {
-        String format = plugin.getConfigManager().getPrivate().getString("spy-format", "<gradient:#D8BFD8:#FFB7C5>[Spy] <sender> -> <receiver>: <message></gradient>");
-        
+        String format = plugin.getConfigManager().getPrivate().getString("spy-format",
+                "<gradient:#D8BFD8:#FFB7C5>[Spy] <sender> -> <receiver>: <message></gradient>");
+
         Component spyComponent = formatData(format, sender, target, message);
 
         for (Player online : Bukkit.getOnlinePlayers()) {
-            if (online.equals(sender) || online.equals(target)) continue;
-            
+            if (online.equals(sender) || online.equals(target))
+                continue;
+
             if (online.hasPermission("vchat.spychat") && isSpyEnabled(online)) {
                 online.sendMessage(spyComponent);
             }
@@ -183,7 +187,7 @@ public class PrivateMessageManager {
             }
         }
     }
-    
+
     // Send feedback via ActionBar and Chat
     private void sendFeedback(Player player, String messageKey) {
         // Implementation depends on where messages are stored.

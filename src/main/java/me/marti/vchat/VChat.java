@@ -37,7 +37,7 @@ public final class VChat extends JavaPlugin {
         // Initialize Managers
         this.configManager = new me.marti.vchat.managers.ConfigManager(this);
         this.configManager.loadConfigs();
-        
+
         this.logManager = new me.marti.vchat.managers.LogManager(this);
         this.adminManager = new me.marti.vchat.managers.AdminManager(this);
         this.mentionManager = new me.marti.vchat.managers.MentionManager(this);
@@ -48,24 +48,30 @@ public final class VChat extends JavaPlugin {
         this.privateMessageManager = new me.marti.vchat.managers.PrivateMessageManager(this);
         this.ignoreManager = new me.marti.vchat.managers.IgnoreManager(this);
 
-        // Register Commands
-        getCommand("vchat").setExecutor(
-                new me.marti.vchat.commands.VChatCommand(this, itemViewManager, adminManager));
-        getCommand("vchat").setTabCompleter(new me.marti.vchat.commands.VChatTabCompleter());
+        // Register Commands (Deferred by 1 tick to prevent
+        // ConcurrentModificationException with Paper's Async Command Builder during
+        // reloads)
+        getServer().getScheduler().runTaskLater(this, () -> {
+            getCommand("vchat").setExecutor(
+                    new me.marti.vchat.commands.VChatCommand(this, itemViewManager, adminManager));
+            getCommand("vchat").setTabCompleter(new me.marti.vchat.commands.VChatTabCompleter());
 
-        getCommand("showitem").setExecutor(
-                new me.marti.vchat.commands.ShowItemCommand(this, messageProcessor, luckPerms));
+            getCommand("showitem").setExecutor(
+                    new me.marti.vchat.commands.ShowItemCommand(this, messageProcessor, luckPerms));
 
-        getCommand("msg").setExecutor(new me.marti.vchat.commands.PrivateMessageCommand(this));
-        getCommand("reply").setExecutor(new me.marti.vchat.commands.ReplyCommand(this));
-        getCommand("togglemsg").setExecutor(new me.marti.vchat.commands.ToggleMsgCommand(this));
-        getCommand("spychat").setExecutor(new me.marti.vchat.commands.SocialSpyCommand(this));
-        
-        getCommand("togglechat").setExecutor(new me.marti.vchat.commands.ToggleChatCommand(this));
-        getCommand("mutechat").setExecutor(new me.marti.vchat.commands.MuteChatCommand(this));
-        
-        getCommand("ignore").setExecutor(new me.marti.vchat.commands.IgnoreCommand(this));
-        getCommand("togglementions").setExecutor(new me.marti.vchat.commands.ToggleMentionsCommand(this));
+            getCommand("msg").setExecutor(new me.marti.vchat.commands.PrivateMessageCommand(this));
+            getCommand("reply").setExecutor(new me.marti.vchat.commands.ReplyCommand(this));
+            getCommand("togglemsg").setExecutor(new me.marti.vchat.commands.ToggleMsgCommand(this));
+            getCommand("spychat").setExecutor(new me.marti.vchat.commands.SocialSpyCommand(this));
+
+            getCommand("togglechat").setExecutor(new me.marti.vchat.commands.ToggleChatCommand(this));
+            getCommand("mutechat").setExecutor(new me.marti.vchat.commands.MuteChatCommand(this));
+
+            getCommand("ignore").setExecutor(new me.marti.vchat.commands.IgnoreCommand(this));
+            getCommand("togglementions").setExecutor(new me.marti.vchat.commands.ToggleMentionsCommand(this));
+
+            getLogger().info("Commands registered successfully.");
+        }, 1L);
 
         // Register Listeners
         getServer().getPluginManager().registerEvents(
@@ -96,7 +102,7 @@ public final class VChat extends JavaPlugin {
     public me.marti.vchat.managers.PrivateMessageManager getPrivateMessageManager() {
         return privateMessageManager;
     }
-    
+
     public me.marti.vchat.managers.IgnoreManager getIgnoreManager() {
         return ignoreManager;
     }

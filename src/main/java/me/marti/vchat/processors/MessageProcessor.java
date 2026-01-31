@@ -31,7 +31,7 @@ public class MessageProcessor {
     /**
      * Process the chat format and message into a single Component.
      */
-    public Component process(Player player, String format, String message) {
+    public Component process(Player player, String format, Component message) {
         // 0. Get LuckPerms Data
         net.luckperms.api.cacheddata.CachedMetaData metaData = this.luckPerms.getPlayerAdapter(Player.class)
                 .getMetaData(player);
@@ -39,10 +39,6 @@ public class MessageProcessor {
         String suffix = metaData.getSuffix() != null ? metaData.getSuffix() : "";
 
         // 1. Process string placeholders (PAPI mostly)
-        // Note: We do NOT replace {name} or {displayname} here yet if we want hover on
-        // them.
-        // But we DO replace {prefix}/{suffix} and PAPI.
-
         String processed = format
                 .replace("{prefix}", prefix)
                 .replace("{suffix}", suffix);
@@ -58,20 +54,18 @@ public class MessageProcessor {
         if (!hoverLines.isEmpty()) {
             hoverFormat = String.join("<newline>", hoverLines);
         } else {
-            // Fallback for single string or if list is empty but key exists as string
             hoverFormat = plugin.getConfigManager().getFormats().getString("name-hover", "");
         }
 
         Component hoverComponent = null;
         if (hoverFormat != null && !hoverFormat.isEmpty()) {
-            // Support for \n as newline for convenience (legacy support)
             hoverFormat = hoverFormat.replace("\\n", "<newline>");
 
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                 hoverFormat = PlaceholderAPI.setPlaceholders(player, hoverFormat);
             }
             hoverFormat = translateLegacyHexToMiniMessage(hoverFormat);
-            hoverFormat = translateLegacyToMiniMessage(hoverFormat); // Ensure colors are MiniMessage friendly
+            hoverFormat = translateLegacyToMiniMessage(hoverFormat);
             hoverComponent = miniMessage.deserialize(hoverFormat);
         }
 
@@ -83,26 +77,12 @@ public class MessageProcessor {
             displayNameComp = displayNameComp.hoverEvent(hoverComponent);
         }
 
-        // Replace {name} and {displayname} with tags to resolve later
+        // Replace placeholders with tags
         processed = processed.replace("{name}", "<user_name>")
-                .replace("{displayname}", "<user_displayname>");
+                .replace("{displayname}", "<user_displayname>")
+                .replace("{message}", "<chat_message>");
 
-        // 3. Handle Colors & Item Placeholder in Message
-        // Check for [item] or [i]
-        boolean hasItemPlaceholder = message.toLowerCase().contains("[item]") || message.toLowerCase().contains("[i]");
-        ItemStack handItem = player.getInventory().getItemInMainHand();
-
-        // ... (Item logic is similar, just resolve <item_tag>)
-        Component itemComponent = Component.empty();
-        if (hasItemPlaceholder && handItem.getType() != Material.AIR) {
-            itemComponent = getItemComponent(handItem);
-            message = message.replaceAll("(?i)\\[item]|(?i)\\[i]", "<item_tag>");
-        }
-
-        // Insert message
-        processed = processed.replace("{message}", message);
-
-        // Translate Colors
+        // Translate Colors in the FORMAT ONLY
         processed = translateLegacyHexToMiniMessage(processed);
         processed = translateLegacyToMiniMessage(processed);
 
@@ -110,9 +90,7 @@ public class MessageProcessor {
         return miniMessage.deserialize(processed,
                 Placeholder.component("user_name", nameComp),
                 Placeholder.component("user_displayname", displayNameComp),
-                Placeholder.component("item_tag", itemComponent) // Always pass it, empty if unused is fine? No, empty
-                                                                 // component is fine.
-        );
+                Placeholder.component("chat_message", message));
     }
 
     public Component getItemComponent(ItemStack item) {
