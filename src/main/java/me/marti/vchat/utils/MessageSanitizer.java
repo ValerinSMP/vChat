@@ -76,6 +76,7 @@ public class MessageSanitizer {
         // Add System Tags
         resolvers.add(StandardTags.color()); // For mentions
         resolvers.add(StandardTags.decorations()); // For mentions
+        resolvers.add(StandardTags.reset()); // Ensure reset is always available (for mentions)
 
         if (itemComponent != null) {
             resolvers.add(

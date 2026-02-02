@@ -20,7 +20,7 @@ public class ProfanityFilter implements ChatFilter {
 
     private void loadPatterns() {
         cachedPatterns.clear();
-        List<String> badWords = plugin.getConfig().getStringList("filters.profanity.words");
+        List<String> badWords = plugin.getConfigManager().getFilters().getStringList("profanity.words");
         for (String word : badWords) {
             cachedPatterns.add(createRobustPattern(word));
         }

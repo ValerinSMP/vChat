@@ -18,7 +18,7 @@ commands:
   msg:
     description: Send a private message
     usage: /msg <player> <message>
-    aliases: [w, tell, whisper, dm]
+    aliases: [w, tell, whisper]
     permission: vchat.msg
     permission-message: "&cNo tienes permisos."
   reply:

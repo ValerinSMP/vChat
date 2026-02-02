@@ -13,7 +13,7 @@ outgoing: "<#FDFD96>Tú <gray>-> <#FDFD96><receiver>: <white><message>"
 incoming: "<#FDFD96><sender> <gray>-> <#FDFD96>Tú: <white><message>"
 
 # SpyChat (Formato visto por admins) - Purple/Pink
-spy-format: "<gradient:#D8BFD8:#FFB7C5>[Spy] <sender> -> <receiver>: <message></gradient>"
+spy-format: "<dark_gray>[<gradient:#D8BFD8:#FFB7C5>sᴘʏᴄʜᴀᴛ</gradient><dark_gray>] <#D8BFD8><sender> <gray>-> <#D8BFD8><receiver><gray>: <message>"
 
 sounds:
   message-send: "ENTITY_EXPERIENCE_ORB_PICKUP"

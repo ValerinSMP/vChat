@@ -1,5 +1,5 @@
 # ---------------------------------------------------------
-# vChat - Filtros de Chat
+# vChat - Filtros de Chat (Configurado para ValerinSMP)
 # ---------------------------------------------------------
 
 # Check de Spam (Repetición y Similitud)
@@ -16,49 +16,87 @@ spam:
 caps:
   enabled: true
   percentage: 50 # % máximo de mayúsculas permitido
-  min-length: 5 # Longitud mínima del mensaje para revisar caps
-  # No hay mensaje de bloqueo porque se corrige automáticamente a minúsculas
+  min-length: 6 # Longitud mínima del mensaje para revisar caps
 
 # Check de Publicidad (IPs y Dominios)
 ads:
   enabled: true
   whitelist:
-    - "tiktok\\.com/@valerinsmp_oficial"
-    - "instagram\\.com/valerinsmp"
-    - "youtube\\.com/@valerinnetwork"
-    - "discord\\.valerinsmp\\.com"
-    - "tienda\\.valerinsmp\\.com"
-    - "play\\.valerinsmp\\.com"
-    # Common Socials (allow generic domain but can be strict if needed)
-    - "youtube\\.com"
-    - "tiktok\\.com"
-    - "instagram\\.com"
+    # Dominios Oficiales
+    - "valerinsmp.com"
+    - "tienda.valerinsmp.com"
+    - "discord.valerinsmp.com"
+    - "play.valerinsmp.com"
   lines:
     - ""
     - "&#FF6961Prohibido enviar publicidad de otros servidores."
     - ""
 
 # Check de Lenguaje Ofensivo (Groserías)
+# El plugin genera automáticamente variaciones regex para estas palabras (ej: p.u.t.a, pVt4, etc.)
+# Solo pon la palabra base.
 profanity:
   enabled: true
-  words: 
+  words:
+    # --- Insultos Comunes ---
+    - "puta"
+    - "puto"
+    - "mierda"
+    - "coño"
+    - "verga"
+    - "pendejo"
+    - "maricon"
+    - "estupido"
+    - "idiota"
+    - "imbecil"
+    - "zorra"
+    - "bastardo"
+    - "capullo"
+    - "gilipollas"
+    - "gonorrea"
+    - "malparido"
+    - "perra"
+    - "concha"
+    - "chinga"
+    - "tarado"
+    - "subnormal"
+    - "retrasado"
+    
+    # --- Sexual ---
+    - "pene"
+    - "semen"
+    - "vagina"
+    - "follar"
+    - "culear"
+    - "mamada"
+    - "chupar"
+    - "tragaleche"
+    - "anal"
+    - "orgasmo"
+    - "clitoris"
+    - "dildo"
+    - "paja"
+    
+    # --- Discriminación / Odio ---
+    - "sudaca"
+    - "panchito"
+    - "negrata"
     - "nigger"
+    - "nigga"
+    - "mogolico"
+    - "autista" # Contexto sensible
+    - "sidoso"
+    - "down"    # Contexto sensible
+    
+    # --- Inglés (Frecuentes) ---
     - "fuck"
     - "shit"
     - "bitch"
     - "asshole"
-    - "motherfucker"
     - "cunt"
-    - "bastard"
-    - "hell"
-    - "damn"
-    - "goddamn"
-    - "bitch"
-    - "asshole"
-    - "motherfucker"
-    - "cunt"
-    - "bastard"
-    - "hell"
-    - "damn"
-    - "goddamn"
-  # Se reemplaza por ****
+    - "whore"
+    - "dick"
+    - "cock"
+    - "pussy"
+
+  # Se reemplaza por **** (o lo que defina el plugin internamente)
