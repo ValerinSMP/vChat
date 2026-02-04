@@ -38,6 +38,15 @@ public class MessageProcessor {
         String prefix = metaData.getPrefix() != null ? metaData.getPrefix() : "";
         String suffix = metaData.getSuffix() != null ? metaData.getSuffix() : "";
 
+        // Pre-parse PAPI in prefix/suffix (Fix for placeholders inside LuckPerms
+        // prefixes)
+        // Pre-parse PAPI in prefix/suffix (Fix for placeholders inside LuckPerms
+        // prefixes)
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            prefix = PlaceholderAPI.setPlaceholders(player, prefix);
+            suffix = PlaceholderAPI.setPlaceholders(player, suffix);
+        }
+
         // 1. Process string placeholders (PAPI mostly)
         String processed = format
                 .replace("{prefix}", prefix)
@@ -59,7 +68,9 @@ public class MessageProcessor {
 
         Component hoverComponent = null;
         if (hoverFormat != null && !hoverFormat.isEmpty()) {
-            hoverFormat = hoverFormat.replace("\\n", "<newline>");
+            hoverFormat = hoverFormat.replace("\\n", "<newline>")
+                    .replace("{prefix}", prefix)
+                    .replace("{suffix}", suffix);
 
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                 hoverFormat = PlaceholderAPI.setPlaceholders(player, hoverFormat);
