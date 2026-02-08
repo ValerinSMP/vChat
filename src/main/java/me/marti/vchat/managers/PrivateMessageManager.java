@@ -4,6 +4,7 @@ import me.marti.vchat.VChat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -25,6 +26,8 @@ public class PrivateMessageManager {
     private final Map<UUID, Boolean> spyToggleCache = new HashMap<>();
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
+
+    private static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public PrivateMessageManager(VChat plugin) {
         this.plugin = plugin;
@@ -92,27 +95,33 @@ public class PrivateMessageManager {
         }
     }
 
-    public void sendPrivateMessage(Player sender, Player target, String message) {
-        // Checks
-        if (!isMsgEnabled(sender)) {
-            plugin.getAdminManager().sendConfigMessage(sender, "private.disabled-self");
-            return;
-        }
-        if (!isMsgEnabled(target) && !sender.hasPermission("vchat.bypass.msg")) {
-            plugin.getAdminManager().sendConfigMessage(sender, "private.disabled-target"); // Need %player% replacement?
-            return;
-        }
+    public void sendPrivateMessage(CommandSender sender, Player target, String message) {
+        UUID senderUUID = (sender instanceof Player p) ? p.getUniqueId() : CONSOLE_UUID;
 
-        // Check if target ignores sender
-        if (plugin.getIgnoreManager().isIgnored(target.getUniqueId(), sender.getUniqueId())
-                && !sender.hasPermission("vchat.bypass.ignore")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>Este jugador te ha ignorado.</red>"));
-            return;
+        // Checks (Only if sender is player)
+        if (sender instanceof Player p) {
+            if (!isMsgEnabled(p)) {
+                plugin.getAdminManager().sendConfigMessage(sender, "private.disabled-self");
+                return;
+            }
+            if (!isMsgEnabled(target) && !p.hasPermission("vchat.bypass.msg")) {
+                plugin.getAdminManager().sendConfigMessage(sender, "private.disabled-target");
+                return;
+            }
+            // Check if target ignores sender
+            if (plugin.getIgnoreManager().isIgnored(target.getUniqueId(), p.getUniqueId())
+                    && !p.hasPermission("vchat.bypass.ignore")) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>Este jugador te ha ignorado.</red>"));
+                return;
+            }
         }
 
         // Reply Link
-        lastRunners.put(target.getUniqueId(), sender.getUniqueId());
-        lastRunners.put(sender.getUniqueId(), target.getUniqueId());
+        lastRunners.put(target.getUniqueId(), senderUUID);
+        // If console, we can technically allow reply back to console
+        if (senderUUID != CONSOLE_UUID) {
+            lastRunners.put(senderUUID, target.getUniqueId());
+        }
 
         // Format Components
         String outgoingFormat = plugin.getConfigManager().getPrivate().getString("outgoing");
@@ -129,17 +138,50 @@ public class PrivateMessageManager {
                 miniMessage.deserialize("<gray>✉ Nuevo mensaje de <white>" + sender.getName() + "</white></gray>"));
 
         // Sounds
-        playSound(sender, "sounds.message-send");
+        if (sender instanceof Player p) {
+            playSound(p, "sounds.message-send");
+        }
         playSound(target, "sounds.message-receive");
 
         // Social Spy
         notifySocialSpy(sender, target, message);
     }
 
-    public void reply(Player sender, String message) {
-        UUID targetId = lastRunners.get(sender.getUniqueId());
+    public void reply(CommandSender sender, String message) {
+        UUID senderUUID = (sender instanceof Player p) ? p.getUniqueId() : CONSOLE_UUID;
+
+        UUID targetId = lastRunners.get(senderUUID);
         if (targetId == null) {
             plugin.getAdminManager().sendConfigMessage(sender, "private.no-reply");
+            return;
+        }
+
+        // Handle reply to console?
+        // If targetId is CONSOLE_UUID, we can't use Bukkit.getPlayer(targetId).
+        // Since we only set lastRunners for targets as senderUUID...
+        // If I am CONSOLE, my target is a Player UUID.
+        // If I am Player, my target *could* be CONSOLE_UUID if Console messaged me.
+
+        if (targetId.equals(CONSOLE_UUID)) {
+            // Reply to Console
+            CommandSender targetConsole = Bukkit.getConsoleSender();
+            // We reuse sendPrivateMessage logic, but sendPrivateMessage expects Player
+            // target.
+            // We need to handle Console as target too? Or just block reply to console for
+            // now?
+            // "permitir msg de consola". Doesn't explicitly ask for reply to console.
+            // But it's nice. However, sendPrivateMessage signature is (CommandSender,
+            // Player).
+            // Let's keep it simple: If target is console, handle directly here or error.
+
+            // For now, let's just say "Console" cannot be a target of /msg (standard MC
+            // behavior usually).
+            // But if I want to support reply to console, I need to refactor
+            // sendPrivateMessage to accept CommandSender target.
+            // Let's stick to user request: "permitir msg de consola".
+            // So Console -> Player works. Player replying to Console... maybe validation
+            // error "Cannot reply to console".
+            sender.sendMessage(Component.text("No puedes responder a la consola (aún).", NamedTextColor.RED));
             return;
         }
 
@@ -153,14 +195,14 @@ public class PrivateMessageManager {
         sendPrivateMessage(sender, target, message);
     }
 
-    private Component formatData(String format, Player sender, Player target, String message) {
+    private Component formatData(String format, CommandSender sender, Player target, String message) {
         return miniMessage.deserialize(format,
                 Placeholder.component("sender", Component.text(sender.getName())),
                 Placeholder.component("receiver", Component.text(target.getName())),
                 Placeholder.component("message", Component.text(message)));
     }
 
-    private void notifySocialSpy(Player sender, Player target, String message) {
+    private void notifySocialSpy(CommandSender sender, Player target, String message) {
         String format = plugin.getConfigManager().getPrivate().getString("spy-format",
                 "<gradient:#D8BFD8:#FFB7C5>[Spy] <sender> -> <receiver>: <message></gradient>");
 

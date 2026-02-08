@@ -17,7 +17,6 @@ name-hover:
   - '&#fce300⌚ &fHoras Jugadas: &#fce300%statistic_hours_played%h %statistic_minutes_played%m'
   - '&#fc8c00⚔ &fClan: &8%justteams_plain_name%'
   - '&8&m0                                           0&r'
-  - '&7Clic para enviar mensaje privado'
 
 # Formato de Ítem al usar [item] o [i]
 # {amount} = Cantidad, {item} = Nombre del ítem (con hover nativo)

@@ -75,7 +75,7 @@ public class MentionManager {
         if (!sender.hasPermission("vchat.mention"))
             return message;
 
-        Pattern mentionPattern = Pattern.compile("@(\\w+)");
+        Pattern mentionPattern = Pattern.compile("@([.\\w]+)");
         Matcher matcher = mentionPattern.matcher(message);
 
         StringBuffer sb = new StringBuffer();

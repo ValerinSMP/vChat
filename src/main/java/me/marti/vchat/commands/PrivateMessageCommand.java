@@ -23,35 +23,30 @@ public class PrivateMessageCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("Solo jugadores pueden enviar mensajes privados.", NamedTextColor.RED));
-            return true;
-        }
-
-        if (!player.hasPermission("vchat.msg")) {
+        if (sender instanceof Player player && !player.hasPermission("vchat.msg")) {
             plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
             return true;
         }
 
         if (args.length < 2) {
-            player.sendMessage(Component.text("Uso: /msg <jugador> <mensaje>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Uso: /msg <jugador> <mensaje>", NamedTextColor.RED));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null || !target.isOnline()) { // isOnline check just in case getPlayer returns offline player (it
                                                     // shouldn't usually but safest)
-            player.sendMessage(Component.text("Jugador no encontrado.", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Jugador no encontrado.", NamedTextColor.RED));
             return true;
         }
 
-        if (target.equals(player)) {
+        if (sender instanceof Player player && target.equals(player)) {
             plugin.getAdminManager().sendConfigMessage(player, "private.no-self");
             return true;
         }
 
         String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-        plugin.getPrivateMessageManager().sendPrivateMessage(player, target, message);
+        plugin.getPrivateMessageManager().sendPrivateMessage(sender, target, message);
         return true;
     }
 }
