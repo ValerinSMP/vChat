@@ -1,6 +1,7 @@
 package me.marti.vchat.managers;
 
 import me.marti.vchat.VChat;
+import me.marti.vchat.utils.MessageSanitizer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -127,8 +128,12 @@ public class PrivateMessageManager {
         String outgoingFormat = plugin.getConfigManager().getPrivate().getString("outgoing");
         String incomingFormat = plugin.getConfigManager().getPrivate().getString("incoming");
 
-        Component outgoing = formatData(outgoingFormat, sender, target, message);
-        Component incoming = formatData(incomingFormat, sender, target, message);
+        // Process Message Colors/Formats
+        String prepared = MessageSanitizer.prepare(sender, message);
+        Component messageComp = MessageSanitizer.parse(sender, prepared, null);
+
+        Component outgoing = formatData(outgoingFormat, sender, target, messageComp);
+        Component incoming = formatData(incomingFormat, sender, target, messageComp);
 
         sender.sendMessage(outgoing);
         target.sendMessage(incoming);
@@ -144,7 +149,7 @@ public class PrivateMessageManager {
         playSound(target, "sounds.message-receive");
 
         // Social Spy
-        notifySocialSpy(sender, target, message);
+        notifySocialSpy(sender, target, messageComp);
     }
 
     public void reply(CommandSender sender, String message) {
@@ -195,14 +200,14 @@ public class PrivateMessageManager {
         sendPrivateMessage(sender, target, message);
     }
 
-    private Component formatData(String format, CommandSender sender, Player target, String message) {
+    private Component formatData(String format, CommandSender sender, Player target, Component message) {
         return miniMessage.deserialize(format,
                 Placeholder.component("sender", Component.text(sender.getName())),
                 Placeholder.component("receiver", Component.text(target.getName())),
-                Placeholder.component("message", Component.text(message)));
+                Placeholder.component("message", message));
     }
 
-    private void notifySocialSpy(CommandSender sender, Player target, String message) {
+    private void notifySocialSpy(CommandSender sender, Player target, Component message) {
         String format = plugin.getConfigManager().getPrivate().getString("spy-format",
                 "<gradient:#D8BFD8:#FFB7C5>[Spy] <sender> -> <receiver>: <message></gradient>");
 

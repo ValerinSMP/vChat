@@ -5,7 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 public class MessageSanitizer {
 
@@ -13,17 +13,17 @@ public class MessageSanitizer {
      * Prepares a message by escaping unauthorized tags and translating allowed
      * legacy codes.
      */
-    public static String prepare(Player player, String message) {
-        if (player.hasPermission("vchat.format.bypass")) {
+    public static String prepare(CommandSender sender, String message) {
+        if (sender.hasPermission("vchat.format.bypass")) {
             // If bypass, we still want to support both & and MiniMessage tags.
             // We translate & to tags first, then parse.
             return translateLegacyToMiniMessage(message, true, true, true, true);
         }
 
-        boolean allowBasic = player.hasPermission("vchat.format.color.basic");
-        boolean allowHex = player.hasPermission("vchat.format.color.hex");
-        boolean allowStyles = player.hasPermission("vchat.format.style.basic");
-        boolean allowMagic = player.hasPermission("vchat.format.style.magic");
+        boolean allowBasic = sender.hasPermission("vchat.format.color.basic");
+        boolean allowHex = sender.hasPermission("vchat.format.color.hex");
+        boolean allowStyles = sender.hasPermission("vchat.format.style.basic");
+        boolean allowMagic = sender.hasPermission("vchat.format.style.magic");
 
         // 1. First, we escape the message so MiniMessage tags typed by player are
         // literal.
@@ -37,8 +37,8 @@ public class MessageSanitizer {
      * Parses the prepared message into a Component, enforcing permissions and
      * including item support.
      */
-    public static Component parse(Player player, String processedMessage, Component itemComponent) {
-        if (player.hasPermission("vchat.format.bypass")) {
+    public static Component parse(CommandSender sender, String processedMessage, Component itemComponent) {
+        if (sender.hasPermission("vchat.format.bypass")) {
             java.util.List<TagResolver> bypassResolvers = new java.util.ArrayList<>();
             if (itemComponent != null) {
                 bypassResolvers.add(net.kyori.adventure.text.minimessage.tag.resolver.Placeholder.component("item_tag",
@@ -47,10 +47,10 @@ public class MessageSanitizer {
             return MiniMessage.miniMessage().deserialize(processedMessage, TagResolver.resolver(bypassResolvers));
         }
 
-        boolean allowBasic = player.hasPermission("vchat.format.color.basic");
-        boolean allowHex = player.hasPermission("vchat.format.color.hex");
-        boolean allowStyles = player.hasPermission("vchat.format.style.basic");
-        boolean allowMagic = player.hasPermission("vchat.format.style.magic");
+        boolean allowBasic = sender.hasPermission("vchat.format.color.basic");
+        boolean allowHex = sender.hasPermission("vchat.format.color.hex");
+        boolean allowStyles = sender.hasPermission("vchat.format.style.basic");
+        boolean allowMagic = sender.hasPermission("vchat.format.style.magic");
 
         // 3. Build a TagResolver with ONLY allowed tags.
         java.util.List<TagResolver> resolvers = new java.util.ArrayList<>();
