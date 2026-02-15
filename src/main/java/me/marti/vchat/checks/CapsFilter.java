@@ -38,7 +38,7 @@ public class CapsFilter implements ChatFilter {
         double percentage = (double) capsCount / lettersCount * 100;
 
         if (percentage > threshold) {
-            return FilterResult.modified("Caps", message.toLowerCase());
+            return FilterResult.modified("Mayúsculas (" + (int) percentage + "%)", message.toLowerCase());
         }
 
         return FilterResult.allowed();

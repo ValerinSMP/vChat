@@ -63,14 +63,14 @@ public class AdsFilter implements ChatFilter {
 
         Matcher ipMatcher = IP_PATTERN.matcher(message);
         if (ipMatcher.find()) {
-            return FilterResult.blocked("Publicidad (IP)", getBlockMessage());
+            return FilterResult.blocked("Publicidad (IP: " + ipMatcher.group() + ")", getBlockMessage());
         }
 
         Matcher urlMatcher = URL_PATTERN.matcher(message);
         if (urlMatcher.find()) {
             // Basic domain check can be aggressive, so we rely on whitelisting common ones
             // if needed
-            return FilterResult.blocked("Publicidad (Link)", getBlockMessage());
+            return FilterResult.blocked("Publicidad (Link: " + urlMatcher.group() + ")", getBlockMessage());
         }
 
         return FilterResult.allowed();

@@ -81,7 +81,7 @@ public class MessageProcessor {
         }
 
         Component nameComp = Component.text(player.getName());
-        Component displayNameComp = legacySerializer.deserialize(player.getDisplayName());
+        Component displayNameComp = LegacyComponentSerializer.legacySection().deserialize(player.getDisplayName());
 
         if (hoverComponent != null) {
             nameComp = nameComp.hoverEvent(hoverComponent);
@@ -114,19 +114,40 @@ public class MessageProcessor {
 
         // Resolve item name
         Component itemName;
-        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            String rawName = item.getItemMeta().getDisplayName();
 
-            // Check for legacy codes (Section symbol §) to prevent MiniMessage parsing
-            // errors
-            if (rawName.contains(LegacyComponentSerializer.SECTION_CHAR + "")) {
-                // It's a legacy string (likely from another plugin or NBT)
-                itemName = LegacyComponentSerializer.legacySection().deserialize(rawName);
-            } else {
-                // Process & codes manually and then parse as MiniMessage
-                rawName = translateLegacyHexToMiniMessage(rawName);
-                rawName = translateLegacyToMiniMessage(rawName);
-                itemName = miniMessage.deserialize(rawName);
+        // Fetch Meta ONCE to ensure consistency
+        // Fetch Meta ONCE to ensure consistency
+        org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            // 1. Custom Name (Anvil/Command - usually italic)
+            if (meta.hasDisplayName()) {
+                Component displayComp = meta.displayName();
+
+                if (displayComp != null) {
+                    itemName = displayComp;
+                } else {
+                    // Fallback to legacy string if component is null (unexpected but safe)
+                    String rawName = meta.getDisplayName();
+                    // Check for legacy codes
+                    if (rawName.contains(LegacyComponentSerializer.SECTION_CHAR + "")) {
+                        itemName = LegacyComponentSerializer.legacySection().deserialize(rawName);
+                    } else {
+                        rawName = translateLegacyHexToMiniMessage(rawName);
+                        rawName = translateLegacyToMiniMessage(rawName);
+                        itemName = miniMessage.deserialize(rawName);
+                    }
+                }
+            }
+            // 2. Item Name (Data Component - usually normal text, used by Nexo/Oraxen
+            // 1.21+)
+            else if (meta.hasItemName()) {
+                plugin.getLogger().info("[vChat-1.0.5] Detected ItemName 1.21+ capability. Using it.");
+                itemName = meta.itemName();
+            }
+            // 3. Fallback to Material Name
+            else {
+                itemName = Component.text(prettifyEnumName(item.getType().name()));
             }
         } else {
             itemName = Component.text(prettifyEnumName(item.getType().name()));

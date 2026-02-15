@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "me.marti"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.5-SNAPSHOT-FIX"
 
 repositories {
     mavenCentral()

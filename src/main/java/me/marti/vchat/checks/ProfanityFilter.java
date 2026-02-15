@@ -33,14 +33,18 @@ public class ProfanityFilter implements ChatFilter {
 
         boolean modified = false;
         String tempMessage = message;
+        java.util.Set<String> detectedWords = new java.util.HashSet<>();
 
         for (Pattern p : cachedPatterns) {
             Matcher m = p.matcher(tempMessage);
             if (m.find()) {
-                // Replace with ****
+                // Capture detected word (first match is enough to identify type, but we might
+                // want all unique)
+                // We reset to capture all
                 m.reset();
                 StringBuffer sb = new StringBuffer();
                 while (m.find()) {
+                    detectedWords.add(m.group());
                     m.appendReplacement(sb, "****");
                 }
                 m.appendTail(sb);
@@ -50,7 +54,8 @@ public class ProfanityFilter implements ChatFilter {
         }
 
         if (modified) {
-            return FilterResult.modified("Groserías", tempMessage);
+            String reason = "Groserías (" + String.join(", ", detectedWords) + ")";
+            return FilterResult.modified(reason, tempMessage);
         }
 
         return FilterResult.allowed();
