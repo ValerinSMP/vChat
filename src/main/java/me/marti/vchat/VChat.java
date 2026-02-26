@@ -1,6 +1,5 @@
 package me.marti.vchat;
 
-import me.marti.vchat.commands.ReloadCommand;
 import me.marti.vchat.listeners.ChatListener;
 import me.marti.vchat.managers.FormatManager;
 import me.marti.vchat.processors.MessageProcessor;
@@ -22,6 +21,7 @@ public final class VChat extends JavaPlugin {
     private me.marti.vchat.managers.MentionManager mentionManager;
     private me.marti.vchat.managers.PrivateMessageManager privateMessageManager;
     private me.marti.vchat.managers.IgnoreManager ignoreManager;
+    private me.marti.vchat.managers.DiscordBridgeManager discordBridgeManager;
     private me.marti.vchat.compat.MentionsTabInjector mentionsTabInjector;
     private LuckPerms luckPerms;
 
@@ -47,6 +47,7 @@ public final class VChat extends JavaPlugin {
         this.messageProcessor = new MessageProcessor(this, luckPerms);
         this.privateMessageManager = new me.marti.vchat.managers.PrivateMessageManager(this);
         this.ignoreManager = new me.marti.vchat.managers.IgnoreManager(this);
+        this.discordBridgeManager = new me.marti.vchat.managers.DiscordBridgeManager(this);
 
         // Register Commands
         registerCommands();
@@ -77,6 +78,8 @@ public final class VChat extends JavaPlugin {
             this.mentionsTabInjector = new me.marti.vchat.compat.MentionsTabInjector(this);
             this.mentionsTabInjector.register();
         }
+
+        discordBridgeManager.start();
 
         printStartupBanner();
     }
@@ -113,10 +116,15 @@ public final class VChat extends JavaPlugin {
         return logManager;
     }
 
+    public me.marti.vchat.managers.DiscordBridgeManager getDiscordBridgeManager() {
+        return discordBridgeManager;
+    }
+
     @Override
     public void onDisable() {
-        // Cancel all async/sync tasks
-        getServer().getScheduler().cancelTasks(this);
+        if (logManager != null) {
+            logManager.shutdown();
+        }
 
         // Unregister ProtocolLib Hook if exists (Optional, but good practice)
         if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
@@ -126,6 +134,12 @@ public final class VChat extends JavaPlugin {
         if (mentionsTabInjector != null) {
             mentionsTabInjector.shutdown();
         }
+        if (discordBridgeManager != null) {
+            discordBridgeManager.shutdown();
+        }
+
+        // Cancel all remaining async/sync tasks
+        getServer().getScheduler().cancelTasks(this);
 
         getLogger().info("vChat has been disabled!");
     }
@@ -201,6 +215,9 @@ public final class VChat extends JavaPlugin {
         formatManager.reload();
         if (filterManager != null) {
             filterManager.loadFilters();
+        }
+        if (discordBridgeManager != null) {
+            discordBridgeManager.reload();
         }
         getLogger().info("Configuration reloaded.");
     }

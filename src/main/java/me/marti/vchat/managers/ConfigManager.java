@@ -30,7 +30,8 @@ public class ConfigManager {
             "filters.yml",
             "formats.yml",
             "mentions.yml",
-            "private.yml"
+            "private.yml",
+            "bridge.yml"
         };
 
         for (String file : files) {
@@ -75,6 +76,7 @@ public class ConfigManager {
     public FileConfiguration getFormats() { return getConfig("formats.yml"); }
     public FileConfiguration getMentions() { return getConfig("mentions.yml"); }
     public FileConfiguration getPrivate() { return getConfig("private.yml"); }
+    public FileConfiguration getBridge() { return getConfig("bridge.yml"); }
 
     public void saveConfig(String fileName) {
         if (configFiles.containsKey(fileName) && configs.containsKey(fileName)) {

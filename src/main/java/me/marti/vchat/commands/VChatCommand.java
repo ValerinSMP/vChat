@@ -66,6 +66,8 @@ public class VChatCommand implements CommandExecutor {
                 return handleMsgToggle(sender);
             case "viewitem":
                 return handleViewItem(sender, args);
+            case "bridge":
+                return handleBridge(sender, args);
         }
 
         sender.sendMessage(
@@ -204,8 +206,85 @@ public class VChatCommand implements CommandExecutor {
         if (sender.hasPermission("vchat.notify")) {
             sender.sendMessage(formatCommand("/vchat notify", "Notificaciones de admin"));
         }
+        if (sender.hasPermission("vchat.bridge.admin") || sender.hasPermission("vchat.admin")) {
+            sender.sendMessage(formatCommand("/vchat bridge status", "Estado del bridge de Discord"));
+            sender.sendMessage(formatCommand("/vchat bridge block <id>", "Bloquear usuario de Discord"));
+            sender.sendMessage(formatCommand("/vchat bridge unblock <id>", "Desbloquear usuario de Discord"));
+            sender.sendMessage(formatCommand("/vchat bridge reload", "Recargar bridge de Discord"));
+            sender.sendMessage(formatCommand("/vchat bridge test <msg>", "Enviar test por webhook"));
+        }
 
         sender.sendMessage(Component.text(" ", NamedTextColor.GRAY));
+    }
+
+    private boolean handleBridge(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("vchat.bridge.admin") && !sender.hasPermission("vchat.admin")) {
+            adminManager.sendConfigMessage(sender, "messages.no-permission");
+            return true;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage(Component.text("Uso: /vchat bridge <status|reload|block|unblock|list|test>", NamedTextColor.RED));
+            return true;
+        }
+
+        String action = args[1].toLowerCase();
+        me.marti.vchat.managers.DiscordBridgeManager bridge = plugin.getDiscordBridgeManager();
+
+        switch (action) {
+            case "status" -> {
+                sender.sendMessage(Component.text("Bridge enabled: " + bridge.isEnabled(), NamedTextColor.AQUA));
+                sender.sendMessage(Component.text("Server ID: " + bridge.getServerId(), NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("Channel ID: " + bridge.getCurrentChannelId(), NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("Blocked users: " + bridge.getBlockedDiscordUsers().size(), NamedTextColor.GRAY));
+                return true;
+            }
+            case "reload" -> {
+                bridge.reload();
+                sender.sendMessage(Component.text("Discord bridge recargado.", NamedTextColor.GREEN));
+                return true;
+            }
+            case "block" -> {
+                if (args.length < 3) {
+                    sender.sendMessage(Component.text("Uso: /vchat bridge block <discordUserId>", NamedTextColor.RED));
+                    return true;
+                }
+                boolean added = bridge.blockDiscordUser(args[2]);
+                sender.sendMessage(Component.text(added ? "Usuario bloqueado." : "Ese usuario ya estaba bloqueado.",
+                        added ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+                return true;
+            }
+            case "unblock" -> {
+                if (args.length < 3) {
+                    sender.sendMessage(Component.text("Uso: /vchat bridge unblock <discordUserId>", NamedTextColor.RED));
+                    return true;
+                }
+                boolean removed = bridge.unblockDiscordUser(args[2]);
+                sender.sendMessage(Component.text(removed ? "Usuario desbloqueado." : "Ese usuario no estaba bloqueado.",
+                        removed ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+                return true;
+            }
+            case "list" -> {
+                java.util.Set<String> blocked = bridge.getBlockedDiscordUsers();
+                if (blocked.isEmpty()) {
+                    sender.sendMessage(Component.text("No hay usuarios bloqueados.", NamedTextColor.GRAY));
+                    return true;
+                }
+                sender.sendMessage(Component.text("Usuarios bloqueados: " + String.join(", ", blocked), NamedTextColor.YELLOW));
+                return true;
+            }
+            case "test" -> {
+                String msg = args.length >= 3 ? String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length))
+                        : "bridge test";
+                bridge.sendTestMessageToDiscord(msg);
+                sender.sendMessage(Component.text("Test enviado a Discord (webhook).", NamedTextColor.GREEN));
+                return true;
+            }
+            default -> {
+                sender.sendMessage(Component.text("Subcomando bridge desconocido.", NamedTextColor.RED));
+                return true;
+            }
+        }
     }
 
     private Component formatCommand(String command, String description) {

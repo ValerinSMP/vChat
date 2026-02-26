@@ -123,7 +123,7 @@ public class ProtocolLibHook {
     }
 
     private List<String> getMentionCompletions(Player player, String partial) {
-        if (!plugin.getConfig().getBoolean("mentions.enabled"))
+        if (!plugin.getConfigManager().getMentions().getBoolean("enabled", true))
             return Collections.emptyList();
 
         List<String> results = new java.util.ArrayList<>();

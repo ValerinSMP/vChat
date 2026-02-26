@@ -15,6 +15,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
+import java.util.Set;
+import java.util.UUID;
+
 public class ChatListener implements Listener {
 
     private final VChat plugin;
@@ -43,15 +46,15 @@ public class ChatListener implements Listener {
             return;
         }
 
-        Component originalMessageComp = event.message();
-        String message = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
-                .serialize(originalMessageComp);
+        String originalMessage = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
+                .serialize(event.message());
+        String message = originalMessage;
 
         // 1. PRE-SANITIES (Escape & Transition)
         message = MessageSanitizer.prepare(player, message);
 
-        // 2. MENTIONS
-        message = mentionManager.processMentions(player, message);
+        MentionManager.MentionProcessResult mentionResult = mentionManager.processMentions(player, message);
+        message = mentionResult.processedMessage();
 
         // 3. ITEM PLACEHOLDER
         boolean hasItemPlaceholder = message.toLowerCase().contains("[item]") || message.toLowerCase().contains("[i]");
@@ -68,13 +71,27 @@ public class ChatListener implements Listener {
         FilterResult result = filterManager.process(player, message);
         if (result.state() == FilterResult.State.BLOCKED) {
             event.setCancelled(true);
-            if (result.reasonMessage() != null) {
-                player.sendMessage(result.reasonMessage());
-            }
+            runSync(() -> {
+                plugin.getAdminManager().playSound(player, "sounds.blocked");
+                if (result.reason() != null) {
+                    plugin.getAdminManager().notifyAdmins(player, result.reason(), originalMessage);
+                    plugin.getLogManager().logViolation(player.getName(), result.reason(), originalMessage);
+                }
+                if (result.reasonMessage() != null) {
+                    player.sendMessage(result.reasonMessage());
+                }
+            });
             return;
         }
         if (result.state() == FilterResult.State.MODIFIED) {
-            message = result.modifiedMessage();
+            if (result.reason() != null) {
+                String modifiedMessage = result.modifiedMessage();
+                runSync(() -> plugin.getAdminManager().notifyAdmins(player, result.reason(), originalMessage));
+                plugin.getLogManager().logViolation(player.getName(), result.reason(), originalMessage);
+                message = modifiedMessage;
+            } else {
+                message = result.modifiedMessage();
+            }
         }
 
         // 5. PARSE TO COMPONENT (Enforces Permissions)
@@ -83,15 +100,22 @@ public class ChatListener implements Listener {
         // 6. FORMATTING
         String format = formatManager.getFormat(player);
         Component formatted = messageProcessor.process(player, format, messageComponent);
+        plugin.getDiscordBridgeManager().relayMinecraftChat(player,
+                PlainTextComponentSerializer.plainText().serialize(messageComponent));
 
         event.renderer((source, sourceDisplayName, messageComp, viewer) -> formatted);
+
+        Set<UUID> targetsToNotify = mentionResult.targetsToNotify();
+        if (!targetsToNotify.isEmpty()) {
+            runSync(() -> mentionManager.notifyTargets(player, targetsToNotify));
+        }
 
         // Handle Ignored Players and Personal Mute
         event.viewers().removeIf(viewer -> {
             if (viewer instanceof Player audience) {
                 // Check Ignored
                 if (plugin.getIgnoreManager().isIgnored(audience.getUniqueId(), player.getUniqueId())
-                        && !audience.hasPermission("vchat.bypass.ignore")) {
+                        && !player.hasPermission("vchat.bypass.ignore")) {
                     return true;
                 }
 
@@ -102,5 +126,13 @@ public class ChatListener implements Listener {
             }
             return false;
         });
+    }
+
+    private void runSync(Runnable runnable) {
+        if (plugin.getServer().isPrimaryThread()) {
+            runnable.run();
+            return;
+        }
+        plugin.getServer().getScheduler().runTask(plugin, runnable);
     }
 }

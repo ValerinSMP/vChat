@@ -2,6 +2,8 @@ package me.marti.vchat.processors;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -20,6 +22,8 @@ public class MessageProcessor {
     private final net.luckperms.api.LuckPerms luckPerms;
     private final me.marti.vchat.VChat plugin;
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
+    private static final Pattern URL_PATTERN = Pattern.compile(
+            "(?i)\\b((?:https?://)?(?:www\\.)?[a-z0-9-]+(?:\\.[a-z0-9-]+)+(?:/[^\\s]*)?)\\b");
 
     public MessageProcessor(me.marti.vchat.VChat plugin, net.luckperms.api.LuckPerms luckPerms) {
         this.plugin = plugin;
@@ -98,10 +102,12 @@ public class MessageProcessor {
         processed = translateLegacyToMiniMessage(processed);
 
         // Deserialize with Resolvers
-        return miniMessage.deserialize(processed,
+        Component formatted = miniMessage.deserialize(processed,
                 Placeholder.component("user_name", nameComp),
                 Placeholder.component("user_displayname", displayNameComp),
                 Placeholder.component("chat_message", message));
+
+        return makeUrlsClickable(formatted);
     }
 
     public Component getItemComponent(ItemStack item) {
@@ -237,5 +243,38 @@ public class MessageProcessor {
                     .append(" ");
         }
         return builder.toString().trim();
+    }
+
+    private Component makeUrlsClickable(Component component) {
+        return component.replaceText(TextReplacementConfig.builder()
+                .match(URL_PATTERN)
+                .replacement((match, builder) -> {
+                    String raw = match.group(1);
+                    String target = normalizeUrl(raw);
+                    if (target == null) {
+                        return builder.build();
+                    }
+                    return builder
+                            .clickEvent(ClickEvent.openUrl(target))
+                            .build();
+                })
+                .build());
+    }
+
+    private String normalizeUrl(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+
+        String lower = raw.toLowerCase();
+        if (lower.startsWith("http://") || lower.startsWith("https://")) {
+            return raw;
+        }
+
+        if (lower.startsWith("www.") || raw.contains(".")) {
+            return "https://" + raw;
+        }
+
+        return null;
     }
 }

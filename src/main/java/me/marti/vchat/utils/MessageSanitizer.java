@@ -52,6 +52,11 @@ public class MessageSanitizer {
         boolean allowStyles = sender.hasPermission("vchat.format.style.basic");
         boolean allowMagic = sender.hasPermission("vchat.format.style.magic");
 
+        // Hard guard: if player doesn't have HEX permission, strip HEX-like tags.
+        if (!allowHex) {
+            processedMessage = stripHexTags(processedMessage);
+        }
+
         // 3. Build a TagResolver with ONLY allowed tags.
         java.util.List<TagResolver> resolvers = new java.util.ArrayList<>();
         if (allowBasic)
@@ -90,6 +95,21 @@ public class MessageSanitizer {
                 .build();
 
         return restricted.deserialize(processedMessage);
+    }
+
+    private static String stripHexTags(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        String out = input;
+        // <#aabbcc> / </#aabbcc>
+        out = out.replaceAll("(?i)</?#[0-9a-f]{6}>", "");
+        // <gradient:...> </gradient> <rainbow> </rainbow>
+        out = out.replaceAll("(?i)</?gradient(?::[^>]*)?>", "");
+        out = out.replaceAll("(?i)</?rainbow(?::[^>]*)?>", "");
+        // legacy style hex that could appear from external pipelines
+        out = out.replaceAll("(?i)&#[0-9a-f]{6}", "");
+        return out;
     }
 
     private static String translateLegacyToMiniMessage(String message, boolean basic, boolean hex, boolean styles,

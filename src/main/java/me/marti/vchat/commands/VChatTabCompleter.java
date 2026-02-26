@@ -28,8 +28,22 @@ public class VChatTabCompleter implements TabCompleter {
             suggestions.add("spy");
             suggestions.add("msg_toggle");
             suggestions.add("help");
+            if (sender.hasPermission("vchat.bridge.admin") || sender.hasPermission("vchat.admin")) {
+                suggestions.add("bridge");
+            }
 
             return filter(suggestions, args[0]);
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("bridge")
+                && (sender.hasPermission("vchat.bridge.admin") || sender.hasPermission("vchat.admin"))) {
+            suggestions.add("status");
+            suggestions.add("reload");
+            suggestions.add("block");
+            suggestions.add("unblock");
+            suggestions.add("list");
+            suggestions.add("test");
+            return filter(suggestions, args[1]);
         }
 
         return suggestions;

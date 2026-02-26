@@ -7,24 +7,25 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PrivateMessageManager {
 
     private final VChat plugin;
-    private final Map<UUID, UUID> lastRunners = new HashMap<>(); // Receiver -> Sender (for reply)
+    private final Map<UUID, UUID> lastRunners = new ConcurrentHashMap<>(); // Receiver -> Sender (for reply)
     private final org.bukkit.NamespacedKey msgToggleKey;
     private final org.bukkit.NamespacedKey spyToggleKey;
-    private final Map<UUID, Boolean> msgToggleCache = new HashMap<>();
-    private final Map<UUID, Boolean> spyToggleCache = new HashMap<>();
+    private final Map<UUID, Boolean> msgToggleCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> spyToggleCache = new ConcurrentHashMap<>();
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
@@ -134,6 +135,9 @@ public class PrivateMessageManager {
 
         Component outgoing = formatData(outgoingFormat, sender, target, messageComp);
         Component incoming = formatData(incomingFormat, sender, target, messageComp);
+
+        plugin.getLogger().info("[PM] " + sender.getName() + " -> " + target.getName() + ": "
+                + PlainTextComponentSerializer.plainText().serialize(messageComp));
 
         sender.sendMessage(outgoing);
         target.sendMessage(incoming);

@@ -20,6 +20,7 @@ dependencies {
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
+    compileOnly("net.dv8tion:JDA:5.2.1")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
 }
 

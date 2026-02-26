@@ -13,11 +13,11 @@ public class CapsFilter implements ChatFilter {
 
     @Override
     public FilterResult check(Player player, String message) {
-        int minLength = plugin.getConfig().getInt("filters.caps.min-length", 5);
+        int minLength = plugin.getConfigManager().getFilters().getInt("caps.min-length", 5);
         if (message.length() < minLength)
             return FilterResult.allowed();
 
-        int threshold = plugin.getConfig().getInt("filters.caps.percentage", 50);
+        int threshold = plugin.getConfigManager().getFilters().getInt("caps.percentage", 50);
         int capsCount = 0;
 
         // Count letters only

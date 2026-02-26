@@ -5,16 +5,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SpamFilter implements ChatFilter {
 
     private final VChat plugin;
-    private final Map<UUID, String> lastMessages = new HashMap<>();
-    private final Map<UUID, Long> lastMessageTime = new HashMap<>();
+    private final Map<UUID, String> lastMessages = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastMessageTime = new ConcurrentHashMap<>();
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     public SpamFilter(VChat plugin) {
@@ -29,12 +29,12 @@ public class SpamFilter implements ChatFilter {
         long lastTime = lastMessageTime.getOrDefault(uuid, 0L);
 
         // Cooldown check (Simple time based)
-        int cooldownSeconds = plugin.getConfig().getInt("filters.spam.cooldown", 3);
+        int cooldownSeconds = plugin.getConfigManager().getFilters().getInt("spam.cooldown", 3);
         long diff = now - lastTime;
 
         if (last != null && diff < (cooldownSeconds * 1000L)) {
             // Check similarity
-            int threshold = plugin.getConfig().getInt("filters.spam.similarity-threshold", 80);
+            int threshold = plugin.getConfigManager().getFilters().getInt("spam.similarity-threshold", 80);
             double similarity = getSimilarity(last, message);
 
             if (similarity >= threshold) {
@@ -51,7 +51,7 @@ public class SpamFilter implements ChatFilter {
     }
 
     private Component getBlockMessage(double timeLeft) {
-        List<String> lines = plugin.getConfig().getStringList("filters.spam.lines");
+        List<String> lines = plugin.getConfigManager().getFilters().getStringList("spam.lines");
         Component comp = Component.empty();
         for (String line : lines) {
             String processed = line.replace("%time%", String.format("%.1f", timeLeft));

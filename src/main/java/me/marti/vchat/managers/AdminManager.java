@@ -10,15 +10,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AdminManager {
 
     private final VChat plugin;
     private final org.bukkit.NamespacedKey notifyKey;
     private final org.bukkit.NamespacedKey personalChatKey; // New key
-    private final Map<UUID, Boolean> notifyCache = new HashMap<>();
-    private final Map<UUID, Boolean> personalChatCache = new HashMap<>(); // New cache
-    private final Map<UUID, Integer> violationCounts = new HashMap<>();
+    private final Map<UUID, Boolean> notifyCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> personalChatCache = new ConcurrentHashMap<>(); // New cache
+    private final Map<UUID, Integer> violationCounts = new ConcurrentHashMap<>();
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand(); 
 
     public AdminManager(VChat plugin) {

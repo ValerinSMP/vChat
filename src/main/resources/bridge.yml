@@ -1,0 +1,52 @@
+# ---------------------------------------------------------
+# vChat - Discord Bridge
+# ---------------------------------------------------------
+# Bridge bidireccional:
+# - Minecraft -> Discord por Webhook
+# - Discord -> Minecraft por Bot Token (JDA)
+#
+# Seguridad:
+# - Puedes dejar bot-token vacio y usar variable de entorno:
+#   VCHAT_DISCORD_BOT_TOKEN
+
+enabled: true
+debug: false
+
+# Cambia este valor por servidor:
+# - survival-custom en tu server custom
+# - survival-pvp en tu server pvp
+server-id: "survival-custom"
+
+guild-id: "YOUR_GUILD_ID"
+bot-token: ""
+
+minecraft-to-discord:
+  content-format: "**%player%**: %message%"
+  username-format: "[%server%] %player%"
+  avatar-url: ""
+
+discord-to-minecraft:
+  format: "<dark_gray>[<#7289da>ᴅɪꜱᴄᴏʀᴅ</#7289da>]</dark_gray> <#a2a9b5><user></#a2a9b5><dark_gray>: </dark_gray><white><message></white>"
+
+routes:
+  survival-custom:
+    channel-id: "YOUR_CUSTOM_CHANNEL_ID"
+    webhook-url: "YOUR_CUSTOM_WEBHOOK_URL"
+
+  survival-pvp:
+    channel-id: "YOUR_PVP_CHANNEL_ID"
+    webhook-url: "YOUR_PVP_WEBHOOK_URL"
+
+moderation:
+  block-bots: true
+  block-webhooks: true
+  max-discord-message-length: 220
+  max-discord-name-length: 16
+
+  # Bloqueo manual por ID de Discord (admin command):
+  # /vchat bridge block <discordUserId>
+  blocked-discord-user-ids: []
+
+  # Usa las mismas palabras base de filters.yml -> profanity.words
+  use-filters-profanity-words: true
+  extra-blocked-words: []

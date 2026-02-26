@@ -1,18 +1,31 @@
 package me.marti.vchat.managers;
 
 import me.marti.vchat.VChat;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MentionManager {
 
+    private static final Pattern MENTION_PATTERN = Pattern.compile("@([.\\w]+)");
+
     private final VChat plugin;
     private final org.bukkit.NamespacedKey mentionKey;
-    private final java.util.Map<java.util.UUID, Boolean> mentionCache = new java.util.HashMap<>();
+    private final ConcurrentMap<UUID, Boolean> mentionCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, Long> cooldowns = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, UUID> onlineNameIndex = new ConcurrentHashMap<>();
 
     public MentionManager(VChat plugin) {
         this.plugin = plugin;
@@ -20,17 +33,19 @@ public class MentionManager {
     }
 
     public void loadData(Player player) {
-        boolean value = true; // Default
-        if (player.getPersistentDataContainer().has(mentionKey, org.bukkit.persistence.PersistentDataType.BYTE)) {
-            value = player.getPersistentDataContainer().get(mentionKey,
-                    org.bukkit.persistence.PersistentDataType.BYTE) == 1;
+        boolean value = true;
+        Byte raw = player.getPersistentDataContainer().get(mentionKey, PersistentDataType.BYTE);
+        if (raw != null) {
+            value = raw == 1;
         }
         mentionCache.put(player.getUniqueId(), value);
+        onlineNameIndex.put(player.getName().toLowerCase(Locale.ROOT), player.getUniqueId());
     }
 
     public void unloadData(Player player) {
         mentionCache.remove(player.getUniqueId());
         cooldowns.remove(player.getUniqueId());
+        onlineNameIndex.remove(player.getName().toLowerCase(Locale.ROOT));
     }
 
     public boolean areMentionsEnabled(Player player) {
@@ -38,23 +53,12 @@ public class MentionManager {
     }
 
     public void setMentionsEnabled(Player player, boolean enabled) {
-        // Update Cache
         mentionCache.put(player.getUniqueId(), enabled);
-        // Update PDC
-        if (enabled) {
-            // To save space, we could remove key if default is true.
-            // But explicit is safer for now.
-            player.getPersistentDataContainer().set(mentionKey, org.bukkit.persistence.PersistentDataType.BYTE,
-                    (byte) 1);
-        } else {
-            player.getPersistentDataContainer().set(mentionKey, org.bukkit.persistence.PersistentDataType.BYTE,
-                    (byte) 0);
-        }
+        player.getPersistentDataContainer().set(mentionKey, PersistentDataType.BYTE, enabled ? (byte) 1 : (byte) 0);
     }
 
     public void toggleMentions(Player player) {
-        boolean current = areMentionsEnabled(player);
-        boolean newState = !current;
+        boolean newState = !areMentionsEnabled(player);
         setMentionsEnabled(player, newState);
 
         if (newState) {
@@ -66,43 +70,29 @@ public class MentionManager {
         }
     }
 
-    private final java.util.Map<java.util.UUID, Long> cooldowns = new java.util.HashMap<>();
+    public MentionProcessResult processMentions(Player sender, String message) {
+        if (!plugin.getConfigManager().getMentions().getBoolean("enabled", true) || !sender.hasPermission("vchat.mention")) {
+            return new MentionProcessResult(message, Collections.emptySet());
+        }
 
-    public String processMentions(Player sender, String message) {
-        if (!plugin.getConfigManager().getMentions().getBoolean("enabled")) // Removed 'mentions.' prefix as root is
-                                                                            // mentions.yml
-            return message;
-        if (!sender.hasPermission("vchat.mention"))
-            return message;
-
-        Pattern mentionPattern = Pattern.compile("@([.\\w]+)");
-        Matcher matcher = mentionPattern.matcher(message);
-
+        Matcher matcher = MENTION_PATTERN.matcher(message);
         StringBuffer sb = new StringBuffer();
 
-        boolean anyMention = false;
+        UUID senderId = sender.getUniqueId();
+        Set<UUID> targetsToNotify = new HashSet<>();
+        boolean applyCooldown = !sender.hasPermission("vchat.bypass.cooldown");
+        boolean onCooldown = applyCooldown && isOnCooldown(senderId);
+
+        String color = resolveMentionColor();
 
         while (matcher.find()) {
             String targetName = matcher.group(1);
-            Player target = Bukkit.getPlayerExact(targetName);
+            UUID targetId = onlineNameIndex.get(targetName.toLowerCase(Locale.ROOT));
 
-            // Check if target exists, can be seen, AND has mentions enabled
-            if (target != null && !target.equals(sender) && sender.canSee(target) && areMentionsEnabled(target)) {
-                String color = plugin.getConfigManager().getMentions().getString("color", "<yellow>");
-                // Ensure color is in tag format if it was legacy
-                if (color.startsWith("&")) {
-                    color = color.replace("&e", "<yellow>").replace("&a", "<green>").replace("&b", "<aqua>")
-                            .replace("&c", "<red>").replace("&d", "<light_purple>").replace("&f", "<white>")
-                            .replace("&r", "<reset>");
-                }
-                String replacement = color + "@" + targetName + "<reset>";
-
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
-
-                // Only notify if cooldown passed
-                if (!isOnCooldown(sender, target)) {
-                    notifyTarget(sender, target);
-                    anyMention = true;
+            if (targetId != null && !targetId.equals(senderId) && mentionCache.getOrDefault(targetId, true)) {
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(color + "@" + targetName + "<reset>"));
+                if (!onCooldown) {
+                    targetsToNotify.add(targetId);
                 }
             } else {
                 matcher.appendReplacement(sb, Matcher.quoteReplacement("@" + targetName));
@@ -110,44 +100,64 @@ public class MentionManager {
         }
         matcher.appendTail(sb);
 
-        if (anyMention) {
-            setCooldown(sender);
+        if (!targetsToNotify.isEmpty() && applyCooldown) {
+            cooldowns.put(senderId, System.currentTimeMillis());
         }
 
-        return sb.toString();
+        return new MentionProcessResult(sb.toString(), targetsToNotify);
     }
 
-    private boolean isOnCooldown(Player sender, Player target) {
-        // We can have a global cooldown per sender OR per sender-target pair.
-        // Simple global cooldown per sender is usually best to prevent spamming many
-        // people too.
-        if (sender.hasPermission("vchat.bypass.cooldown"))
-            return false;
-        long last = cooldowns.getOrDefault(sender.getUniqueId(), 0L);
+    public void notifyTargets(Player sender, Set<UUID> targetIds) {
+        if (targetIds == null || targetIds.isEmpty()) {
+            return;
+        }
+
+        String soundName = plugin.getConfigManager().getMentions().getString("sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
+        Sound sound = null;
+        try {
+            sound = Sound.valueOf(soundName.toUpperCase(Locale.ROOT));
+        } catch (Exception ignored) {
+        }
+
+        String actionMsg = plugin.getConfigManager().getMentions().getString("actionbar");
+
+        for (UUID targetId : targetIds) {
+            Player target = Bukkit.getPlayer(targetId);
+            if (target == null || !areMentionsEnabled(target)) {
+                continue;
+            }
+
+            if (sound != null) {
+                target.playSound(target.getLocation(), sound, 1.0f, 1.0f);
+            }
+
+            if (actionMsg != null && !actionMsg.isEmpty()) {
+                String rendered = actionMsg.replace("%player%", sender.getName());
+                target.sendActionBar(LegacyComponentSerializer.legacyAmpersand().deserialize(rendered));
+            }
+        }
+    }
+
+    private boolean isOnCooldown(UUID senderId) {
+        long last = cooldowns.getOrDefault(senderId, 0L);
         int cooldownSec = plugin.getConfigManager().getMentions().getInt("cooldown", 5);
         return (System.currentTimeMillis() - last) < (cooldownSec * 1000L);
     }
 
-    private void setCooldown(Player sender) {
-        cooldowns.put(sender.getUniqueId(), System.currentTimeMillis());
+    private String resolveMentionColor() {
+        String color = plugin.getConfigManager().getMentions().getString("color", "<yellow>");
+        if (color.startsWith("&")) {
+            color = color.replace("&e", "<yellow>")
+                    .replace("&a", "<green>")
+                    .replace("&b", "<aqua>")
+                    .replace("&c", "<red>")
+                    .replace("&d", "<light_purple>")
+                    .replace("&f", "<white>")
+                    .replace("&r", "<reset>");
+        }
+        return color;
     }
 
-    private void notifyTarget(Player sender, Player target) {
-        // Sound
-        String soundName = plugin.getConfigManager().getMentions().getString("sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
-        try {
-            Sound sound = Sound.valueOf(soundName.toUpperCase());
-            target.playSound(target.getLocation(), sound, 1.0f, 1.0f);
-        } catch (Exception e) {
-            // ignore invalid sound
-        }
-
-        // Actionbar
-        String actionMsg = plugin.getConfigManager().getMentions().getString("actionbar");
-        if (actionMsg != null && !actionMsg.isEmpty()) {
-            actionMsg = actionMsg.replace("%player%", sender.getName());
-            target.sendActionBar(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacyAmpersand()
-                    .deserialize(actionMsg));
-        }
+    public record MentionProcessResult(String processedMessage, Set<UUID> targetsToNotify) {
     }
 }

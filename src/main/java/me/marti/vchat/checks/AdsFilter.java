@@ -29,7 +29,7 @@ public class AdsFilter implements ChatFilter {
     private void loadWhitelist() {
         cachedWhitelist.clear();
         simpleWhitelist.clear();
-        List<String> whitelist = plugin.getConfig().getStringList("filters.ads.whitelist");
+        List<String> whitelist = plugin.getConfigManager().getFilters().getStringList("ads.whitelist");
         for (String w : whitelist) {
             // Heuristic to decide if regex or simple
             // For safety, let's assume everything is a regex if it compiles, else string?
@@ -77,7 +77,7 @@ public class AdsFilter implements ChatFilter {
     }
 
     private Component getBlockMessage() {
-        List<String> lines = plugin.getConfig().getStringList("filters.ads.lines");
+        List<String> lines = plugin.getConfigManager().getFilters().getStringList("ads.lines");
         Component comp = Component.empty();
         for (String line : lines) {
             comp = comp.append(legacySerializer.deserialize(line)).append(Component.newline());

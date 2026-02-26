@@ -4,7 +4,9 @@ main: me.marti.vchat.VChat
 api-version: 1.21
 authors: [mtynnn]
 depend: [LuckPerms]
-softdepend: [PlaceholderAPI]
+softdepend: [PlaceholderAPI, ProtocolLib]
+libraries:
+  - net.dv8tion:JDA:5.2.1
 commands:
   vchat:
     description: Main command for vChat
@@ -72,6 +74,9 @@ permissions:
   vchat.notify.auto:
     description: Recibe notificaciones automáticamente al entrar.
     default: op
+  vchat.bridge.admin:
+    description: Permite administrar el bridge de Discord.
+    default: op
   vchat.showitem:
     description: Permite usar /showitem.
     default: true
@@ -104,6 +109,14 @@ permissions:
     default: true
   vchat.bypass.ignore:
     description: Evita ser ignorado.
+    default: op
+  vchat.bypass.filters:
+    description: Bypass de todos los filtros de chat.
+    default: op
+    children:
+      vchat.bypass.all: true
+  vchat.bypass.cooldown:
+    description: Evita cooldown de menciones.
     default: op
 
   # Bypass Filters
