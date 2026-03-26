@@ -6,7 +6,7 @@ vChat es una solución integral de chat para servidores de Minecraft, diseñada 
 
 Para el correcto funcionamiento del plugin, asegúrese de contar con las siguientes dependencias:
 
-- **Java**: 17 o superior.
+- **Java**: 21 o superior.
 - **LuckPerms** (Requerido): Para la gestión de prefijos, sufijos y permisos.
 - **PlaceholderAPI** (Opcional): Para el uso de variables en el chat y scoreboards.
 - **ProtocolLib** (Opcional): Para mejorar la compatibilidad del autocompletado de menciones.

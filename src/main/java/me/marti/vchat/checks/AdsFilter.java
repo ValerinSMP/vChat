@@ -6,6 +6,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +16,8 @@ public class AdsFilter implements ChatFilter {
     // Simple but effective patterns for IPs and broad domains
     private static final Pattern IP_PATTERN = Pattern.compile(
             "((?<![0-9])(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})[ ]?[.,-:; ][ ]?(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})[ ]?[.,-:; ][ ]?(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})[ ]?[.,-:; ][ ]?(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2}))(?![0-9]))");
-    private static final Pattern URL_PATTERN = Pattern.compile("([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}");
+        private static final Pattern URL_PATTERN = Pattern.compile(
+            "(?i)\\b(?:https?://|www\\.)\\S+|\\b[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+(?::\\d{2,5})?(?:/\\S*)?");
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     private final java.util.List<Pattern> cachedWhitelist = new java.util.ArrayList<>();
@@ -31,13 +33,14 @@ public class AdsFilter implements ChatFilter {
         simpleWhitelist.clear();
         List<String> whitelist = plugin.getConfigManager().getFilters().getStringList("ads.whitelist");
         for (String w : whitelist) {
-            // Heuristic to decide if regex or simple
-            // For safety, let's assume everything is a regex if it compiles, else string?
-            // User code previously allowed simple contains fallback.
-            // We'll store string for contains check, and Pattern for regex check.
-            simpleWhitelist.add(w.toLowerCase());
+            String normalized = w.trim();
+            if (normalized.isEmpty()) {
+                continue;
+            }
+
+            simpleWhitelist.add(normalized.toLowerCase(Locale.ROOT));
             try {
-                cachedWhitelist.add(Pattern.compile(w, Pattern.CASE_INSENSITIVE));
+                cachedWhitelist.add(Pattern.compile(normalized, Pattern.CASE_INSENSITIVE));
             } catch (Exception e) {
                 // Not a valid regex, just rely on simple contains
             }
@@ -47,7 +50,7 @@ public class AdsFilter implements ChatFilter {
     @Override
     public FilterResult check(Player player, String message) {
         // Whitelist check first
-        String msgLower = message.toLowerCase();
+        String msgLower = message.toLowerCase(Locale.ROOT);
 
         // Simple Check
         for (String w : simpleWhitelist) {

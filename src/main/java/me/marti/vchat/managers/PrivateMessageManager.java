@@ -5,9 +5,6 @@ import me.marti.vchat.utils.MessageSanitizer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -27,7 +24,6 @@ public class PrivateMessageManager {
     private final Map<UUID, Boolean> msgToggleCache = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> spyToggleCache = new ConcurrentHashMap<>();
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
-    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     private static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
@@ -136,9 +132,6 @@ public class PrivateMessageManager {
         Component outgoing = formatData(outgoingFormat, sender, target, messageComp);
         Component incoming = formatData(incomingFormat, sender, target, messageComp);
 
-        plugin.getLogger().info("[PM] " + sender.getName() + " -> " + target.getName() + ": "
-                + PlainTextComponentSerializer.plainText().serialize(messageComp));
-
         sender.sendMessage(outgoing);
         target.sendMessage(incoming);
 
@@ -172,25 +165,7 @@ public class PrivateMessageManager {
         // If I am Player, my target *could* be CONSOLE_UUID if Console messaged me.
 
         if (targetId.equals(CONSOLE_UUID)) {
-            // Reply to Console
-            CommandSender targetConsole = Bukkit.getConsoleSender();
-            // We reuse sendPrivateMessage logic, but sendPrivateMessage expects Player
-            // target.
-            // We need to handle Console as target too? Or just block reply to console for
-            // now?
-            // "permitir msg de consola". Doesn't explicitly ask for reply to console.
-            // But it's nice. However, sendPrivateMessage signature is (CommandSender,
-            // Player).
-            // Let's keep it simple: If target is console, handle directly here or error.
-
-            // For now, let's just say "Console" cannot be a target of /msg (standard MC
-            // behavior usually).
-            // But if I want to support reply to console, I need to refactor
-            // sendPrivateMessage to accept CommandSender target.
-            // Let's stick to user request: "permitir msg de consola".
-            // So Console -> Player works. Player replying to Console... maybe validation
-            // error "Cannot reply to console".
-            sender.sendMessage(Component.text("No puedes responder a la consola (aún).", NamedTextColor.RED));
+            sendReplyToConsole(sender, message);
             return;
         }
 
@@ -204,14 +179,36 @@ public class PrivateMessageManager {
         sendPrivateMessage(sender, target, message);
     }
 
-    private Component formatData(String format, CommandSender sender, Player target, Component message) {
+    private void sendReplyToConsole(CommandSender sender, String message) {
+        CommandSender targetConsole = Bukkit.getConsoleSender();
+
+        String outgoingFormat = plugin.getConfigManager().getPrivate().getString("outgoing");
+        String incomingFormat = plugin.getConfigManager().getPrivate().getString("incoming");
+
+        String prepared = MessageSanitizer.prepare(sender, message);
+        Component messageComp = MessageSanitizer.parse(sender, prepared, null);
+
+        Component outgoing = formatData(outgoingFormat, sender, targetConsole, messageComp);
+        Component incoming = formatData(incomingFormat, sender, targetConsole, messageComp);
+
+        sender.sendMessage(outgoing);
+        targetConsole.sendMessage(incoming);
+
+        if (sender instanceof Player playerSender) {
+            playSound(playerSender, "sounds.message-send");
+        }
+
+        notifySocialSpy(sender, targetConsole, messageComp);
+    }
+
+    private Component formatData(String format, CommandSender sender, CommandSender target, Component message) {
         return miniMessage.deserialize(format,
                 Placeholder.component("sender", Component.text(sender.getName())),
                 Placeholder.component("receiver", Component.text(target.getName())),
                 Placeholder.component("message", message));
     }
 
-    private void notifySocialSpy(CommandSender sender, Player target, Component message) {
+    private void notifySocialSpy(CommandSender sender, CommandSender target, Component message) {
         String format = plugin.getConfigManager().getPrivate().getString("spy-format",
                 "<gradient:#D8BFD8:#FFB7C5>[Spy] <sender> -> <receiver>: <message></gradient>");
 
@@ -239,12 +236,4 @@ public class PrivateMessageManager {
         }
     }
 
-    // Send feedback via ActionBar and Chat
-    private void sendFeedback(Player player, String messageKey) {
-        // Implementation depends on where messages are stored.
-        // If messageKey refers to messages.yml path:
-        // plugin.getAdminManager().sendConfigMessage(player, messageKey);
-        // AND send actionbar?
-        // For this task, we can just ensure sounds are played.
-    }
 }

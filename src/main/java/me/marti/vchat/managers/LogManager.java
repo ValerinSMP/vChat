@@ -7,17 +7,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class LogManager {
 
     private final VChat plugin;
     private final File logFile;
     private final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private volatile boolean running = true;
     private Thread workerThread;
 
@@ -50,24 +51,24 @@ public class LogManager {
 
     private void runLoop() {
         while (running || !logQueue.isEmpty()) {
-            String log;
             try {
-                log = logQueue.poll();
+                String log = logQueue.poll(250, TimeUnit.MILLISECONDS);
                 if (log == null) {
-                    Thread.sleep(10L);
                     continue;
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                continue;
-            }
 
-            try (FileWriter fw = new FileWriter(logFile, true);
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    PrintWriter out = new PrintWriter(bw)) {
-                out.println(log);
-            } catch (IOException e) {
-                plugin.getLogger().severe("Could not write chat log: " + e.getMessage());
+                try (FileWriter fw = new FileWriter(logFile, true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        PrintWriter out = new PrintWriter(bw)) {
+                    out.println(log);
+                } catch (IOException e) {
+                    plugin.getLogger().severe("Could not write chat log: " + e.getMessage());
+                }
+            } catch (InterruptedException e) {
+                if (!running) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
         }
     }
@@ -77,7 +78,7 @@ public class LogManager {
             return;
 
         String format = plugin.getConfigManager().getMainConfig().getString("logging.format", "[%date%] %player%: %reason% | %message%");
-        String date = dateFormat.format(new Date());
+        String date = LocalDateTime.now().format(DATE_FORMAT);
 
         String entry = format
                 .replace("%date%", date)
