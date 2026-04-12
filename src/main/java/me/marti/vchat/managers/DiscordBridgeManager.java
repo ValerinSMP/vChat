@@ -3,9 +3,11 @@ package me.marti.vchat.managers;
 import me.marti.vchat.VChat;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -69,7 +71,12 @@ public class DiscordBridgeManager {
     private volatile boolean blockWebhooks;
     private volatile int maxDiscordMessageLength;
     private volatile int maxDiscordNameLength;
+    private volatile boolean channelTopicEnabled;
+    private volatile String channelTopicFormat;
+    private volatile int channelTopicUpdateIntervalSeconds;
     private volatile boolean debug;
+    private volatile int topicTaskId = -1;
+    private volatile String lastAppliedTopic = "";
 
     private final Set<String> blockedDiscordUsers = ConcurrentHashMap.newKeySet();
     private volatile List<Pattern> blockedWordPatterns = List.of();
@@ -87,6 +94,7 @@ public class DiscordBridgeManager {
     }
 
     public void shutdown() {
+        stopTopicUpdater();
         shutdownJda();
         webhookExecutor.shutdownNow();
     }
@@ -166,6 +174,8 @@ public class DiscordBridgeManager {
     private synchronized void reloadInternal(boolean startup) {
         FileConfiguration cfg = plugin.getConfigManager().getBridge();
 
+        stopTopicUpdater();
+
         enabled = cfg.getBoolean("enabled", false);
         serverId = cfg.getString("server-id", "survival-custom");
         guildId = cfg.getString("guild-id", "");
@@ -190,6 +200,10 @@ public class DiscordBridgeManager {
         blockWebhooks = cfg.getBoolean("moderation.block-webhooks", true);
         maxDiscordMessageLength = cfg.getInt("moderation.max-discord-message-length", 220);
         maxDiscordNameLength = cfg.getInt("moderation.max-discord-name-length", 16);
+        channelTopicEnabled = cfg.getBoolean("channel-topic.enabled", false);
+        channelTopicFormat = cfg.getString("channel-topic.format",
+            "Online: %online%/%max% | Servidor: %server% | Hora: %time%");
+        channelTopicUpdateIntervalSeconds = Math.max(15, cfg.getInt("channel-topic.update-interval-seconds", 60));
         debug = cfg.getBoolean("debug", false);
 
         blockedDiscordUsers.clear();
@@ -225,6 +239,9 @@ public class DiscordBridgeManager {
                     .setMemberCachePolicy(MemberCachePolicy.NONE)
                     .addEventListeners(new DiscordInboundListener())
                     .build();
+
+            startTopicUpdater();
+
             if (startup) {
                 plugin.getLogger().info("[Bridge] Discord bridge started for server-id '" + serverId + "'.");
             } else {
@@ -239,6 +256,7 @@ public class DiscordBridgeManager {
     private void shutdownJda() {
         net.dv8tion.jda.api.JDA ref = jda;
         jda = null;
+        lastAppliedTopic = "";
         if (ref != null) {
             try {
                 ref.shutdownNow();
@@ -576,6 +594,85 @@ public class DiscordBridgeManager {
             return "";
         }
         return trimmed;
+    }
+
+    private void startTopicUpdater() {
+        if (!enabled || !channelTopicEnabled) {
+            return;
+        }
+
+        if (topicTaskId != -1) {
+            plugin.getServer().getScheduler().cancelTask(topicTaskId);
+            topicTaskId = -1;
+        }
+
+        long periodTicks = Math.max(20L, channelTopicUpdateIntervalSeconds * 20L);
+        topicTaskId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,
+                this::updateChannelTopicIfNeeded,
+                40L,
+                periodTicks);
+        debug("Channel topic updater started. Interval=" + channelTopicUpdateIntervalSeconds + "s");
+    }
+
+    private void stopTopicUpdater() {
+        if (topicTaskId != -1) {
+            plugin.getServer().getScheduler().cancelTask(topicTaskId);
+            topicTaskId = -1;
+            debug("Channel topic updater stopped.");
+        }
+    }
+
+    private void updateChannelTopicIfNeeded() {
+        if (!enabled || !channelTopicEnabled) {
+            return;
+        }
+
+        net.dv8tion.jda.api.JDA currentJda = jda;
+        BridgeRoute route = currentRoute;
+        if (currentJda == null || route == null || route.channelId().isBlank()) {
+            return;
+        }
+
+        TextChannel channel = currentJda.getTextChannelById(route.channelId());
+        if (channel == null) {
+            debug("Channel topic updater: target channel not found.");
+            return;
+        }
+
+        String topic = renderTopicTemplate();
+        if (topic.isBlank()) {
+            return;
+        }
+
+        if (topic.equals(lastAppliedTopic)) {
+            return;
+        }
+
+        RestAction<Void> action = channel.getManager().setTopic(topic);
+        action.queue(
+                success -> {
+                    lastAppliedTopic = topic;
+                    debug("Channel topic updated.");
+                },
+                failure -> plugin.getLogger().warning("[Bridge] Could not update channel topic: " + failure.getMessage()));
+    }
+
+    private String renderTopicTemplate() {
+        String format = channelTopicFormat == null ? "" : channelTopicFormat;
+        int online = Bukkit.getOnlinePlayers().size();
+        int max = Bukkit.getMaxPlayers();
+        java.time.LocalTime now = java.time.LocalTime.now();
+
+        String topic = format
+                .replace("%server%", serverId)
+                .replace("%online%", String.valueOf(online))
+                .replace("%max%", String.valueOf(max))
+                .replace("%time%", now.withNano(0).toString());
+
+        if (topic.length() > 1024) {
+            topic = topic.substring(0, 1024);
+        }
+        return topic.trim();
     }
 
     private void debug(String message) {

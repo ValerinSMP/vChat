@@ -7,8 +7,6 @@ import net.luckperms.api.LuckPerms;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.logging.Logger;
-
 public final class VChat extends JavaPlugin {
 
     private me.marti.vchat.managers.ConfigManager configManager;
@@ -23,6 +21,8 @@ public final class VChat extends JavaPlugin {
     private me.marti.vchat.managers.IgnoreManager ignoreManager;
     private me.marti.vchat.managers.DiscordBridgeManager discordBridgeManager;
     private me.marti.vchat.compat.MentionsTabInjector mentionsTabInjector;
+    private me.marti.vchat.compat.NexoHook nexoHook;
+    private volatile boolean debugMode;
     private LuckPerms luckPerms;
 
     @Override
@@ -79,6 +79,11 @@ public final class VChat extends JavaPlugin {
             this.mentionsTabInjector.register();
         }
 
+        if (getServer().getPluginManager().getPlugin("Nexo") != null) {
+            getLogger().info("Hooking into Nexo for custom item name resolution...");
+            this.nexoHook = new me.marti.vchat.compat.NexoHook(this);
+        }
+
         discordBridgeManager.start();
 
         printStartupBanner();
@@ -120,6 +125,25 @@ public final class VChat extends JavaPlugin {
         return discordBridgeManager;
     }
 
+    public me.marti.vchat.compat.NexoHook getNexoHook() {
+        return nexoHook;
+    }
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public boolean toggleDebugMode() {
+        debugMode = !debugMode;
+        return debugMode;
+    }
+
+    public void debugLog(String message) {
+        if (debugMode) {
+            getLogger().info("[Debug] " + message);
+        }
+    }
+
     @Override
     public void onDisable() {
         if (logManager != null) {
@@ -136,6 +160,11 @@ public final class VChat extends JavaPlugin {
         }
         if (discordBridgeManager != null) {
             discordBridgeManager.shutdown();
+        }
+
+        if (nexoHook != null) {
+            nexoHook.shutdown();
+            nexoHook = null;
         }
 
         // Cancel all remaining async/sync tasks

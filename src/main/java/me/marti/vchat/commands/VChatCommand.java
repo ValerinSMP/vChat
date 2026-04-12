@@ -68,6 +68,8 @@ public class VChatCommand implements CommandExecutor {
                 return handleViewItem(sender, args);
             case "bridge":
                 return handleBridge(sender, args);
+            case "debug":
+                return handleDebug(sender);
         }
 
         sender.sendMessage(
@@ -202,6 +204,7 @@ public class VChatCommand implements CommandExecutor {
         }
         if (sender.hasPermission("vchat.admin") || sender.hasPermission("vchat.reload")) {
             sender.sendMessage(formatCommand("/vchat reload", "Recargar configuración"));
+            sender.sendMessage(formatCommand("/vchat debug", "Activar/Desactivar debug de parseo"));
         }
         if (sender.hasPermission("vchat.notify")) {
             sender.sendMessage(formatCommand("/vchat notify", "Notificaciones de admin"));
@@ -285,6 +288,18 @@ public class VChatCommand implements CommandExecutor {
                 return true;
             }
         }
+    }
+
+    private boolean handleDebug(CommandSender sender) {
+        if (!sender.hasPermission("vchat.admin") && !sender.hasPermission("vchat.debug")) {
+            adminManager.sendConfigMessage(sender, "messages.no-permission");
+            return true;
+        }
+
+        boolean enabled = plugin.toggleDebugMode();
+        sender.sendMessage(Component.text("Debug vChat: " + (enabled ? "ACTIVADO" : "DESACTIVADO"),
+                enabled ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+        return true;
     }
 
     private Component formatCommand(String command, String description) {

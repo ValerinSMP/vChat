@@ -13,6 +13,7 @@ repositories {
     maven("https://oss.sonatype.org/content/groups/public/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.dmulloy2.net/repository/public/")
+    maven("https://repo.nexomc.com/releases")
 }
 
 dependencies {
@@ -20,6 +21,7 @@ dependencies {
     compileOnly("net.luckperms:api:5.4")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
+    compileOnly("com.nexomc:nexo:1.8.0")
     compileOnly("net.dv8tion:JDA:5.2.1")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
 }

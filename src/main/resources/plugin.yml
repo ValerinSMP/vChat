@@ -4,7 +4,7 @@ main: me.marti.vchat.VChat
 api-version: 1.21
 authors: [mtynnn]
 depend: [LuckPerms]
-softdepend: [PlaceholderAPI, ProtocolLib]
+softdepend: [PlaceholderAPI, ProtocolLib, Nexo]
 libraries:
   - net.dv8tion:JDA:5.2.1
 commands:
@@ -67,6 +67,9 @@ permissions:
     default: op
   vchat.reload:
     description: Permite recargar la configuración.
+    default: op
+  vchat.debug:
+    description: Permite activar debug interno de vChat.
     default: op
   vchat.notify:
     description: Permite ver comandos de notificación.

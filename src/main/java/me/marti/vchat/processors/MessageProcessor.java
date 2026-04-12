@@ -4,14 +4,23 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,6 +60,11 @@ public class MessageProcessor {
             suffix = PlaceholderAPI.setPlaceholders(player, suffix);
         }
 
+        if (plugin.isDebugMode() && (containsGlyphToken(prefix) || containsGlyphToken(suffix))) {
+            plugin.debugLog("Glyph token in meta for " + player.getName() + " | prefix='" + prefix + "' | suffix='"
+                    + suffix + "'");
+        }
+
         // 1. Process string placeholders (PAPI mostly)
         String processed = format
                 .replace("{prefix}", prefix)
@@ -81,7 +95,12 @@ public class MessageProcessor {
             }
             hoverFormat = translateLegacyHexToMiniMessage(hoverFormat);
             hoverFormat = translateLegacyToMiniMessage(hoverFormat);
-            hoverComponent = miniMessage.deserialize(hoverFormat);
+
+            if (plugin.isDebugMode() && containsGlyphToken(hoverFormat)) {
+                plugin.debugLog("Hover format contains glyph token for " + player.getName() + ": " + hoverFormat);
+            }
+
+            hoverComponent = deserializeHoverWithOptionalNexo(player, hoverFormat);
         }
 
         Component nameComp = Component.text(player.getName());
@@ -101,8 +120,12 @@ public class MessageProcessor {
         processed = translateLegacyHexToMiniMessage(processed);
         processed = translateLegacyToMiniMessage(processed);
 
+        if (plugin.isDebugMode() && containsGlyphToken(processed)) {
+            plugin.debugLog("Main format contains glyph token for " + player.getName() + ": " + processed);
+        }
+
         // Deserialize with Resolvers
-        Component formatted = miniMessage.deserialize(processed,
+        Component formatted = deserializeFormatWithOptionalNexo(player, processed,
                 Placeholder.component("user_name", nameComp),
                 Placeholder.component("user_displayname", displayNameComp),
                 Placeholder.component("chat_message", message));
@@ -110,7 +133,7 @@ public class MessageProcessor {
         return makeUrlsClickable(formatted);
     }
 
-    public Component getItemComponent(ItemStack item) {
+    public Component getItemComponent(Player viewer, ItemStack item) {
         String format = plugin.getConfigManager().getFormats().getString("item-format",
                 "<dark_gray>[</dark_gray><aqua>{amount}x {item}</aqua><dark_gray>]</dark_gray>");
 
@@ -123,7 +146,7 @@ public class MessageProcessor {
 
         // Fetch Meta ONCE to ensure consistency
         // Fetch Meta ONCE to ensure consistency
-        org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
+        ItemMeta meta = item.getItemMeta();
 
         if (meta != null) {
             // 1. Custom Name (Anvil/Command - usually italic)
@@ -145,15 +168,21 @@ public class MessageProcessor {
                     }
                 }
             }
-            // 2. Item Name (Data Component - usually normal text, used by Nexo/Oraxen
-            // 1.21+)
-            else if (meta.hasItemName()) {
-                plugin.getLogger().info("[vChat-1.0.5] Detected ItemName 1.21+ capability. Using it.");
-                itemName = meta.itemName();
-            }
-            // 3. Fallback to Material Name
+            // 1.5 Nexo Custom Item Name
             else {
-                itemName = Component.text(prettifyEnumName(item.getType().name()));
+                Component nexoName = resolveNexoItemName(item);
+                if (nexoName != null) {
+                    itemName = nexoName;
+                }
+                // 2. Item Name (Data Component - usually normal text, used by Nexo/Oraxen
+                // 1.21+)
+                else if (meta.hasItemName()) {
+                    itemName = sanitizePotentialGlyphName(meta.itemName(), item.getType());
+                }
+                // 3. Fallback to Material Name
+                else {
+                    itemName = Component.text(prettifyEnumName(item.getType().name()));
+                }
             }
         } else {
             itemName = Component.text(prettifyEnumName(item.getType().name()));
@@ -167,8 +196,234 @@ public class MessageProcessor {
                 Placeholder.parsed("amount", String.valueOf(item.getAmount())),
                 Placeholder.component("item", itemName));
 
-        return fullItem.hoverEvent(item.asHoverEvent())
+        ItemStack hoverItem = createHoverItemSnapshot(viewer, item);
+
+        return fullItem.hoverEvent(hoverItem.asHoverEvent())
                 .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/vchat viewitem " + itemId));
+    }
+
+    public Component parseMiniMessageForPlayer(Player player, String input, TagResolver... resolvers) {
+        if (input == null) {
+            return Component.empty();
+        }
+
+        String processed = translateLegacyHexToMiniMessage(input);
+        processed = translateLegacyToMiniMessage(processed);
+        return deserializeFormatWithOptionalNexo(player, processed, resolvers);
+    }
+
+    private ItemStack createHoverItemSnapshot(Player viewer, ItemStack item) {
+        ItemStack snapshot = item.clone();
+        ItemMeta snapshotMeta = snapshot.getItemMeta();
+        if (snapshotMeta == null) {
+            return snapshot;
+        }
+
+        boolean apiReportsLore = snapshotMeta.hasLore();
+        int adventureLoreCount = snapshotMeta.lore() == null ? 0 : snapshotMeta.lore().size();
+        int legacyLoreCount = getLegacyLoreCount(snapshotMeta);
+        List<Component> originalLore = extractLoreComponents(snapshotMeta);
+        if (originalLore.isEmpty()) {
+            List<Component> nexoLore = resolveNexoItemLore(snapshot);
+            if (!nexoLore.isEmpty()) {
+                originalLore.addAll(nexoLore);
+                if (plugin.isDebugMode()) {
+                    plugin.debugLog("ItemHoverDebug using Nexo lore fallback lines=" + nexoLore.size());
+                }
+            }
+        }
+
+        List<Component> enchantLines = buildReadableEnchantLore(viewer, snapshot, snapshotMeta);
+        List<Component> mergedLore = new ArrayList<>();
+        if (!enchantLines.isEmpty()) {
+            mergedLore.addAll(enchantLines);
+            if (!originalLore.isEmpty()) {
+                mergedLore.add(Component.empty());
+            }
+        }
+
+        if (!originalLore.isEmpty()) {
+            mergedLore.addAll(originalLore);
+        }
+
+        boolean canReplaceLoreSafely = !apiReportsLore || !originalLore.isEmpty();
+        if (plugin.isDebugMode()) {
+            String viewerName = viewer != null ? viewer.getName() : "unknown";
+            plugin.debugLog("ItemHoverDebug viewer='" + viewerName + "' item='" + snapshot.getType() + "' hasLore="
+                    + apiReportsLore + " adventureLore=" + adventureLoreCount + " legacyLore=" + legacyLoreCount
+                    + " extractedLore=" + originalLore.size() + " enchants=" + enchantLines.size()
+                    + " mergedLore=" + mergedLore.size() + " canReplace=" + canReplaceLoreSafely);
+            if (!originalLore.isEmpty()) {
+                plugin.debugLog("ItemHoverDebug firstLore='" + componentPreview(originalLore.get(0)) + "'");
+            }
+            if (!enchantLines.isEmpty()) {
+                plugin.debugLog("ItemHoverDebug firstEnchant='" + componentPreview(enchantLines.get(0)) + "'");
+            }
+        }
+
+        if (!mergedLore.isEmpty() && canReplaceLoreSafely) {
+            snapshotMeta.lore(mergedLore);
+        } else if (!mergedLore.isEmpty() && plugin.isDebugMode()) {
+            plugin.debugLog("Hover lore merge skipped to avoid overriding opaque lore data.");
+        }
+
+        // Keep original lore and add readable enchant lines while hiding the raw section.
+        snapshotMeta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+        snapshot.setItemMeta(snapshotMeta);
+        return snapshot;
+    }
+
+    private List<Component> buildReadableEnchantLore(Player viewer, ItemStack item, ItemMeta meta) {
+        List<Component> lines = new ArrayList<>();
+
+        for (Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
+            lines.add(normalizeEnchantLine(viewer, entry.getKey().displayName(entry.getValue())));
+        }
+
+        if (meta instanceof EnchantmentStorageMeta storageMeta) {
+            for (Map.Entry<Enchantment, Integer> entry : storageMeta.getStoredEnchants().entrySet()) {
+                lines.add(normalizeEnchantLine(viewer, entry.getKey().displayName(entry.getValue())));
+            }
+        }
+
+        return lines;
+    }
+
+    @SuppressWarnings("deprecation")
+    private int getLegacyLoreCount(ItemMeta meta) {
+        List<String> legacyLore = meta.getLore();
+        return legacyLore == null ? 0 : legacyLore.size();
+    }
+
+    @SuppressWarnings("deprecation")
+    private List<Component> extractLoreComponents(ItemMeta meta) {
+        List<Component> lore = new ArrayList<>();
+
+        List<Component> adventureLore = meta.lore();
+        if (adventureLore != null && !adventureLore.isEmpty()) {
+            lore.addAll(adventureLore);
+            return lore;
+        }
+
+        List<String> legacyLore = meta.getLore();
+        if (legacyLore != null && !legacyLore.isEmpty()) {
+            for (String line : legacyLore) {
+                if (line != null && !line.isEmpty()) {
+                    lore.add(LegacyComponentSerializer.legacySection().deserialize(line));
+                }
+            }
+        }
+
+        return lore;
+    }
+
+    private Component normalizeEnchantLine(Player viewer, Component input) {
+        Component parsed = applyNexoGlyphSupport(viewer, input);
+        return parsed.decoration(TextDecoration.ITALIC, false);
+    }
+
+    private Component applyNexoGlyphSupport(Player viewer, Component input) {
+        if (viewer == null || input == null) {
+            return input;
+        }
+
+        String plain = PlainTextComponentSerializer.plainText().serialize(input);
+        if (!containsGlyphToken(plain)) {
+            return input;
+        }
+
+        me.marti.vchat.compat.NexoHook hook = plugin.getNexoHook();
+        if (hook == null) {
+            return input;
+        }
+
+        Component parsed = hook.deserializeForPlayer(viewer, plain);
+        return parsed != null ? parsed : input;
+    }
+
+    private String componentPreview(Component component) {
+        String plain = PlainTextComponentSerializer.plainText().serialize(component);
+        if (plain.length() <= 80) {
+            return plain;
+        }
+        return plain.substring(0, 80) + "...";
+    }
+
+    private Component resolveNexoItemName(ItemStack item) {
+        me.marti.vchat.compat.NexoHook hook = plugin.getNexoHook();
+        if (hook == null) {
+            return null;
+        }
+        return hook.resolveItemDisplayName(item);
+    }
+
+    private List<Component> resolveNexoItemLore(ItemStack item) {
+        me.marti.vchat.compat.NexoHook hook = plugin.getNexoHook();
+        if (hook == null) {
+            return List.of();
+        }
+        return hook.resolveItemLore(item);
+    }
+
+    private Component deserializeHoverWithOptionalNexo(Player player, String hoverFormat) {
+        me.marti.vchat.compat.NexoHook hook = plugin.getNexoHook();
+        if (hook != null) {
+            Component nexoRendered = hook.deserializeForPlayer(player, hoverFormat);
+            if (nexoRendered != null) {
+                if (plugin.isDebugMode() && containsGlyphToken(hoverFormat)) {
+                    String plain = PlainTextComponentSerializer.plainText().serialize(nexoRendered);
+                    plugin.debugLog("Hover parsed with Nexo parser for " + player.getName() + " | plain='" + plain
+                            + "'");
+                }
+                return nexoRendered;
+            }
+        }
+
+        if (plugin.isDebugMode() && containsGlyphToken(hoverFormat)) {
+            plugin.debugLog("Hover fallback to default MiniMessage parser for " + player.getName());
+        }
+        return miniMessage.deserialize(hoverFormat);
+    }
+
+    private Component deserializeFormatWithOptionalNexo(Player player, String processed,
+            TagResolver... placeholders) {
+        me.marti.vchat.compat.NexoHook hook = plugin.getNexoHook();
+        if (hook != null) {
+            Component nexoRendered = hook.deserializeForPlayer(player, processed, placeholders);
+            if (nexoRendered != null) {
+                if (plugin.isDebugMode() && containsGlyphToken(processed)) {
+                    String plain = PlainTextComponentSerializer.plainText().serialize(nexoRendered);
+                    plugin.debugLog("Main format parsed with Nexo parser for " + player.getName() + " | plain='"
+                            + plain + "'");
+                }
+                return nexoRendered;
+            }
+        }
+
+        if (plugin.isDebugMode() && containsGlyphToken(processed)) {
+            plugin.debugLog("Main format fallback to default MiniMessage parser for " + player.getName());
+        }
+        return miniMessage.deserialize(processed, placeholders);
+    }
+
+    private Component sanitizePotentialGlyphName(Component rawName, Material material) {
+        if (rawName == null) {
+            return Component.text(prettifyEnumName(material.name()));
+        }
+
+        String plain = PlainTextComponentSerializer.plainText().serialize(rawName);
+        if (plain.toLowerCase().startsWith("glyph:")) {
+            return Component.text(prettifyEnumName(material.name()));
+        }
+        return rawName;
+    }
+
+    private boolean containsGlyphToken(String input) {
+        if (input == null || input.isEmpty()) {
+            return false;
+        }
+        String lower = input.toLowerCase();
+        return lower.contains("<glyph:") || lower.contains("glyph:");
     }
 
     private String translateLegacyHexToMiniMessage(String message) {

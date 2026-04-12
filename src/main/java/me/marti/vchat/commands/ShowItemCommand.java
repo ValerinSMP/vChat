@@ -74,12 +74,12 @@ public class ShowItemCommand implements CommandExecutor {
                 .replace("{item}", "<item>");
 
         // 3. Item Component
-        Component itemComponent = messageProcessor.getItemComponent(item);
+        Component itemComponent = messageProcessor.getItemComponent(player, item);
 
         // 4. Build Component
         // We assume the user config is MiniMessage friendly for now.
-        Component finalMessage = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
-                .deserialize(format, Placeholder.component("item", itemComponent));
+        Component finalMessage = messageProcessor.parseMiniMessageForPlayer(player, format,
+            Placeholder.component("item", itemComponent));
 
         // Broadcast
         Bukkit.getServer().sendMessage(finalMessage);

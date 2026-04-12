@@ -62,7 +62,7 @@ public class ChatListener implements Listener {
         if (hasItemPlaceholder) {
             org.bukkit.inventory.ItemStack hand = player.getInventory().getItemInMainHand();
             if (hand.getType() != org.bukkit.Material.AIR) {
-                itemComp = messageProcessor.getItemComponent(hand);
+                itemComp = messageProcessor.getItemComponent(player, hand);
                 message = message.replaceAll("(?i)\\[item]|(?i)\\[i]", "<item_tag>");
             }
         }
