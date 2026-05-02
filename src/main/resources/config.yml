@@ -15,3 +15,10 @@ sounds:
   blocked: "BLOCK_NOTE_BLOCK_BASS"
   toggle-on: "BLOCK_NOTE_BLOCK_PLING"
   toggle-off: "BLOCK_NOTE_BLOCK_BASS"
+
+# Cooldown global entre comandos de jugadores
+command-cooldown:
+  enabled: true
+  seconds: 3
+  # Comandos exentos (sin /)
+  exempt-commands: []

@@ -121,6 +121,9 @@ permissions:
   vchat.bypass.cooldown:
     description: Evita cooldown de menciones.
     default: op
+  vchat.bypass.commandcooldown:
+    description: Evita cooldown global entre comandos.
+    default: op
 
   # Bypass Filters
   vchat.bypass.spam:

@@ -60,6 +60,7 @@ public final class VChat extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.ChatTabListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.JoinListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.QuitListener(this), this);
+        getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.CommandCooldownListener(this), this);
 
         // Load data for online players (for hot-reloads)
         for (org.bukkit.entity.Player online : getServer().getOnlinePlayers()) {
