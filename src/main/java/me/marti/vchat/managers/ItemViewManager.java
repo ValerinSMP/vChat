@@ -11,13 +11,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemViewManager {
 
-    private final Map<UUID, ItemStack> itemCache = new HashMap<>();
+    private final Map<UUID, CachedItem> itemCache = new ConcurrentHashMap<>();
     private final me.marti.vchat.VChat plugin;
 
     public ItemViewManager(me.marti.vchat.VChat plugin) {
@@ -26,16 +26,24 @@ public class ItemViewManager {
 
     public UUID cacheItem(ItemStack item) {
         UUID id = UUID.randomUUID();
-        itemCache.put(id, item.clone()); // Clone for safety
+        itemCache.put(id, new CachedItem(item.clone(), System.currentTimeMillis())); // Clone for safety
         return id;
     }
 
     public ItemStack getItem(UUID id) {
-        return itemCache.get(id);
+        CachedItem cached = itemCache.get(id);
+        if (cached == null) {
+            return null;
+        }
+        if (isExpired(cached.createdAt())) {
+            itemCache.remove(id);
+            return null;
+        }
+        return cached.item().clone();
     }
 
     public void openView(Player player, UUID itemId) {
-        ItemStack item = itemCache.get(itemId);
+        ItemStack item = getItem(itemId);
         if (item == null) {
             player.sendMessage(
                     Component.text("Item expired or not found.", net.kyori.adventure.text.format.NamedTextColor.RED));
@@ -62,10 +70,31 @@ public class ItemViewManager {
         player.openInventory(inv);
     }
 
+    public void purgeExpired() {
+        long now = System.currentTimeMillis();
+        itemCache.entrySet().removeIf(entry -> isExpired(entry.getValue().createdAt(), now));
+    }
+
+    public void clear() {
+        itemCache.clear();
+    }
+
+    private boolean isExpired(long createdAt) {
+        return isExpired(createdAt, System.currentTimeMillis());
+    }
+
+    private boolean isExpired(long createdAt, long now) {
+        long ttlSeconds = Math.max(60L, plugin.getConfigManager().getMainConfig().getLong("item-view.cache-ttl-seconds", 300L));
+        return (now - createdAt) > (ttlSeconds * 1000L);
+    }
+
     public static class ItemViewHolder implements InventoryHolder {
         @Override
         public @NotNull Inventory getInventory() {
             return null; // Not needed really, just a marker
         }
+    }
+
+    private record CachedItem(ItemStack item, long createdAt) {
     }
 }

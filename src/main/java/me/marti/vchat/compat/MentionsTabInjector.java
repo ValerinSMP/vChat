@@ -25,7 +25,6 @@ public class MentionsTabInjector implements Listener {
 
     public MentionsTabInjector(VChat plugin) {
         this.plugin = plugin;
-        plugin.getLogger().info("DEBUG: MentionsTabInjector Initialized!");
     }
 
     public void register() {

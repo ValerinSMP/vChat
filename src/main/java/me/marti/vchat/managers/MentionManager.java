@@ -26,6 +26,7 @@ public class MentionManager {
     private final ConcurrentMap<UUID, Boolean> mentionCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, UUID> onlineNameIndex = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, String> onlineNameCanonical = new ConcurrentHashMap<>();
 
     public MentionManager(VChat plugin) {
         this.plugin = plugin;
@@ -39,13 +40,17 @@ public class MentionManager {
             value = raw == 1;
         }
         mentionCache.put(player.getUniqueId(), value);
-        onlineNameIndex.put(player.getName().toLowerCase(Locale.ROOT), player.getUniqueId());
+        String lowerName = player.getName().toLowerCase(Locale.ROOT);
+        onlineNameIndex.put(lowerName, player.getUniqueId());
+        onlineNameCanonical.put(lowerName, player.getName());
     }
 
     public void unloadData(Player player) {
         mentionCache.remove(player.getUniqueId());
         cooldowns.remove(player.getUniqueId());
-        onlineNameIndex.remove(player.getName().toLowerCase(Locale.ROOT));
+        String lowerName = player.getName().toLowerCase(Locale.ROOT);
+        onlineNameIndex.remove(lowerName);
+        onlineNameCanonical.remove(lowerName);
     }
 
     public boolean areMentionsEnabled(Player player) {
@@ -89,7 +94,9 @@ public class MentionManager {
             String targetName = matcher.group(1);
             UUID targetId = onlineNameIndex.get(targetName.toLowerCase(Locale.ROOT));
 
-            if (targetId != null && !targetId.equals(senderId) && mentionCache.getOrDefault(targetId, true)) {
+            boolean senderBypassesToggleMentions = canBypassToggleMentions(sender);
+            if (targetId != null && !targetId.equals(senderId)
+                    && (senderBypassesToggleMentions || mentionCache.getOrDefault(targetId, true))) {
                 matcher.appendReplacement(sb, Matcher.quoteReplacement(color + "@" + targetName + "<reset>"));
                 if (!onCooldown) {
                     targetsToNotify.add(targetId);
@@ -107,6 +114,18 @@ public class MentionManager {
         return new MentionProcessResult(sb.toString(), targetsToNotify);
     }
 
+    public java.util.List<String> getOnlineMentionNamesStartingWith(String prefix) {
+        String lowerPrefix = prefix == null ? "" : prefix.toLowerCase(Locale.ROOT);
+        java.util.List<String> result = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<String, String> entry : onlineNameCanonical.entrySet()) {
+            if (entry.getKey().startsWith(lowerPrefix)) {
+                result.add(entry.getValue());
+            }
+        }
+        result.sort(String.CASE_INSENSITIVE_ORDER);
+        return result;
+    }
+
     public void notifyTargets(Player sender, Set<UUID> targetIds) {
         if (targetIds == null || targetIds.isEmpty()) {
             return;
@@ -121,9 +140,11 @@ public class MentionManager {
 
         String actionMsg = plugin.getConfigManager().getMentions().getString("actionbar");
 
+        boolean senderBypassesToggleMentions = canBypassToggleMentions(sender);
+
         for (UUID targetId : targetIds) {
             Player target = Bukkit.getPlayer(targetId);
-            if (target == null || !areMentionsEnabled(target)) {
+            if (target == null || (!senderBypassesToggleMentions && !areMentionsEnabled(target))) {
                 continue;
             }
 
@@ -156,6 +177,12 @@ public class MentionManager {
                     .replace("&r", "<reset>");
         }
         return color;
+    }
+
+    private boolean canBypassToggleMentions(Player sender) {
+        return sender.hasPermission("vchat.bypass.togglementions")
+                || sender.hasPermission("vchat.bypass.mentions")
+                || sender.hasPermission("vchat.bypass.social");
     }
 
     public record MentionProcessResult(String processedMessage, Set<UUID> targetsToNotify) {

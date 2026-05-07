@@ -22,6 +22,7 @@ public final class VChat extends JavaPlugin {
     private me.marti.vchat.managers.DiscordBridgeManager discordBridgeManager;
     private me.marti.vchat.compat.MentionsTabInjector mentionsTabInjector;
     private me.marti.vchat.compat.NexoHook nexoHook;
+    private int itemCacheCleanupTaskId = -1;
     private volatile boolean debugMode;
     private LuckPerms luckPerms;
 
@@ -85,6 +86,7 @@ public final class VChat extends JavaPlugin {
             this.nexoHook = new me.marti.vchat.compat.NexoHook(this);
         }
 
+        startBackgroundMaintenanceTasks();
         discordBridgeManager.start();
 
         printStartupBanner();
@@ -130,6 +132,10 @@ public final class VChat extends JavaPlugin {
         return nexoHook;
     }
 
+    public boolean isProtocolMentionsInjectorActive() {
+        return mentionsTabInjector != null;
+    }
+
     public boolean isDebugMode() {
         return debugMode;
     }
@@ -168,6 +174,12 @@ public final class VChat extends JavaPlugin {
             nexoHook = null;
         }
 
+        stopBackgroundMaintenanceTasks();
+
+        if (itemViewManager != null) {
+            itemViewManager.clear();
+        }
+
         // Cancel all remaining async/sync tasks
         getServer().getScheduler().cancelTasks(this);
 
@@ -175,25 +187,35 @@ public final class VChat extends JavaPlugin {
     }
 
     private void registerCommands() {
-        getCommand("vchat").setExecutor(
-                new me.marti.vchat.commands.VChatCommand(this, itemViewManager, adminManager));
-        getCommand("vchat").setTabCompleter(new me.marti.vchat.commands.VChatTabCompleter());
+        registerCommand("vchat", cmd -> {
+            cmd.setExecutor(new me.marti.vchat.commands.VChatCommand(this, itemViewManager, adminManager));
+            cmd.setTabCompleter(new me.marti.vchat.commands.VChatTabCompleter());
+        });
 
-        getCommand("showitem").setExecutor(
-                new me.marti.vchat.commands.ShowItemCommand(this, messageProcessor, luckPerms));
+        registerCommand("showitem", cmd -> cmd.setExecutor(
+                new me.marti.vchat.commands.ShowItemCommand(this, messageProcessor, luckPerms)));
 
-        getCommand("msg").setExecutor(new me.marti.vchat.commands.PrivateMessageCommand(this));
-        getCommand("reply").setExecutor(new me.marti.vchat.commands.ReplyCommand(this));
-        getCommand("togglemsg").setExecutor(new me.marti.vchat.commands.ToggleMsgCommand(this));
-        getCommand("spychat").setExecutor(new me.marti.vchat.commands.SocialSpyCommand(this));
+        registerCommand("msg", cmd -> cmd.setExecutor(new me.marti.vchat.commands.PrivateMessageCommand(this)));
+        registerCommand("reply", cmd -> cmd.setExecutor(new me.marti.vchat.commands.ReplyCommand(this)));
+        registerCommand("togglemsg", cmd -> cmd.setExecutor(new me.marti.vchat.commands.ToggleMsgCommand(this)));
+        registerCommand("spychat", cmd -> cmd.setExecutor(new me.marti.vchat.commands.SocialSpyCommand(this)));
 
-        getCommand("togglechat").setExecutor(new me.marti.vchat.commands.ToggleChatCommand(this));
-        getCommand("mutechat").setExecutor(new me.marti.vchat.commands.MuteChatCommand(this));
+        registerCommand("togglechat", cmd -> cmd.setExecutor(new me.marti.vchat.commands.ToggleChatCommand(this)));
+        registerCommand("mutechat", cmd -> cmd.setExecutor(new me.marti.vchat.commands.MuteChatCommand(this)));
 
-        getCommand("ignore").setExecutor(new me.marti.vchat.commands.IgnoreCommand(this));
-        getCommand("togglementions").setExecutor(new me.marti.vchat.commands.ToggleMentionsCommand(this));
+        registerCommand("ignore", cmd -> cmd.setExecutor(new me.marti.vchat.commands.IgnoreCommand(this)));
+        registerCommand("togglementions", cmd -> cmd.setExecutor(new me.marti.vchat.commands.ToggleMentionsCommand(this)));
 
         getLogger().info("Commands registered successfully.");
+    }
+
+    private void registerCommand(String name, java.util.function.Consumer<org.bukkit.command.PluginCommand> binder) {
+        org.bukkit.command.PluginCommand command = getCommand(name);
+        if (command == null) {
+            getLogger().warning("Command '" + name + "' not found in plugin.yml. Skipping binding.");
+            return;
+        }
+        binder.accept(command);
     }
 
     private void printStartupBanner() {
@@ -250,5 +272,23 @@ public final class VChat extends JavaPlugin {
             discordBridgeManager.reload();
         }
         getLogger().info("Configuration reloaded.");
+    }
+
+    private void startBackgroundMaintenanceTasks() {
+        stopBackgroundMaintenanceTasks();
+
+        long periodTicks = Math.max(20L, getConfigManager().getMainConfig().getLong("item-view.cleanup-interval-seconds", 120L) * 20L);
+        itemCacheCleanupTaskId = getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            if (itemViewManager != null) {
+                itemViewManager.purgeExpired();
+            }
+        }, periodTicks, periodTicks).getTaskId();
+    }
+
+    private void stopBackgroundMaintenanceTasks() {
+        if (itemCacheCleanupTaskId != -1) {
+            getServer().getScheduler().cancelTask(itemCacheCleanupTaskId);
+            itemCacheCleanupTaskId = -1;
+        }
     }
 }

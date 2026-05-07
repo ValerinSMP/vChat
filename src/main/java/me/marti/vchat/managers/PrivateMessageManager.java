@@ -98,17 +98,17 @@ public class PrivateMessageManager {
 
         // Checks (Only if sender is player)
         if (sender instanceof Player p) {
-            if (!isMsgEnabled(p)) {
+            if (!isMsgEnabled(p) && !canBypassToggleMsg(p)) {
                 plugin.getAdminManager().sendConfigMessage(sender, "private.disabled-self");
                 return;
             }
-            if (!isMsgEnabled(target) && !p.hasPermission("vchat.bypass.msg")) {
+            if (!isMsgEnabled(target) && !canBypassToggleMsg(p)) {
                 plugin.getAdminManager().sendConfigMessage(sender, "private.disabled-target");
                 return;
             }
             // Check if target ignores sender
             if (plugin.getIgnoreManager().isIgnored(target.getUniqueId(), p.getUniqueId())
-                    && !p.hasPermission("vchat.bypass.ignore")) {
+                    && !canBypassIgnore(p)) {
                 sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>Este jugador te ha ignorado.</red>"));
                 return;
             }
@@ -234,6 +234,17 @@ public class PrivateMessageManager {
                 // Ignore
             }
         }
+    }
+
+    private boolean canBypassToggleMsg(Player player) {
+        return player.hasPermission("vchat.bypass.msg")
+                || player.hasPermission("vchat.bypass.togglemsg")
+                || player.hasPermission("vchat.bypass.social");
+    }
+
+    private boolean canBypassIgnore(Player player) {
+        return player.hasPermission("vchat.bypass.ignore")
+                || player.hasPermission("vchat.bypass.social");
     }
 
 }

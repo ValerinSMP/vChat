@@ -98,6 +98,9 @@ permissions:
   vchat.bypass.msg:
     description: Permite enviar mensajes a quien los tenga desactivados.
     default: op
+  vchat.bypass.togglemsg:
+    description: Alias de bypass para /togglemsg (equivale a vchat.bypass.msg).
+    default: op
   vchat.togglechat:
     description: Permite activar/desactivar el chat para uno mismo.
     default: true
@@ -113,6 +116,21 @@ permissions:
   vchat.bypass.ignore:
     description: Evita ser ignorado.
     default: op
+  vchat.bypass.togglementions:
+    description: Permite mencionar aunque el objetivo tenga /togglementions desactivado.
+    default: op
+  vchat.bypass.mentions:
+    description: Alias de bypass para menciones desactivadas.
+    default: op
+  vchat.bypass.social:
+    description: Bypass global para ignore, togglemsg y togglementions.
+    default: op
+    children:
+      vchat.bypass.ignore: true
+      vchat.bypass.msg: true
+      vchat.bypass.togglemsg: true
+      vchat.bypass.togglementions: true
+      vchat.bypass.mentions: true
   vchat.bypass.filters:
     description: Bypass de todos los filtros de chat.
     default: op

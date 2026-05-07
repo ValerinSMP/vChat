@@ -1,8 +1,6 @@
 package me.marti.vchat.listeners;
 
 import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import me.marti.vchat.VChat;
@@ -19,6 +17,11 @@ public class ChatTabListener implements Listener {
 
     @EventHandler
     public void onTabComplete(AsyncTabCompleteEvent event) {
+        // If ProtocolLib injector is active, it owns mention suggestion behavior.
+        if (plugin.isProtocolMentionsInjectorActive()) {
+            return;
+        }
+
         String buffer = event.getBuffer();
         if (buffer.startsWith("/"))
             return;
@@ -34,10 +37,8 @@ public class ChatTabListener implements Listener {
             String prefix = lastToken.substring(1).toLowerCase();
             List<String> completions = new ArrayList<>();
 
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.getName().toLowerCase().startsWith(prefix)) {
-                    completions.add("@" + p.getName());
-                }
+            for (String playerName : plugin.getMentionManager().getOnlineMentionNamesStartingWith(prefix)) {
+                completions.add("@" + playerName);
             }
 
             if (!completions.isEmpty()) {
