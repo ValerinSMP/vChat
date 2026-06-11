@@ -11,7 +11,7 @@ import java.util.List;
 public class FilterManager {
 
     private final VChat plugin;
-    private final List<ChatFilter> filters = new ArrayList<>();
+    private volatile List<ChatFilter> filters = List.of();
 
     public FilterManager(VChat plugin) {
         this.plugin = plugin;
@@ -19,23 +19,26 @@ public class FilterManager {
     }
 
     public void loadFilters() {
-        filters.clear();
+        List<ChatFilter> loadedFilters = new ArrayList<>();
         boolean enableAll = plugin.getConfigManager().getFilters().getBoolean("enable-all", true);
-        if (!enableAll)
+        if (!enableAll) {
+            filters = List.of();
             return;
+        }
 
         if (plugin.getConfigManager().getFilters().getBoolean("spam.enabled", true)) {
-            filters.add(new me.marti.vchat.checks.SpamFilter(plugin));
+            loadedFilters.add(new me.marti.vchat.checks.SpamFilter(plugin));
         }
         if (plugin.getConfigManager().getFilters().getBoolean("caps.enabled", true)) {
-            filters.add(new me.marti.vchat.checks.CapsFilter(plugin));
+            loadedFilters.add(new me.marti.vchat.checks.CapsFilter(plugin));
         }
         if (plugin.getConfigManager().getFilters().getBoolean("ads.enabled", true)) {
-            filters.add(new me.marti.vchat.checks.AdsFilter(plugin));
+            loadedFilters.add(new me.marti.vchat.checks.AdsFilter(plugin));
         }
         if (plugin.getConfigManager().getFilters().getBoolean("profanity.enabled", true)) {
-            filters.add(new me.marti.vchat.checks.ProfanityFilter(plugin));
+            loadedFilters.add(new me.marti.vchat.checks.ProfanityFilter(plugin));
         }
+        filters = List.copyOf(loadedFilters);
     }
 
     public FilterResult process(Player player, String message) {

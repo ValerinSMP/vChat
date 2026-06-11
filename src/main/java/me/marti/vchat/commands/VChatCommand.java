@@ -3,6 +3,7 @@ package me.marti.vchat.commands;
 import me.marti.vchat.VChat;
 import me.marti.vchat.managers.ItemViewManager;
 import me.marti.vchat.managers.AdminManager;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
@@ -72,7 +73,7 @@ public class VChatCommand implements CommandExecutor {
                 return handleDebug(sender);
         }
 
-        sender.sendMessage(
+        PlatformUtil.sendMessage(sender,
                 Component.text("Subcomando desconocido: '" + subCommand + "'. Usa /vchat help.", NamedTextColor.RED));
         return true;
     }
@@ -179,45 +180,45 @@ public class VChatCommand implements CommandExecutor {
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(Component.text(" ", NamedTextColor.GRAY));
-        sender.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+        PlatformUtil.sendMessage(sender, Component.text(" ", NamedTextColor.GRAY));
+        PlatformUtil.sendMessage(sender, net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
                 .deserialize(" <gradient:#50ffc5:#009985>vChat Help</gradient> "));
-        sender.sendMessage(Component.text(" ", NamedTextColor.GRAY));
+        PlatformUtil.sendMessage(sender, Component.text(" ", NamedTextColor.GRAY));
 
         // Basic Commands
-        sender.sendMessage(formatCommand("/msg <player> <msg>", "Enviar mensaje privado"));
-        sender.sendMessage(formatCommand("/reply <msg>", "Responder mensaje privado"));
-        sender.sendMessage(formatCommand("/ignore <player>", "Ignorar a un jugador"));
-        sender.sendMessage(formatCommand("/showitem", "Mostrar ítem en mano"));
+        PlatformUtil.sendMessage(sender, formatCommand("/msg <player> <msg>", "Enviar mensaje privado"));
+        PlatformUtil.sendMessage(sender, formatCommand("/reply <msg>", "Responder mensaje privado"));
+        PlatformUtil.sendMessage(sender, formatCommand("/ignore <player>", "Ignorar a un jugador"));
+        PlatformUtil.sendMessage(sender, formatCommand("/showitem", "Mostrar ítem en mano"));
 
         // Toggles
-        sender.sendMessage(formatCommand("/togglechat", "Ocultar/Mostrar chat global"));
-        sender.sendMessage(formatCommand("/togglementions", "Activar/Desactivar menciones"));
-        sender.sendMessage(formatCommand("/togglemsg", "Activar/Desactivar mensajes privados"));
+        PlatformUtil.sendMessage(sender, formatCommand("/togglechat", "Ocultar/Mostrar chat global"));
+        PlatformUtil.sendMessage(sender, formatCommand("/togglementions", "Activar/Desactivar menciones"));
+        PlatformUtil.sendMessage(sender, formatCommand("/togglemsg", "Activar/Desactivar mensajes privados"));
 
         // Admin / Staff
         if (sender.hasPermission("vchat.spychat") || sender.hasPermission("vchat.admin")) {
-            sender.sendMessage(formatCommand("/vspy", "Espiar mensajes privados (SocialSpy)"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vspy", "Espiar mensajes privados (SocialSpy)"));
         }
         if (sender.hasPermission("vchat.mutechat")) {
-            sender.sendMessage(formatCommand("/mutechat", "Silenciar chat global (Todos)"));
+            PlatformUtil.sendMessage(sender, formatCommand("/mutechat", "Silenciar chat global (Todos)"));
         }
         if (sender.hasPermission("vchat.admin") || sender.hasPermission("vchat.reload")) {
-            sender.sendMessage(formatCommand("/vchat reload", "Recargar configuración"));
-            sender.sendMessage(formatCommand("/vchat debug", "Activar/Desactivar debug de parseo"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vchat reload", "Recargar configuración"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vchat debug", "Activar/Desactivar debug de parseo"));
         }
         if (sender.hasPermission("vchat.notify")) {
-            sender.sendMessage(formatCommand("/vchat notify", "Notificaciones de admin"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vchat notify", "Notificaciones de admin"));
         }
         if (sender.hasPermission("vchat.bridge.admin") || sender.hasPermission("vchat.admin")) {
-            sender.sendMessage(formatCommand("/vchat bridge status", "Estado del bridge de Discord"));
-            sender.sendMessage(formatCommand("/vchat bridge block <id>", "Bloquear usuario de Discord"));
-            sender.sendMessage(formatCommand("/vchat bridge unblock <id>", "Desbloquear usuario de Discord"));
-            sender.sendMessage(formatCommand("/vchat bridge reload", "Recargar bridge de Discord"));
-            sender.sendMessage(formatCommand("/vchat bridge test <msg>", "Enviar test por webhook"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vchat bridge status", "Estado del bridge de Discord"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vchat bridge block <id>", "Bloquear usuario de Discord"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vchat bridge unblock <id>", "Desbloquear usuario de Discord"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vchat bridge reload", "Recargar bridge de Discord"));
+            PlatformUtil.sendMessage(sender, formatCommand("/vchat bridge test <msg>", "Enviar test por webhook"));
         }
 
-        sender.sendMessage(Component.text(" ", NamedTextColor.GRAY));
+        PlatformUtil.sendMessage(sender, Component.text(" ", NamedTextColor.GRAY));
     }
 
     private boolean handleBridge(CommandSender sender, String[] args) {
@@ -227,7 +228,7 @@ public class VChatCommand implements CommandExecutor {
         }
 
         if (args.length < 2) {
-            sender.sendMessage(Component.text("Uso: /vchat bridge <status|reload|block|unblock|list|test>", NamedTextColor.RED));
+            PlatformUtil.sendMessage(sender, Component.text("Uso: /vchat bridge <status|reload|block|unblock|list|test>", NamedTextColor.RED));
             return true;
         }
 
@@ -236,55 +237,55 @@ public class VChatCommand implements CommandExecutor {
 
         switch (action) {
             case "status" -> {
-                sender.sendMessage(Component.text("Bridge enabled: " + bridge.isEnabled(), NamedTextColor.AQUA));
-                sender.sendMessage(Component.text("Server ID: " + bridge.getServerId(), NamedTextColor.GRAY));
-                sender.sendMessage(Component.text("Channel ID: " + bridge.getCurrentChannelId(), NamedTextColor.GRAY));
-                sender.sendMessage(Component.text("Blocked users: " + bridge.getBlockedDiscordUsers().size(), NamedTextColor.GRAY));
+                PlatformUtil.sendMessage(sender, Component.text("Bridge enabled: " + bridge.isEnabled(), NamedTextColor.AQUA));
+                PlatformUtil.sendMessage(sender, Component.text("Server ID: " + bridge.getServerId(), NamedTextColor.GRAY));
+                PlatformUtil.sendMessage(sender, Component.text("Channel ID: " + bridge.getCurrentChannelId(), NamedTextColor.GRAY));
+                PlatformUtil.sendMessage(sender, Component.text("Blocked users: " + bridge.getBlockedDiscordUsers().size(), NamedTextColor.GRAY));
                 return true;
             }
             case "reload" -> {
                 bridge.reload();
-                sender.sendMessage(Component.text("Discord bridge recargado.", NamedTextColor.GREEN));
+                PlatformUtil.sendMessage(sender, Component.text("Discord bridge recargado.", NamedTextColor.GREEN));
                 return true;
             }
             case "block" -> {
                 if (args.length < 3) {
-                    sender.sendMessage(Component.text("Uso: /vchat bridge block <discordUserId>", NamedTextColor.RED));
+                    PlatformUtil.sendMessage(sender, Component.text("Uso: /vchat bridge block <discordUserId>", NamedTextColor.RED));
                     return true;
                 }
                 boolean added = bridge.blockDiscordUser(args[2]);
-                sender.sendMessage(Component.text(added ? "Usuario bloqueado." : "Ese usuario ya estaba bloqueado.",
+                PlatformUtil.sendMessage(sender, Component.text(added ? "Usuario bloqueado." : "Ese usuario ya estaba bloqueado.",
                         added ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
                 return true;
             }
             case "unblock" -> {
                 if (args.length < 3) {
-                    sender.sendMessage(Component.text("Uso: /vchat bridge unblock <discordUserId>", NamedTextColor.RED));
+                    PlatformUtil.sendMessage(sender, Component.text("Uso: /vchat bridge unblock <discordUserId>", NamedTextColor.RED));
                     return true;
                 }
                 boolean removed = bridge.unblockDiscordUser(args[2]);
-                sender.sendMessage(Component.text(removed ? "Usuario desbloqueado." : "Ese usuario no estaba bloqueado.",
+                PlatformUtil.sendMessage(sender, Component.text(removed ? "Usuario desbloqueado." : "Ese usuario no estaba bloqueado.",
                         removed ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
                 return true;
             }
             case "list" -> {
                 java.util.Set<String> blocked = bridge.getBlockedDiscordUsers();
                 if (blocked.isEmpty()) {
-                    sender.sendMessage(Component.text("No hay usuarios bloqueados.", NamedTextColor.GRAY));
+                    PlatformUtil.sendMessage(sender, Component.text("No hay usuarios bloqueados.", NamedTextColor.GRAY));
                     return true;
                 }
-                sender.sendMessage(Component.text("Usuarios bloqueados: " + String.join(", ", blocked), NamedTextColor.YELLOW));
+                PlatformUtil.sendMessage(sender, Component.text("Usuarios bloqueados: " + String.join(", ", blocked), NamedTextColor.YELLOW));
                 return true;
             }
             case "test" -> {
                 String msg = args.length >= 3 ? String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length))
                         : "bridge test";
                 bridge.sendTestMessageToDiscord(msg);
-                sender.sendMessage(Component.text("Test enviado a Discord (webhook).", NamedTextColor.GREEN));
+                PlatformUtil.sendMessage(sender, Component.text("Test enviado a Discord (webhook).", NamedTextColor.GREEN));
                 return true;
             }
             default -> {
-                sender.sendMessage(Component.text("Subcomando bridge desconocido.", NamedTextColor.RED));
+                PlatformUtil.sendMessage(sender, Component.text("Subcomando bridge desconocido.", NamedTextColor.RED));
                 return true;
             }
         }
@@ -297,7 +298,7 @@ public class VChatCommand implements CommandExecutor {
         }
 
         boolean enabled = plugin.toggleDebugMode();
-        sender.sendMessage(Component.text("Debug vChat: " + (enabled ? "ACTIVADO" : "DESACTIVADO"),
+        PlatformUtil.sendMessage(sender, Component.text("Debug vChat: " + (enabled ? "ACTIVADO" : "DESACTIVADO"),
                 enabled ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
         return true;
     }

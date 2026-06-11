@@ -2,6 +2,7 @@ package me.marti.vchat.managers;
 
 import me.marti.vchat.VChat;
 import me.marti.vchat.utils.MessageSanitizer;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -83,12 +84,11 @@ public class PrivateMessageManager {
         player.getPersistentDataContainer().set(spyToggleKey, PersistentDataType.BYTE, newState ? (byte) 1 : (byte) 0);
 
         if (newState) {
-            player.sendActionBar(
-                    MiniMessage.miniMessage().deserialize("<gradient:#d4af37:#f0e68c>SpyChat activado.</gradient>")); // Gold/Yellow
-                                                                                                                      // ish
+            PlatformUtil.sendActionBar(player,
+                    MiniMessage.miniMessage().deserialize("<gradient:#d4af37:#f0e68c>SpyChat activado.</gradient>"));
             playSound(player, "sounds.toggle-on");
         } else {
-            player.sendActionBar(MiniMessage.miniMessage().deserialize("<red>SpyChat desactivado.</red>"));
+            PlatformUtil.sendActionBar(player, MiniMessage.miniMessage().deserialize("<red>SpyChat desactivado.</red>"));
             playSound(player, "sounds.toggle-off");
         }
     }
@@ -109,7 +109,7 @@ public class PrivateMessageManager {
             // Check if target ignores sender
             if (plugin.getIgnoreManager().isIgnored(target.getUniqueId(), p.getUniqueId())
                     && !canBypassIgnore(p)) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>Este jugador te ha ignorado.</red>"));
+                PlatformUtil.sendMessage(sender, MiniMessage.miniMessage().deserialize("<red>Este jugador te ha ignorado.</red>"));
                 return;
             }
         }
@@ -132,11 +132,11 @@ public class PrivateMessageManager {
         Component outgoing = formatData(outgoingFormat, sender, target, messageComp);
         Component incoming = formatData(incomingFormat, sender, target, messageComp);
 
-        sender.sendMessage(outgoing);
-        target.sendMessage(incoming);
+        PlatformUtil.sendMessage(sender, outgoing);
+        PlatformUtil.sendMessage(target, incoming);
 
         // Premium Feedback: Notify target in ActionBar that they got a message
-        target.sendActionBar(
+        PlatformUtil.sendActionBar(target,
                 miniMessage.deserialize("<gray>✉ Nuevo mensaje de <white>" + sender.getName() + "</white></gray>"));
 
         // Sounds
@@ -171,7 +171,7 @@ public class PrivateMessageManager {
 
         Player target = Bukkit.getPlayer(targetId);
         if (target == null || !target.isOnline()) {
-            sender.sendMessage(
+            PlatformUtil.sendMessage(sender,
                     MiniMessage.miniMessage().deserialize("<red>El jugador ya no est\u00e1 en l\u00ednea.</red>"));
             return;
         }
@@ -191,8 +191,8 @@ public class PrivateMessageManager {
         Component outgoing = formatData(outgoingFormat, sender, targetConsole, messageComp);
         Component incoming = formatData(incomingFormat, sender, targetConsole, messageComp);
 
-        sender.sendMessage(outgoing);
-        targetConsole.sendMessage(incoming);
+        PlatformUtil.sendMessage(sender, outgoing);
+        PlatformUtil.sendMessage(targetConsole, incoming);
 
         if (sender instanceof Player playerSender) {
             playSound(playerSender, "sounds.message-send");
@@ -219,7 +219,7 @@ public class PrivateMessageManager {
                 continue;
 
             if (online.hasPermission("vchat.spychat") && isSpyEnabled(online)) {
-                online.sendMessage(spyComponent);
+                PlatformUtil.sendMessage(online, spyComponent);
             }
         }
     }
@@ -227,12 +227,8 @@ public class PrivateMessageManager {
     private void playSound(Player player, String key) {
         String soundName = plugin.getConfigManager().getPrivate().getString(key);
         if (soundName != null && !soundName.isEmpty()) {
-            try {
-                Sound sound = Sound.valueOf(soundName.toUpperCase());
-                player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
-            } catch (Exception e) {
-                // Ignore
-            }
+            Sound sound = me.marti.vchat.utils.PlatformUtil.resolveSound(soundName);
+            if (sound != null) player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
         }
     }
 

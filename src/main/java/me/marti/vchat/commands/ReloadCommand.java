@@ -1,6 +1,7 @@
 package me.marti.vchat.commands;
 
 import me.marti.vchat.VChat;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
@@ -20,18 +21,18 @@ public class ReloadCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
         if (!sender.hasPermission("vchat.admin")) {
-            sender.sendMessage(
+            PlatformUtil.sendMessage(sender,
                     Component.text("You do not have permission to execute this command.", NamedTextColor.RED));
             return true;
         }
 
         if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
             plugin.reload();
-            sender.sendMessage(Component.text("vChat configuration reloaded!", NamedTextColor.GREEN));
+            PlatformUtil.sendMessage(sender, Component.text("vChat configuration reloaded!", NamedTextColor.GREEN));
             return true;
         }
 
-        sender.sendMessage(Component.text("Usage: /vchat reload", NamedTextColor.RED));
+        PlatformUtil.sendMessage(sender, Component.text("Usage: /vchat reload", NamedTextColor.RED));
         return true;
     }
 }

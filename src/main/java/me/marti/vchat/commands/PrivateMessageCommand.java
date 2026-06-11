@@ -1,6 +1,7 @@
 package me.marti.vchat.commands;
 
 import me.marti.vchat.VChat;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -29,14 +30,14 @@ public class PrivateMessageCommand implements CommandExecutor {
         }
 
         if (args.length < 2) {
-            sender.sendMessage(Component.text("Uso: /msg <jugador> <mensaje>", NamedTextColor.RED));
+            PlatformUtil.sendMessage(sender, Component.text("Uso: /msg <jugador> <mensaje>", NamedTextColor.RED));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null || !target.isOnline()) { // isOnline check just in case getPlayer returns offline player (it
                                                     // shouldn't usually but safest)
-            sender.sendMessage(Component.text("Jugador no encontrado.", NamedTextColor.RED));
+            PlatformUtil.sendMessage(sender, Component.text("Jugador no encontrado.", NamedTextColor.RED));
             return true;
         }
 

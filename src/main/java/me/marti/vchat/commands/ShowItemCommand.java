@@ -2,6 +2,7 @@ package me.marti.vchat.commands;
 
 import me.marti.vchat.VChat;
 import me.marti.vchat.processors.MessageProcessor;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -30,7 +31,7 @@ public class ShowItemCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("Only players can use this command.", NamedTextColor.RED));
+            PlatformUtil.sendMessage(sender, Component.text("Only players can use this command.", NamedTextColor.RED));
             return true;
         }
 
@@ -43,7 +44,7 @@ public class ShowItemCommand implements CommandExecutor {
         if (item.getType() == Material.AIR) {
             String errorMsg = plugin.getConfigManager().getFormats().getString("show-item-error",
                     "<red>You must be holding an item to show it.</red>");
-            player.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(errorMsg));
+            PlatformUtil.sendMessage(player, net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(errorMsg));
             return true;
         }
 
@@ -82,7 +83,9 @@ public class ShowItemCommand implements CommandExecutor {
             Placeholder.component("item", itemComponent));
 
         // Broadcast
-        Bukkit.getServer().sendMessage(finalMessage);
+        for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
+            me.marti.vchat.utils.PlatformUtil.sendMessage(online, finalMessage);
+        }
 
         return true;
     }

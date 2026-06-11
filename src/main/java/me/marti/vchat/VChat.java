@@ -1,9 +1,10 @@
 package me.marti.vchat;
 
-import me.marti.vchat.listeners.ChatListener;
 import me.marti.vchat.managers.FormatManager;
+import me.marti.vchat.utils.PlatformUtil;
 import me.marti.vchat.processors.MessageProcessor;
 import net.luckperms.api.LuckPerms;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,6 +21,7 @@ public final class VChat extends JavaPlugin {
     private me.marti.vchat.managers.PrivateMessageManager privateMessageManager;
     private me.marti.vchat.managers.IgnoreManager ignoreManager;
     private me.marti.vchat.managers.DiscordBridgeManager discordBridgeManager;
+    private me.marti.vchat.managers.JoinQuitManager joinQuitManager;
     private me.marti.vchat.compat.MentionsTabInjector mentionsTabInjector;
     private me.marti.vchat.compat.NexoHook nexoHook;
     private int itemCacheCleanupTaskId = -1;
@@ -49,16 +51,16 @@ public final class VChat extends JavaPlugin {
         this.privateMessageManager = new me.marti.vchat.managers.PrivateMessageManager(this);
         this.ignoreManager = new me.marti.vchat.managers.IgnoreManager(this);
         this.discordBridgeManager = new me.marti.vchat.managers.DiscordBridgeManager(this);
+        this.joinQuitManager = new me.marti.vchat.managers.JoinQuitManager(this);
 
         // Register Commands
         registerCommands();
 
         // Register Listeners
-        getServer().getPluginManager().registerEvents(
-                new ChatListener(this, formatManager, messageProcessor, filterManager, mentionManager),
-                this);
+        getServer().getPluginManager().registerEvents(createChatListener(), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.InventoryListener(), this);
-        getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.ChatTabListener(this), this);
+        getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.DeathListener(this), this);
+        getServer().getPluginManager().registerEvents(createChatTabListener(), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.JoinListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.QuitListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.CommandCooldownListener(this), this);
@@ -77,6 +79,7 @@ public final class VChat extends JavaPlugin {
 
         if (getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
             getLogger().info("Hooking into ProtocolLib for Tab Completion...");
+            me.marti.vchat.utils.PlatformUtil.initProtocolLib(this);
             this.mentionsTabInjector = new me.marti.vchat.compat.MentionsTabInjector(this);
             this.mentionsTabInjector.register();
         }
@@ -126,6 +129,14 @@ public final class VChat extends JavaPlugin {
 
     public me.marti.vchat.managers.DiscordBridgeManager getDiscordBridgeManager() {
         return discordBridgeManager;
+    }
+
+    public me.marti.vchat.managers.JoinQuitManager getJoinQuitManager() {
+        return joinQuitManager;
+    }
+
+    public net.luckperms.api.LuckPerms getLuckPerms() {
+        return luckPerms;
     }
 
     public me.marti.vchat.compat.NexoHook getNexoHook() {
@@ -222,7 +233,8 @@ public final class VChat extends JavaPlugin {
         boolean papi = getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
         String version = getDescription().getVersion();
 
-        getServer().getConsoleSender().sendMessage(net.kyori.adventure.text.Component.text()
+        PlatformUtil.sendMessage(getServer().getConsoleSender(),
+                net.kyori.adventure.text.Component.text()
                 .append(net.kyori.adventure.text.Component.newline())
                 .append(net.kyori.adventure.text.Component.text("  vChat v" + version,
                         net.kyori.adventure.text.format.NamedTextColor.AQUA))
@@ -289,6 +301,30 @@ public final class VChat extends JavaPlugin {
         if (itemCacheCleanupTaskId != -1) {
             getServer().getScheduler().cancelTask(itemCacheCleanupTaskId);
             itemCacheCleanupTaskId = -1;
+        }
+    }
+
+    private Listener createChatListener() {
+        try {
+            Class<?> listenerClass = Class.forName("me.marti.vchat.listeners.ChatListener");
+            return (Listener) listenerClass
+                    .getConstructor(VChat.class,
+                            me.marti.vchat.managers.FormatManager.class,
+                            me.marti.vchat.processors.MessageProcessor.class,
+                            me.marti.vchat.managers.FilterManager.class,
+                            me.marti.vchat.managers.MentionManager.class)
+                    .newInstance(this, formatManager, messageProcessor, filterManager, mentionManager);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to instantiate ChatListener", e);
+        }
+    }
+
+    private Listener createChatTabListener() {
+        try {
+            Class<?> listenerClass = Class.forName("me.marti.vchat.listeners.ChatTabListener");
+            return (Listener) listenerClass.getConstructor(VChat.class).newInstance(this);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to instantiate ChatTabListener", e);
         }
     }
 }

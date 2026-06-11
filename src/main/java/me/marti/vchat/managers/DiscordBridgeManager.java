@@ -139,7 +139,7 @@ public class DiscordBridgeManager {
         }
 
         BridgeRoute route = currentRoute;
-        if (route == null || route.webhookUrl().isBlank()) {
+        if (route == null || !BridgeRouteValidator.isUsableWebhookUrl(route.webhookUrl())) {
             debug("Skip MC->DS relay: missing route or webhook-url for server-id '" + serverId + "'.");
             return;
         }
@@ -218,7 +218,7 @@ public class DiscordBridgeManager {
         }
 
         if (currentRoute == null) {
-            plugin.getLogger().warning("[Bridge] Route not found for server-id '" + serverId + "'. Bridge disabled.");
+            plugin.getLogger().warning("[Bridge] Route not configured for server-id '" + serverId + "'. Bridge disabled.");
             enabled = false;
             shutdownJda();
             return;
@@ -272,6 +272,9 @@ public class DiscordBridgeManager {
         }
         String channelId = sec.getString("channel-id", "");
         String webhookUrl = sec.getString("webhook-url", "");
+        if (!BridgeRouteValidator.isUsableRoute(channelId, webhookUrl)) {
+            return null;
+        }
         return new BridgeRoute(channelId, webhookUrl);
     }
 
@@ -531,7 +534,7 @@ public class DiscordBridgeManager {
                     if (plugin.getAdminManager().isPersonalChatMuted(online)) {
                         continue;
                     }
-                    online.sendMessage(rendered);
+                    me.marti.vchat.utils.PlatformUtil.sendMessage(online, rendered);
                     delivered++;
                 }
                 debug("Delivered DS->MC message to " + delivered + " players.");

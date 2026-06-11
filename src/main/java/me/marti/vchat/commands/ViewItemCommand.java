@@ -1,6 +1,7 @@
 package me.marti.vchat.commands;
 
 import me.marti.vchat.managers.ItemViewManager;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
@@ -23,7 +24,7 @@ public class ViewItemCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("Only players can use this command.", NamedTextColor.RED));
+            PlatformUtil.sendMessage(sender, Component.text("Only players can use this command.", NamedTextColor.RED));
             return true;
         }
 
@@ -35,7 +36,7 @@ public class ViewItemCommand implements CommandExecutor {
             UUID itemId = UUID.fromString(args[0]);
             itemViewManager.openView(player, itemId);
         } catch (IllegalArgumentException e) {
-            player.sendMessage(Component.text("Invalid Item ID.", NamedTextColor.RED));
+            PlatformUtil.sendMessage(player, Component.text("Invalid Item ID.", NamedTextColor.RED));
         }
 
         return true;

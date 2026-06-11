@@ -1,6 +1,7 @@
 package me.marti.vchat.commands;
 
 import me.marti.vchat.VChat;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
@@ -21,7 +22,7 @@ public class SocialSpyCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("Solo jugadores.", NamedTextColor.RED));
+            PlatformUtil.sendMessage(sender, Component.text("Solo jugadores.", NamedTextColor.RED));
             return true;
         }
 

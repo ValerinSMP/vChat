@@ -15,14 +15,17 @@ import java.util.logging.Level;
 public class ConfigManager {
 
     private final VChat plugin;
-    private final Map<String, FileConfiguration> configs = new HashMap<>();
-    private final Map<String, File> configFiles = new HashMap<>();
+    private volatile Map<String, FileConfiguration> configs = Map.of();
+    private volatile Map<String, File> configFiles = Map.of();
 
     public ConfigManager(VChat plugin) {
         this.plugin = plugin;
     }
 
     public void loadConfigs() {
+        Map<String, FileConfiguration> loadedConfigs = new HashMap<>();
+        Map<String, File> loadedFiles = new HashMap<>();
+
         // List of all config files to manage
         String[] files = {
             "config.yml",
@@ -35,11 +38,14 @@ public class ConfigManager {
         };
 
         for (String file : files) {
-            registerConfig(file);
+            registerConfig(file, loadedConfigs, loadedFiles);
         }
+
+        configs = Map.copyOf(loadedConfigs);
+        configFiles = Map.copyOf(loadedFiles);
     }
 
-    private void registerConfig(String fileName) {
+    private void registerConfig(String fileName, Map<String, FileConfiguration> targetConfigs, Map<String, File> targetFiles) {
         File file = new File(plugin.getDataFolder(), fileName);
         
         // Save default if not exists
@@ -50,23 +56,34 @@ public class ConfigManager {
         // Load configuration
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         
-        configs.put(fileName, config);
-        configFiles.put(fileName, file);
+        targetConfigs.put(fileName, config);
+        targetFiles.put(fileName, file);
     }
 
     public void reloadConfigs() {
-        configs.clear();
-        configFiles.clear();
         loadConfigs();
         plugin.getLogger().info("All configurations reloaded.");
     }
 
     public FileConfiguration getConfig(String fileName) {
-        if (!configs.containsKey(fileName)) {
-            // Lazy load or error? Let's try to load/register if missing
-            registerConfig(fileName);
+        FileConfiguration config = configs.get(fileName);
+        if (config != null) {
+            return config;
         }
-        return configs.get(fileName);
+
+        synchronized (this) {
+            config = configs.get(fileName);
+            if (config != null) {
+                return config;
+            }
+
+            Map<String, FileConfiguration> updatedConfigs = new HashMap<>(configs);
+            Map<String, File> updatedFiles = new HashMap<>(configFiles);
+            registerConfig(fileName, updatedConfigs, updatedFiles);
+            configs = Map.copyOf(updatedConfigs);
+            configFiles = Map.copyOf(updatedFiles);
+            return configs.get(fileName);
+        }
     }
     
     // Convenience getters
@@ -78,10 +95,12 @@ public class ConfigManager {
     public FileConfiguration getPrivate() { return getConfig("private.yml"); }
     public FileConfiguration getBridge() { return getConfig("bridge.yml"); }
 
-    public void saveConfig(String fileName) {
-        if (configFiles.containsKey(fileName) && configs.containsKey(fileName)) {
+    public synchronized void saveConfig(String fileName) {
+        File file = configFiles.get(fileName);
+        FileConfiguration config = configs.get(fileName);
+        if (file != null && config != null) {
             try {
-                configs.get(fileName).save(configFiles.get(fileName));
+                config.save(file);
             } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "Could not save config: " + fileName, e);
             }

@@ -1,6 +1,7 @@
 package me.marti.vchat.managers;
 
 import me.marti.vchat.VChat;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -63,13 +64,13 @@ public class AdminManager {
     public void toggleGlobalChat() {
         this.globalChatMuted = !this.globalChatMuted;
         if (globalChatMuted) {
-             org.bukkit.Bukkit.broadcast(legacySerializer.deserialize(plugin.getConfigManager().getMessages().getString("moderation.chat-muted", "&cChat silenciado.")));
+             PlatformUtil.broadcast(legacySerializer.deserialize(plugin.getConfigManager().getMessages().getString("moderation.chat-muted", "&cChat silenciado.")));
              // Broadcast sound
              for(Player p : Bukkit.getOnlinePlayers()) {
                  playSound(p, "sounds.toggle-off");
              }
         } else {
-             org.bukkit.Bukkit.broadcast(legacySerializer.deserialize(plugin.getConfigManager().getMessages().getString("moderation.chat-unmuted", "&aChat activado.")));
+             PlatformUtil.broadcast(legacySerializer.deserialize(plugin.getConfigManager().getMessages().getString("moderation.chat-unmuted", "&aChat activado.")));
              for(Player p : Bukkit.getOnlinePlayers()) {
                  playSound(p, "sounds.toggle-on");
              }
@@ -80,7 +81,7 @@ public class AdminManager {
          if (plugin.getConfigManager().getMessages().isString(path)) {
             String msg = plugin.getConfigManager().getMessages().getString(path);
             if (msg != null && !msg.isEmpty()) {
-                player.sendActionBar(legacySerializer.deserialize(msg));
+                PlatformUtil.sendActionBar(player, legacySerializer.deserialize(msg));
             }
         }
     }
@@ -154,7 +155,7 @@ public class AdminManager {
             for (Player admin : Bukkit.getOnlinePlayers()) {
                 // Check cache via getter
                 if (admin.hasPermission("vchat.notify") && isNotifyEnabled(admin)) {
-                    admin.sendMessage(comp);
+                    PlatformUtil.sendMessage(admin, comp);
                 }
             }
         }
@@ -165,26 +166,22 @@ public class AdminManager {
         if (plugin.getConfigManager().getMessages().isString(path)) {
             String msg = plugin.getConfigManager().getMessages().getString(path);
             if (msg != null && !msg.isEmpty()) {
-                sender.sendMessage(legacySerializer.deserialize(msg));
+                PlatformUtil.sendMessage(sender, legacySerializer.deserialize(msg));
             }
         } else {
             List<String> messages = plugin.getConfigManager().getMessages().getStringList(path);
             for (String msg : messages) {
-                sender.sendMessage(legacySerializer.deserialize(msg));
+                PlatformUtil.sendMessage(sender, legacySerializer.deserialize(msg));
             }
         }
     }
 
     public void playSound(Player player, String path) {
-        // Defaulting to config.yml for general sounds
         String soundName = plugin.getConfigManager().getMainConfig().getString(path);
         if (soundName != null && !soundName.isEmpty()) {
-            try {
-                Sound sound = Sound.valueOf(soundName.toUpperCase());
-                player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
-            } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Invalid sound: " + soundName);
-            }
+            Sound sound = PlatformUtil.resolveSound(soundName);
+            if (sound != null) player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
+            else plugin.getLogger().warning("Invalid sound: " + soundName);
         }
     }
 }

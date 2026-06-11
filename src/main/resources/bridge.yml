@@ -9,7 +9,7 @@
 # - Puedes dejar bot-token vacio y usar variable de entorno:
 #   VCHAT_DISCORD_BOT_TOKEN
 
-enabled: true
+enabled: false
 debug: false
 
 # Cambia este valor por servidor:

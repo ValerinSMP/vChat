@@ -4,7 +4,7 @@ main: me.marti.vchat.VChat
 api-version: 1.21
 authors: [mtynnn]
 depend: [LuckPerms]
-softdepend: [PlaceholderAPI, ProtocolLib, Nexo]
+softdepend: [PlaceholderAPI, ProtocolLib]
 libraries:
   - net.dv8tion:JDA:5.2.1
 commands:

@@ -31,6 +31,22 @@ private:
   no-reply: "&cNo tienes a nadie a quien responder."
   no-self: "&cNo puedes enviarte mensajes a ti mismo."
 
+death:
+  enabled: true
+  pvp-format: "<color:#FF6961>☠ <lp_victim> <gray>fue asesinado por <color:#FF6961>🗡 <lp_killer>"
+  pve-format: "<color:#FF6961>☠ <lp_victim> <gray>ha muerto"
+
+join:
+  format: "<gold>🌊 <lp_prefix><player_name></gold> <yellow>sᴇ ʜᴀ ᴜɴɪᴅᴏ <gold>🌊 <dark_gray>(<online>)"
+  first-join: "<yellow>⭐ <gold><lp_prefix><player_name></gold> <yellow>sᴇ ᴜɴᴇ ᴘᴏʀ ᴘʀɪᴍᴇʀᴀ ᴠᴇᴢ ⭐ <gold>(#<player_number>)</gold>"
+  # Sonido global de entrada (vacío = ninguno)
+  sound: ""
+  # Sonido por grupo — key = nombre del grupo en LuckPerms, value = nombre del sonido
+  # Ejemplo:
+  # vip: "ENTITY_PLAYER_LEVELUP"
+  # owner: "UI_TOAST_CHALLENGE_COMPLETE"
+  group-sounds: {}
+
 moderation:
   chat-muted: "&cEl chat ha sido desactivado por un administrador."
   chat-unmuted: "&aEl chat ha sido activado por un administrador."

@@ -1,6 +1,7 @@
 package me.marti.vchat.managers;
 
 import me.marti.vchat.VChat;
+import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -132,11 +133,7 @@ public class MentionManager {
         }
 
         String soundName = plugin.getConfigManager().getMentions().getString("sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
-        Sound sound = null;
-        try {
-            sound = Sound.valueOf(soundName.toUpperCase(Locale.ROOT));
-        } catch (Exception ignored) {
-        }
+        Sound sound = me.marti.vchat.utils.PlatformUtil.resolveSound(soundName);
 
         String actionMsg = plugin.getConfigManager().getMentions().getString("actionbar");
 
@@ -154,7 +151,7 @@ public class MentionManager {
 
             if (actionMsg != null && !actionMsg.isEmpty()) {
                 String rendered = actionMsg.replace("%player%", sender.getName());
-                target.sendActionBar(LegacyComponentSerializer.legacyAmpersand().deserialize(rendered));
+                PlatformUtil.sendActionBar(target, LegacyComponentSerializer.legacyAmpersand().deserialize(rendered));
             }
         }
     }
