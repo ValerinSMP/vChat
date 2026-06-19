@@ -22,6 +22,8 @@ public final class VChat extends JavaPlugin {
     private me.marti.vchat.managers.IgnoreManager ignoreManager;
     private me.marti.vchat.managers.DiscordBridgeManager discordBridgeManager;
     private me.marti.vchat.managers.JoinQuitManager joinQuitManager;
+    private me.marti.vchat.managers.AnnouncementManager announcementManager;
+    private me.marti.vchat.quiz.QuizManager quizManager;
     private me.marti.vchat.compat.MentionsTabInjector mentionsTabInjector;
     private me.marti.vchat.compat.NexoHook nexoHook;
     private int itemCacheCleanupTaskId = -1;
@@ -52,6 +54,12 @@ public final class VChat extends JavaPlugin {
         this.ignoreManager = new me.marti.vchat.managers.IgnoreManager(this);
         this.discordBridgeManager = new me.marti.vchat.managers.DiscordBridgeManager(this);
         this.joinQuitManager = new me.marti.vchat.managers.JoinQuitManager(this);
+        this.announcementManager = new me.marti.vchat.managers.AnnouncementManager(this);
+        this.announcementManager.start();
+        this.quizManager = new me.marti.vchat.quiz.QuizManager(this);
+        if (configManager.getConfig("quiz.yml").getBoolean("quiz.enabled", true)) {
+            this.quizManager.start();
+        }
 
         // Register Commands
         registerCommands();
@@ -64,6 +72,7 @@ public final class VChat extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.JoinListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.QuitListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.CommandCooldownListener(this), this);
+        getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.QuizChatListener(this), this);
 
         // Load data for online players (for hot-reloads)
         for (org.bukkit.entity.Player online : getServer().getOnlinePlayers()) {
@@ -135,6 +144,10 @@ public final class VChat extends JavaPlugin {
         return joinQuitManager;
     }
 
+    public me.marti.vchat.quiz.QuizManager getQuizManager() {
+        return quizManager;
+    }
+
     public net.luckperms.api.LuckPerms getLuckPerms() {
         return luckPerms;
     }
@@ -176,6 +189,12 @@ public final class VChat extends JavaPlugin {
         if (mentionsTabInjector != null) {
             mentionsTabInjector.shutdown();
         }
+        if (announcementManager != null) {
+            announcementManager.stop();
+        }
+        if (quizManager != null) {
+            quizManager.stop();
+        }
         if (discordBridgeManager != null) {
             discordBridgeManager.shutdown();
         }
@@ -216,6 +235,11 @@ public final class VChat extends JavaPlugin {
 
         registerCommand("ignore", cmd -> cmd.setExecutor(new me.marti.vchat.commands.IgnoreCommand(this)));
         registerCommand("togglementions", cmd -> cmd.setExecutor(new me.marti.vchat.commands.ToggleMentionsCommand(this)));
+        registerCommand("quiz", cmd -> {
+            me.marti.vchat.commands.QuizCommand qc = new me.marti.vchat.commands.QuizCommand(this);
+            cmd.setExecutor(qc);
+            cmd.setTabCompleter(qc);
+        });
 
         getLogger().info("Commands registered successfully.");
     }
@@ -282,6 +306,13 @@ public final class VChat extends JavaPlugin {
         }
         if (discordBridgeManager != null) {
             discordBridgeManager.reload();
+        }
+        if (announcementManager != null) {
+            announcementManager.stop();
+            announcementManager.start();
+        }
+        if (quizManager != null) {
+            quizManager.reload();
         }
         getLogger().info("Configuration reloaded.");
     }

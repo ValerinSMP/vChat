@@ -76,6 +76,18 @@ public class PAPIExpansion extends PlaceholderExpansion {
              return getStatusString(enabled);
         }
 
+        // %vchat_toggle_announcements%
+        if (params.equalsIgnoreCase("toggle_announcements")) {
+            boolean muted = plugin.getAdminManager().isAnnouncementsMuted(player);
+            return getStatusString(!muted);
+        }
+
+        // %vchat_toggle_death%
+        if (params.equalsIgnoreCase("toggle_death")) {
+            boolean muted = plugin.getAdminManager().isDeathMuted(player);
+            return getStatusString(!muted);
+        }
+
         return null;
     }
 

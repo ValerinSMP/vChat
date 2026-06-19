@@ -65,6 +65,13 @@ public class VChatCommand implements CommandExecutor {
             case "msg_toggle":
             case "togglemsg":
                 return handleMsgToggle(sender);
+            case "toggleannouncements":
+            case "toggleann":
+            case "tann":
+                return handleToggleAnnouncements(sender);
+            case "toggledeath":
+            case "tdeath":
+                return handleToggleDeath(sender);
             case "viewitem":
                 return handleViewItem(sender, args);
             case "bridge":
@@ -163,13 +170,55 @@ public class VChatCommand implements CommandExecutor {
         return true;
     }
 
-    private boolean handleViewItem(CommandSender sender, String[] args) {
+    private boolean handleToggleAnnouncements(CommandSender sender) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Solo jugadores.");
             return true;
         }
-        if (args.length < 2)
+        if (!player.hasPermission("vchat.toggleannouncements") && !player.hasPermission("vchat.admin")) {
+            adminManager.sendConfigMessage(player, "messages.no-permission");
             return true;
+        }
+        boolean muted = adminManager.toggleAnnouncements(player);
+        if (muted) {
+            adminManager.sendConfigActionBar(player, "messages.announcements-disabled");
+            adminManager.playSound(player, "sounds.toggle-off");
+        } else {
+            adminManager.sendConfigActionBar(player, "messages.announcements-enabled");
+            adminManager.playSound(player, "sounds.toggle-on");
+        }
+        return true;
+    }
+
+    private boolean handleToggleDeath(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Solo jugadores.");
+            return true;
+        }
+        if (!player.hasPermission("vchat.toggledeath") && !player.hasPermission("vchat.admin")) {
+            adminManager.sendConfigMessage(player, "messages.no-permission");
+            return true;
+        }
+        boolean muted = adminManager.toggleDeath(player);
+        if (muted) {
+            adminManager.sendConfigActionBar(player, "messages.death-disabled");
+            adminManager.playSound(player, "sounds.toggle-off");
+        } else {
+            adminManager.sendConfigActionBar(player, "messages.death-enabled");
+            adminManager.playSound(player, "sounds.toggle-on");
+        }
+        return true;
+    }
+
+    private boolean handleViewItem(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            return true;
+        }
+        if (args.length < 2) return true;
+
+        // GUI disabled on Bukkit/Arclight — no Paper inventory Component API
+        if (!me.marti.vchat.utils.PlatformUtil.isPaper()) return true;
+
         try {
             UUID itemId = UUID.fromString(args[1]);
             itemViewManager.openView(player, itemId);

@@ -1,0 +1,152 @@
+# Formato: pregunta|respuesta|opcion1|opcion2|opcion3|dificultad
+# dificultad: easy, medium, hard, ultra
+¿Cuántos Pokémon existen en la primera generación?|151|150|152|140|easy
+¿De qué tipo es Pikachu?|Eléctrico|Fuego|Agua|Normal|easy
+¿Cuál es el Pokémon N°1 en la Pokédex Nacional?|Bulbasaur|Charmander|Squirtle|Caterpie|easy
+¿Cómo se llama el rival del jugador en Pokémon Rojo/Azul?|Gary|Ash|Brock|Misty|easy
+¿Qué tipo tiene ventaja sobre el tipo Fuego?|Agua|Planta|Roca|Hielo|easy
+¿Cuál es la evolución final de Charmander?|Charizard|Charmeleon|Arcanine|Rapidash|easy
+¿Cuántas evoluciones tiene Eevee en la primera generación?|3|4|5|2|easy
+¿Qué objeto hace evolucionar a Pikachu?|Piedra Trueno|Piedra Agua|Piedra Fuego|Piedra Luna|easy
+¿Cuál es el Pokémon legendario de Pokémon Rojo?|Articuno|Zapdos|Moltres|Mewtwo|easy
+¿Cómo se llama el entrenador de Pokémon principal de Kanto?|Ash|Gary|Red|Blue|easy
+¿De qué tipo es Gengar?|Fantasma y Veneno|Oscuro y Veneno|Psíquico y Fantasma|Normal y Veneno|medium
+¿Cuál es el Pokémon más pesado de gen 1?|Snorlax|Onix|Golem|Slowbro|medium
+¿Qué habilidad tiene Intimidate?|Baja el Ataque del rival|Sube el propio Ataque|Baja la Defensa del rival|Inmoviliza al rival|medium
+¿Cuántos insignias hay que ganar en Kanto?|8|7|10|6|easy
+¿Qué tipo es Clefairy?|Normal|Hada|Psíquico|Volador|easy
+¿Qué Pokémon es conocido como el Pokémon Dormilón?|Snorlax|Slowpoke|Jigglypuff|Drowzee|easy
+¿Cuál es la evolución de Magikarp?|Gyarados|Gyaros|Dragonite|Dratini|easy
+¿Qué tipo tiene ventaja sobre el tipo Agua?|Eléctrico|Fuego|Tierra|Roca|easy
+¿Cómo se llama la ciudad inicial de Kanto?|Pueblo Paleta|Villa Raíz|Ciudad Azulona|Ciudad Verde|easy
+¿Cuál es el Pokémon con más HP base en gen 1?|Chansey|Snorlax|Blissey|Lapras|medium
+¿Qué movimiento tiene la mayor potencia base en gen 1?|Explosión|Rayo Hidrante|Llamarada|Rayo|medium
+¿Cuántos movimientos puede aprender un Pokémon a la vez?|4|5|3|6|easy
+¿De qué tipo es Lapras?|Agua y Hielo|Agua y Psíquico|Agua y Normal|Hielo y Normal|medium
+¿Cuál es el único Pokémon tipo Dragón en gen 1?|Dragonite|Charizard|Aerodactyl|Gyarados|medium
+¿Qué Pokémon es el guardián del Lago de la Ira?|Uxie|Azelf|Mesprit|Cresselia|hard
+¿Cuántos Pokémon tiene la segunda generación?|100|106|110|96|medium
+¿Cuál es el starter de tipo Agua de Johto?|Totodile|Chikorita|Cyndaquil|Marill|easy
+¿Qué evolución legendaria no existe: Johto?|Celebi es legendary solo|Lugia|Ho-Oh|Entei|medium
+¿Cuál es el Pokémon mítico introducido en gen 2?|Celebi|Mew|Jirachi|Shaymin|medium
+¿Cuántas regiones existen en los juegos principales hasta gen 8?|8|7|9|6|medium
+¿De qué tipo es Umbreon?|Oscuro|Psíquico|Normal|Veneno|medium
+¿Cuál es la evolución de Sneasel?|Weavile|Absol|Houndoom|Mightyena|medium
+¿Qué Pokémon se conoce como el Pokémon Aurora?|Suicune|Raikou|Entei|Vaporeon|medium
+¿Cuál es el Pokémon Nº 251?|Celebi|Mew|Jirachi|Victini|hard
+¿De qué tipo es Skarmory?|Acero y Volador|Normal y Volador|Roca y Volador|Acero y Normal|medium
+¿Qué Pokémon evoluciona con Piedra Sol?|Sunflora|Bellsprout|Hoppip|Sunkern|medium
+¿Cuál es el Pokémon tipo Oscuro/Fuego introducido en gen 2?|Houndoom|Sneasel|Murkrow|Tyranitar|medium
+¿Qué tipo tienen ventaja sobre el tipo Acero?|Fuego, Lucha y Tierra|Agua, Roca y Fuego|Eléctrico, Fuego y Tierra|Fuego, Veneno y Roca|hard
+¿Cuántas formas tiene Unown?|28|26|25|30|medium
+¿Cuál es el Pokémon legendario que se parece a un perro eléctrico?|Raikou|Entei|Suicune|Zapdos|easy
+¿Qué item necesita Slowpoke para evolucionar a Slowking?|Rei's Roceta|Link Cable|Piedra Agua|Piedra Luna|medium
+¿Cómo se llama la región de gen 3?|Hoenn|Johto|Kanto|Sinnoh|easy
+¿Cuál es el starter de tipo Planta de Hoenn?|Treecko|Torchic|Mudkip|Sceptile|easy
+¿Qué tipo es Rayquaza?|Dragón y Volador|Dragón y Psíquico|Normal y Volador|Dragón y Normal|medium
+¿Cuántos Pokémon tiene la tercera generación?|135|130|140|125|medium
+¿Qué Pokémon es conocido como el Pokémon Cielo?|Rayquaza|Flygon|Salamence|Altaria|medium
+¿Cuál es la evolución final de Ralts (femenino)?|Gardevoir|Gallade|Kirlia|Medicham|easy
+¿De qué tipo es Shedinja?|Bicho y Fantasma|Normal y Fantasma|Bicho y Normal|Fantasma y Oscuro|hard
+¿Qué habilidad especial tiene Shedinja?|Wonder Guard|Sturdy|Battle Armor|Natural Cure|hard
+¿Cuántos Pokémon legendarios hay en Hoenn (sin contar míticos)?|10|8|12|6|hard
+¿Qué Pokémon es el rival de Groudon?|Kyogre|Rayquaza|Deoxys|Jirachi|easy
+¿Cuál es el Pokémon N°386?|Deoxys|Jirachi|Celebi|Mew|hard
+¿De qué tipo es Breloom?|Planta y Lucha|Planta y Normal|Veneno y Lucha|Normal y Lucha|medium
+¿Qué Pokémon evoluciona con Piedra Lunar en gen 3?|Jigglypuff (sin)|Skitty|Nidorina|Clefairy|hard
+¿Cuál es la región de gen 4?|Sinnoh|Hoenn|Unova|Kalos|easy
+¿Cuántos Pokémon tiene la cuarta generación?|107|110|100|120|medium
+¿Cuál es el starter de tipo Fuego de Sinnoh?|Chimchar|Piplup|Turtwig|Infernape|easy
+¿Qué tipo es Dialga?|Acero y Dragón|Dragón y Psíquico|Acero y Normal|Dragón y Volador|medium
+¿Qué Pokémon controla el tiempo?|Dialga|Palkia|Giratina|Arceus|easy
+¿Cuál es el Pokémon Dios de la Pokédex?|Arceus|Mew|Mewtwo|Rayquaza|easy
+¿De qué tipo es Spiritomb?|Fantasma y Oscuro|Fantasma y Normal|Oscuro y Veneno|Psíquico y Oscuro|hard
+¿Qué Pokémon tiene la habilidad Levitate naturalmente y es tipo Tierra?|Flygon|Garchomp|Gliscor|Gastrodon|hard
+¿Cuántas formas tiene Rotom en gen 4?|5|4|6|3|medium
+¿Cuál es la evolución de Budew?|Roselia|Roserade|Bellossom|Cherrim|easy
+¿Qué Pokémon es conocido como el Pokémon Temporal?|Dialga|Palkia|Cresselia|Darkrai|medium
+¿Cuál es el Pokémon mítico de gen 4 que da pesadillas?|Darkrai|Cresselia|Shaymin|Arceus|medium
+¿De qué tipo es Garchomp?|Dragón y Tierra|Dragón y Roca|Dragón y Normal|Tierra y Roca|medium
+¿Cuántas formas tiene Shaymin?|2|1|3|4|medium
+¿Cuál es la región de gen 5?|Unova|Kalos|Alola|Hoenn|easy
+¿Cuántos Pokémon tiene la quinta generación?|156|150|160|145|medium
+¿Cuál es el starter de tipo Agua de Unova?|Oshawott|Snivy|Tepig|Dewott|easy
+¿Qué tipo es Zekrom?|Dragón y Eléctrico|Dragón y Oscuro|Eléctrico y Oscuro|Dragón y Normal|medium
+¿Cuál es el Pokémon legendario representativo de Pokémon Blanco?|Reshiram|Zekrom|Kyurem|Victini|easy
+¿De qué tipo es Chandelure?|Fuego y Fantasma|Fuego y Oscuro|Fantasma y Normal|Fuego y Normal|medium
+¿Qué Pokémon es conocido como el Pokémon Illusion?|Zoroark|Zorua|Ditto|Gengar|medium
+¿Cuántos Pokémon hay en la Pokédex Unova original?|156|649|300|200|hard
+¿Cuál es la evolución de Larvesta?|Volcarona|Butterfree|Beautifly|Dustox|medium
+¿Qué tipo tiene Landorus?|Tierra y Volador|Tierra y Roca|Normal y Volador|Tierra y Normal|medium
+¿Cuál es el Pokémon mítico de gen 5 que da suerte?|Victini|Keldeo|Meloetta|Genesect|medium
+¿Qué Pokémon tiene la mayor velocidad base en gen 5?|Accelgor|Ninjask|Deoxys-V|Crobat|hard
+¿Cuál es la región de gen 6?|Kalos|Alola|Galar|Unova|easy
+¿Cuántos Pokémon tiene la sexta generación?|72|80|70|65|medium
+¿Cuál es el starter de tipo Planta de Kalos?|Chespin|Fennekin|Froakie|Quilladin|easy
+¿Qué tipo es Xerneas?|Hada|Normal|Psíquico|Planta|medium
+¿Cuál es el Pokémon legendario de Pokémon X?|Xerneas|Yveltal|Zygarde|Diancie|easy
+¿De qué tipo es Aegislash?|Acero y Fantasma|Acero y Oscuro|Normal y Acero|Fantasma y Oscuro|medium
+¿Qué es la Mega Evolución?|Evolución temporal en batalla|Evolución permanente|Una forma alternativa|Un estado de furia|easy
+¿Cuántas Mega Evoluciones tiene Charizard?|2|1|3|4|medium
+¿Cuál es el Pokémon mítico introducido en gen 6 asociado con los diamantes?|Diancie|Hoopa|Volcanion|Magearna|medium
+¿Qué Pokémon tiene la habilidad Protean de forma oficial?|Greninja|Kecleon|Zoroark|Ditto|medium
+¿Cuál es la región de gen 7?|Alola|Galar|Paldea|Kalos|easy
+¿Cuántos Pokémon tiene la séptima generación?|88|80|90|100|medium
+¿Cuál es el starter de tipo Fuego de Alola?|Litten|Rowlet|Popplio|Torracat|easy
+¿Qué tipo es Lunala?|Psíquico y Fantasma|Normal y Fantasma|Oscuro y Fantasma|Psíquico y Oscuro|medium
+¿Cuál es el Pokémon legendario asociado con el sol en Alola?|Solgaleo|Lunala|Tapu Koko|Necrozma|easy
+¿De qué tipo es Toxapex?|Veneno y Agua|Veneno y Normal|Agua y Oscuro|Veneno y Roca|medium
+¿Qué forma tiene Alolan Raichu además de Eléctrico?|Psíquico|Normal|Agua|Hada|medium
+¿Cuántos Guardianes Insulares hay en Alola?|4|3|5|6|easy
+¿Cuál es la habilidad especial de Necrozma en forma Ultra?|Neuroforce|Prism Armor|Beast Boost|Pressure|hard
+¿Qué Pokémon es conocido como el emisario del Ultraespacio?|Nihilego|Buzzwole|Pheromosa|Xurkitree|medium
+¿Cuál es la región de gen 8?|Galar|Alola|Paldea|Johto|easy
+¿Cuántos Pokémon tiene la octava generación?|96|80|100|90|medium
+¿Cuál es el starter de tipo Agua de Galar?|Sobble|Grookey|Scorbunny|Drizzile|easy
+¿Qué tipo es Zacian en su forma Hero of Many Battles?|Hada|Hada y Acero|Normal|Acero|hard
+¿Cuál es el fenómeno de Galar equivalente a Mega Evolución?|Dinamax|Gigamax|Terrax|Ultramax|easy
+¿De qué tipo es Dragapult?|Dragón y Fantasma|Dragón y Oscuro|Fantasma y Normal|Dragón y Normal|medium
+¿Qué Pokémon legendario puede criar Ditto (sin glitch)?|Ninguno|Mew|Arceus|Phione|hard
+¿Cuántas formas tiene Calyrex en Crown Tundra?|3|2|4|1|medium
+¿Qué tipo es Eternatus?|Veneno y Dragón|Dragón y Oscuro|Veneno y Oscuro|Dragón y Normal|medium
+¿Cuál es la región de gen 9?|Paldea|Kitakami|Unova|Kalos|easy
+¿Cuántos Pokémon tiene la novena generación?|103|100|110|96|medium
+¿Cuál es el starter de tipo Fuego de Paldea?|Fuecoco|Sprigatito|Quaxly|Crocalor|easy
+¿Qué tipo es Miraidon?|Eléctrico y Dragón|Dragón y Normal|Eléctrico y Normal|Psíquico y Eléctrico|medium
+¿Cuál es el Pokémon legendario de Pokémon Escarlatá?|Koraidon|Miraidon|Terapagos|Pecharunt|easy
+¿De qué tipo es Gholdengo?|Acero y Fantasma|Acero y Normal|Fantasma y Oscuro|Normal y Acero|medium
+¿Cuántos Pokémon tiene la Pokédex Nacional completa hasta gen 9?|1025|1000|1008|999|hard
+¿Cuál es el movimiento exclusivo de Pikachu en el anime?|Rayo|Rayo Rápido|Impactrueno|Chispazo|easy
+¿Qué Pokémon es inmortal porque no evoluciona ni puede morir?|No hay ninguno|Ditto|Mew|Shedinja|hard
+¿Cuál es el Pokémon con mayor Ataque Especial base?|Deoxys-A|Mewtwo|Xurkitree|Blacephalon|hard
+¿Qué tipo tiene CERO debilidades en gen 6+?|Normal/Fantasma (Eevee)|Acero puro|Hada|Eléctrico/Tierra|hard
+¿Cuál es el único tipo inmune al tipo Normal?|Fantasma|Acero|Roca|Oscuro|medium
+¿Qué Pokémon puede aprender todos los MTs en gen 1?|No existe uno que pueda aprender todos|Mew|Ditto|Mewtwo|hard
+¿Cuántos tipos existen actualmente (gen 9)?|18|17|19|16|medium
+¿Cuál es el tipo introducido en gen 2?|Acero y Oscuro|Solo Oscuro|Solo Acero|Hada|hard
+¿Qué tipo fue introducido en gen 6?|Hada|Acero|Oscuro|Dragón|medium
+¿Cuál es la debilidad del tipo Fantasma?|Fantasma y Oscuro|Solo Oscuro|Solo Fantasma|Normal y Oscuro|medium
+¿Qué tipo es immune al tipo Psíquico?|Oscuro|Normal|Acero|Fantasma|medium
+¿Cuántos Pokémon pueden Mega Evolucionar?|48|46|50|44|hard
+¿Cuál es el Pokémon más rápido del juego base (sin Mega, sin formas)?|Deoxys-V|Ninjask|Pheromosa|Regieleki|hard
+¿Qué Pokémon tiene la mayor Defensa base?|Shuckle|Steelix|Aggron|Bastiodon|hard
+¿Cuántos Pokémon tipo Dragón existen en gen 1?|2|1|3|0|hard
+¿Cuál es el movimiento de estado que garantiza dormir al objetivo?|Spore|Hypnosis|Sleep Powder|Lovely Kiss|hard
+¿Qué Pokémon tiene la habilidad Wonder Guard legítimamente?|Shedinja|Spiritomb|Sableye|Darkrai|hard
+¿Cuál es el único tipo que no puede ser afectado por Tóxico (Veneno)|Acero y Veneno|Solo Veneno|Acero, Veneno y Fantasma|Solo Acero|hard
+¿Qué Pokémon NO puede ser golpeado por movimientos de tipo Normal o de Lucha?|Fantasma|Roca|Acero|Hada|medium
+¿Cuál es el Pokémon con mayor PS base de todos?|Blissey|Chansey|Snorlax|Wailord|hard
+¿Qué movimiento tiene más PP en el juego?|Splash|Tackle|Pound|Teleport|hard
+¿Cuál es la forma de Mewtwo más rápida?|Mega Mewtwo Y|Mega Mewtwo X|Mewtwo base|Deoxys-V|hard
+¿Cuántos Pokémon tipo Agua existen en gen 1?|32|28|30|35|hard
+¿Qué Pokémon de Hoenn tiene la habilidad Truant?|Slaking|Slakoth|Vigoroth|Slaking y Slakoth|hard
+¿Cuál es el único Pokémon con tipo Normal/Volador que se convierte en solo Normal al Mega Evolucionar?|Pidgeot|Swellow|Noctowl|Fearow|ultra
+¿Qué Pokémon tiene el movimiento exclusivo V-create?|Victini|Reshiram|Kyurem|Rayquaza|ultra
+¿Cuántos Pokémon existen con el tipo Hada/Acero?|2|1|3|4|ultra
+¿Cuál es el único movimiento de tipo Fantasma con 100% de precisión en gen 1?|No existía ninguno|Shadow Ball|Lick|Night Shade|ultra
+¿Qué Pokémon tiene la stat total más alta de todos sin contar formas alternativas?|Arceus|Mewtwo|Rayquaza|Zygarde 100|ultra
+¿Cuál es el único starter que es tipo Agua/Tierra?|Swampert|Blastoise|Empoleon|Samurott|ultra
+¿Qué Pokémon tiene la habilidad Multitype?|Arceus|Silvally|Ditto|Mew|ultra
+¿Cuántos Pokémon tienen la habilidad Protean/Libero de forma legal?|6|4|8|10|ultra
+¿Cuál es el único Pokémon que puede aprender Sketch?|Smeargle|Ditto|Mew|Zoroark|ultra
+¿Qué movimiento tiene la mayor precisión debilitante de ataque (baja 2 niveles)?|Screech|Metal Sound|Charm|Growl|ultra

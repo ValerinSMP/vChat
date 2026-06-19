@@ -39,6 +39,10 @@ public final class PlatformUtil {
     private PlatformUtil() {
     }
 
+    public static boolean isPaper() {
+        return PAPER_SENDER_COMPONENT;
+    }
+
     public static void initProtocolLib(Plugin plugin) {
         if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null) {
             protocolManager = com.comphenix.protocol.ProtocolLibrary.getProtocolManager();

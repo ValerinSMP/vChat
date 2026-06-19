@@ -55,6 +55,7 @@ public class DeathListener implements Listener {
         }
 
         for (Player online : Bukkit.getOnlinePlayers()) {
+            if (plugin.getAdminManager().isDeathMuted(online)) continue;
             PlatformUtil.sendMessage(online, message);
         }
         PlatformUtil.sendMessage(Bukkit.getConsoleSender(), message);

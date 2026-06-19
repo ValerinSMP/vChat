@@ -63,7 +63,7 @@ public class CommandCooldownListener implements Listener {
             double remaining = remainingMs / 1000.0;
             String template = plugin.getConfigManager().getMessages()
                     .getString("moderation.command-cooldown", "&cEspera %time%s antes de usar otro comando.");
-            player.sendMessage(legacySerializer.deserialize(
+            me.marti.vchat.utils.PlatformUtil.sendMessage(player, legacySerializer.deserialize(
                     template.replace("%time%", String.format(Locale.US, "%.1f", remaining))));
             return;
         }

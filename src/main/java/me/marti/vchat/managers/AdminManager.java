@@ -17,9 +17,13 @@ public class AdminManager {
 
     private final VChat plugin;
     private final org.bukkit.NamespacedKey notifyKey;
-    private final org.bukkit.NamespacedKey personalChatKey; // New key
+    private final org.bukkit.NamespacedKey personalChatKey;
+    private final org.bukkit.NamespacedKey announcementsMutedKey;
+    private final org.bukkit.NamespacedKey deathMutedKey;
     private final Map<UUID, Boolean> notifyCache = new ConcurrentHashMap<>();
-    private final Map<UUID, Boolean> personalChatCache = new ConcurrentHashMap<>(); // New cache
+    private final Map<UUID, Boolean> personalChatCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> announcementsMutedCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> deathMutedCache = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> violationCounts = new ConcurrentHashMap<>();
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand(); 
 
@@ -27,6 +31,8 @@ public class AdminManager {
         this.plugin = plugin;
         this.notifyKey = new org.bukkit.NamespacedKey(plugin, "notify_enabled");
         this.personalChatKey = new org.bukkit.NamespacedKey(plugin, "personal_chat_muted");
+        this.announcementsMutedKey = new org.bukkit.NamespacedKey(plugin, "announcements_muted");
+        this.deathMutedKey = new org.bukkit.NamespacedKey(plugin, "death_muted");
     }
     
     // Global Chat Logic
@@ -109,11 +115,53 @@ public class AdminManager {
              personalMuted = player.getPersistentDataContainer().get(personalChatKey, org.bukkit.persistence.PersistentDataType.BYTE) == 1;
         }
         personalChatCache.put(player.getUniqueId(), personalMuted);
+
+        // Load Announcements muted
+        boolean annMuted = false;
+        if (player.getPersistentDataContainer().has(announcementsMutedKey, org.bukkit.persistence.PersistentDataType.BYTE)) {
+            annMuted = player.getPersistentDataContainer().get(announcementsMutedKey, org.bukkit.persistence.PersistentDataType.BYTE) == 1;
+        }
+        announcementsMutedCache.put(player.getUniqueId(), annMuted);
+
+        // Load Death messages muted
+        boolean deathMuted = false;
+        if (player.getPersistentDataContainer().has(deathMutedKey, org.bukkit.persistence.PersistentDataType.BYTE)) {
+            deathMuted = player.getPersistentDataContainer().get(deathMutedKey, org.bukkit.persistence.PersistentDataType.BYTE) == 1;
+        }
+        deathMutedCache.put(player.getUniqueId(), deathMuted);
     }
 
     public void unloadData(Player player) {
         notifyCache.remove(player.getUniqueId());
         personalChatCache.remove(player.getUniqueId());
+        announcementsMutedCache.remove(player.getUniqueId());
+        deathMutedCache.remove(player.getUniqueId());
+    }
+
+    // Announcements toggle
+    public boolean isAnnouncementsMuted(Player player) {
+        return announcementsMutedCache.getOrDefault(player.getUniqueId(), false);
+    }
+
+    public boolean toggleAnnouncements(Player player) {
+        boolean newState = !isAnnouncementsMuted(player);
+        announcementsMutedCache.put(player.getUniqueId(), newState);
+        player.getPersistentDataContainer().set(announcementsMutedKey,
+                org.bukkit.persistence.PersistentDataType.BYTE, newState ? (byte) 1 : (byte) 0);
+        return newState;
+    }
+
+    // Death messages toggle
+    public boolean isDeathMuted(Player player) {
+        return deathMutedCache.getOrDefault(player.getUniqueId(), false);
+    }
+
+    public boolean toggleDeath(Player player) {
+        boolean newState = !isDeathMuted(player);
+        deathMutedCache.put(player.getUniqueId(), newState);
+        player.getPersistentDataContainer().set(deathMutedKey,
+                org.bukkit.persistence.PersistentDataType.BYTE, newState ? (byte) 1 : (byte) 0);
+        return newState;
     }
 
     public boolean toggleNotifications(Player player) {

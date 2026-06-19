@@ -1,0 +1,146 @@
+# ---------------------------------------------------------
+# vChat - Anuncios Automáticos
+# ---------------------------------------------------------
+announcement:
+  enabled: true
+  # true = orden aleatorio, false = secuencial
+  random: true
+  # Intervalo global en segundos (usado si un anuncio no define el suyo)
+  interval: 600
+
+announcements:
+  '1':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ᴀᴘᴏʏᴀ ᴇʟ &bsᴇʀᴠɪᴅᴏʀ &7ᴄᴏᴍᴘʀᴀɴᴅᴏ &eʀᴀɴɢᴏs &7ᴇɴ %%tienda%% &7- &e¡ᴀʏᴜᴅᴀɴᴏs ᴀ ᴄʀᴇᴄᴇʀ!'
+      - ''
+
+  '2':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7¿ɴᴇᴄᴇsɪᴛᴀs &cᴀʏᴜᴅᴀ&7? ᴇɴᴛʀᴀ ᴀ ɴᴜᴇsᴛʀᴏ %%discord%% &7- &e¡ᴇᴠᴇɴᴛᴏs, sᴏʀᴛᴇᴏs ʏ sᴏᴘᴏʀᴛᴇ!'
+      - ''
+
+  '3':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7¿&cᴍᴏʀɪsᴛᴇ&7? ᴀʜᴏʀᴀ ᴘᴜᴇᴅᴇs &aᴠᴏʟᴠᴇʀ &7ᴀ ᴅᴏɴᴅᴇ ᴇsᴛᴀʙᴀs ᴄᴏɴ %%back%%'
+      - ''
+
+  '4':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ʟᴏs &cᴍᴏᴅs ᴄᴏɴ ᴠᴇɴᴛᴀᴊᴀs &7ɴᴏ ᴇsᴛᴀɴ ᴘᴇʀᴍɪᴛɪᴅᴏs - &6ʀᴇᴠɪsᴀ ʟᴀ ʟɪsᴛᴀ ᴇɴ %%reglas%%'
+      - ''
+
+  '5':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ᴄᴀᴅᴀ &eᴠᴏᴛᴏ &7ᴀʏᴜᴅᴀ ᴀ ᴄᴏᴍᴘʟᴇᴛᴀʀ ʟᴀ &6ᴘɪñᴀᴛᴀ&7! ᴜsᴀ %%vote%% &7- &e¡ᴘᴇɢᴀʟᴇ ᴘᴀʀᴀ ɢᴀɴᴀʀ ɪᴛᴇᴍs!'
+      - ''
+
+  '6':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ᴄʀᴇᴀ ᴏ ᴜɴᴇᴛᴇ ᴀ ᴜɴ &dᴄʟᴀɴ &7ᴄᴏɴ %%clan%% &7- &e¡ᴊᴜᴇɢᴀ ᴄᴏɴ ᴛᴜs ᴀᴍɪɢᴏs!'
+      - ''
+
+  '7':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ᴠɪsɪᴛᴀ ʟᴀs &bᴢᴏɴᴀs ᴘʀɪɴᴄɪᴘᴀʟᴇs &7ᴄᴏɴ %%warps%% &7- &e¡ᴇxᴘʟᴏʀᴀ ᴇʟ sᴇʀᴠɪᴅᴏʀ!'
+      - ''
+
+  '8':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ʀᴇᴄᴜᴇʀᴅᴀ ǫᴜᴇ ᴛᴇɴᴇᴍᴏs &bᴠᴏɪᴄᴇᴄʜᴀᴛ &7ᴘᴀʀᴀ &dʜᴀʙʟᴀʀ &7ᴇɴ ᴇʟ sᴇʀᴠᴇʀ - &e¡ᴄᴏɴᴇᴄᴛᴀᴛᴇ!'
+      - ''
+
+  '9':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7sɪ ᴇʀᴇs ᴅᴇ &cᴄʜɪʟᴇ &7ᴘᴜᴇᴅᴇs ᴘᴀɢᴀʀ sɪɴ ᴄᴏᴍɪsɪᴏɴ ᴘᴏʀ ᴛʀᴀɴsғᴇʀᴇɴᴄɪᴀ - &e¡ᴍᴜᴄʜɪsɪᴍᴏ ᴍᴀs ʙᴀʀᴀᴛᴏ! &7ᴀʙʀᴇ ᴜɴ &dᴛɪᴄᴋᴇᴛ &7ᴇɴ %%discord%%'
+      - ''
+
+  '10':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ᴘᴜᴇᴅᴇs ᴄᴏᴍᴘʀᴀʀ &bғʟʏ &7ᴇɴ ᴛᴜs &bᴘʀᴏᴛᴇᴄᴄɪᴏɴᴇs &7ᴇɴ %%tienda%% &7- &e¡ᴠᴜᴇʟᴀ ʟɪʙʀᴇ!'
+      - ''
+
+  '11':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7sɪ &dʙᴏᴏsᴛᴇᴀs &7ᴇʟ sᴇʀᴠɪᴅᴏʀ ᴇɴ &dᴅɪsᴄᴏʀᴅ&7, ᴀʙʀᴇ ᴜɴ &dᴛɪᴄᴋᴇᴛ &7ᴘᴀʀᴀ ʀᴇᴄʟᴀᴍᴀʀ ᴛᴜ &eᴋɪᴛ ᴇxᴄʟᴜsɪᴠᴏ!'
+      - ''
+
+  '12':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7¿ɴᴏ sᴀʙᴇs ᴄᴏᴍᴏ ɢᴀɴᴀʀ &eᴅɪɴᴇʀᴏ&7? sᴜʙᴇ ᴛᴜs %%skills%%&7, ᴜɴᴇᴛᴇ ᴀ %%jobs%% &7ᴏ ᴠᴇɴᴅᴇ ɪᴛᴇᴍs ᴀ ʟᴏs &eɴᴘᴄ &7ᴅᴇ %%mercado%%'
+      - ''
+
+  '13':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ᴛᴏᴅᴀs ʟᴀs &eᴍᴇᴄᴀɴɪᴄᴀs &7ᴅᴇʟ sᴇʀᴠɪᴅᴏʀ ᴇsᴛᴀɴ ʟɪsᴛᴀᴅᴀs ᴇɴ ɴᴜᴇsᴛʀᴀ %%guia%%'
+      - ''
+
+  '14':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7ᴛᴇɴᴇᴍᴏs ᴍᴀs ᴅᴇ &b+120 ᴍᴇᴛᴏᴅᴏs ᴅᴇ ᴘᴀɢᴏ &7ᴅɪsᴘᴏɴɪʙʟᴇs ᴘᴀʀᴀ ᴛᴏᴅᴏs ʟᴏs ᴘᴀɪsᴇs ᴇɴ %%tienda%%'
+      - ''
+
+  '15':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &cʜᴀᴄᴋs&7, &cʀᴀᴅᴀʀ&7, &cxʀᴀʏ &7ʏ &cғʀᴇᴇᴄᴀᴍ &7ᴇsᴛᴀɴ &4ᴘʀᴏʜɪʙɪᴅᴏs &7- &e¡ᴊᴜᴇɢᴀ ʟɪᴍᴘɪᴏ!'
+      - ''
+
+  '16':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7¿ʙᴜsᴄᴀs &dᴜɴɪʀᴛᴇ ᴀ ᴜɴ ᴄʟᴀɴ&7? ᴠɪsɪᴛᴀ ᴇʟ &bғᴏʀᴏ ᴅᴇ ᴄʟᴀɴᴇs &7ᴇɴ %%discord%% &7- &e¡ᴇɴᴄᴜᴇɴᴛʀᴀ ᴛᴜ ᴇǫᴜɪᴘᴏ!'
+      - ''
+
+  '17':
+    interval: 300
+    sound: ENTITY_ARMADILLO_BRUSH
+    lines:
+      - ''
+      - '&aℹ &7¡ᴘᴀʀᴛɪᴄɪᴘᴀ ᴇɴ ᴇʟ &dᴄᴏɴᴄᴜʀsᴏ ᴅᴇ ᴠɪᴅᴇᴏs&7! &bᴛɪᴋᴛᴏᴋ &7ᴏ &cʏᴏᴜᴛᴜʙᴇ &7- ɢᴀɴᴀ &e$15 ᴜsᴅ &7ᴇɴ %%tienda%% - &6ɪɴғᴏ ᴇɴ %%discord%%'
+      - ''

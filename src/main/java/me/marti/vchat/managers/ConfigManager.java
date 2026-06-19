@@ -34,7 +34,9 @@ public class ConfigManager {
             "formats.yml",
             "mentions.yml",
             "private.yml",
-            "bridge.yml"
+            "bridge.yml",
+            "announcements.yml",
+            "quiz.yml"
         };
 
         for (String file : files) {

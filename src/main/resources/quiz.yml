@@ -1,0 +1,81 @@
+# ---------------------------------------------------------
+# vChat - Sistema de Quiz
+# ---------------------------------------------------------
+quiz:
+  enabled: true
+  # Segundos entre quizzes
+  interval: 300
+  # Segundos para responder
+  answer-time: 30
+  # Mostrar pista a mitad del tiempo
+  show-hint: false
+  # Jugadores mínimos online para iniciar
+  min-players: 1
+
+# Recompensas al ganar
+# Tipos:
+#   command  → ejecuta un comando de consola (%player% = nombre del jugador)
+#   money    → da dinero via Vault Economy
+#   item     → da un item por Material de Bukkit
+# "display" → texto que se muestra al jugador en el mensaje de recompensa
+# "chance"  → probabilidad 0-100 de que se entregue
+rewards:
+  - type: money
+    amount: 500
+    display: "&e$500"
+    chance: 100
+
+  # Ejemplo comando:
+  # - type: command
+  #   value: "give %player% diamond 1"
+  #   display: "&b1 Diamante"
+  #   chance: 30
+
+  # Ejemplo item:
+  # - type: item
+  #   material: GOLDEN_APPLE
+  #   amount: 1
+  #   display: "&61x Manzana Dorada"
+  #   chance: 50
+
+# Mensajes
+messages:
+  prefix: "&8[&bǫᴜɪᴢ&8] &r"
+  # Formato multilínea de la pregunta.
+  # Placeholders: {difficulty} {question} {answers} {time}
+  # Líneas vacías ("") se muestran como línea en blanco.
+  question-format:
+    - " &b&lǫᴜɪᴢ &8| &7TRIVIA  &8· {difficulty}"
+    - " &fEl primero en responder correctamente gana."
+    - ""
+    - " &e\"{question}\""
+    - ""
+    - " &7Opciones&8: &a{answers}"
+    - " &7TIEMPO&8: &e{time} segundos"
+  hint: "&e💡 Pista: &f{hint}"
+  timeout: "&c⏱ ¡Se acabó el tiempo! &7La respuesta correcta era: &e{answer}"
+  correct: "&a✓ ¡Correcto! &f{player} &7respondió primero!"
+  wrong: "&c✗ ¡Incorrecto! Inténtalo de nuevo."
+  reward: "&a🎁 Recibiste: &f{rewards}"
+  already-answered: "&c¡Ya respondiste este quiz!"
+  no-active: "&cNo hay un quiz activo en este momento."
+  stopped: "&cSistema de quiz detenido."
+  started: "&aSistema de quiz iniciado."
+  reloaded: "&aConfiguración recargada."
+  forced: "&aQuiz forzado."
+  already-active: "&c¡El sistema de quiz ya está activo!"
+  not-active: "&c¡El sistema de quiz no está activo!"
+  players-only: "&cSolo jugadores."
+  difficulty-easy: "&a&lFÁCIL"
+  difficulty-medium: "&e&lMEDIO"
+  difficulty-hard: "&c&lDIFÍCIL"
+  difficulty-ultra: "&d&lULTRA"
+  stats-header: "&8&m-----------&r &b📊 Tus estadísticas &8&m-----------"
+  stats-correct: "&7Correctas: &a{correct}"
+  stats-wrong: "&7Incorrectas: &c{wrong}"
+  stats-total: "&7Total: &e{total}"
+  stats-accuracy: "&7Precisión: &6{accuracy}%"
+  top-header: "&8&m-----------&r &6🏆 Clasificación &8&m-----------"
+  top-empty: "&7¡Sin jugadores aún!"
+  top-entry: "{medal} &f{name} &7- &a{correct} correctas &7(&e{accuracy}&7)"
+  help-header: "&8&m----------&r &b⚡ Quiz &8&m----------"

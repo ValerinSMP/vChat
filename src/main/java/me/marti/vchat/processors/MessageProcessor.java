@@ -207,12 +207,30 @@ public class MessageProcessor {
         return lower.contains("<glyph:") || lower.contains("glyph:");
     }
 
+    // §x§R§R§G§G§B§B legacy hex format injected by PAPI placeholders (e.g. DeluxeTags)
+    private static final Pattern SECTION_HEX_PATTERN = Pattern.compile(
+            "§x(§[0-9A-Fa-f])(§[0-9A-Fa-f])(§[0-9A-Fa-f])(§[0-9A-Fa-f])(§[0-9A-Fa-f])(§[0-9A-Fa-f])");
+
     private String translateLegacyHexToMiniMessage(String message) {
+        // First: convert §x§R§R§G§G§B§B → <#RRGGBB>
+        Matcher sectionHex = SECTION_HEX_PATTERN.matcher(message);
+        StringBuffer sb1 = new StringBuffer();
+        while (sectionHex.find()) {
+            StringBuilder hex = new StringBuilder("#");
+            for (int i = 1; i <= 6; i++) {
+                hex.append(sectionHex.group(i).charAt(1));
+            }
+            sectionHex.appendReplacement(sb1, Matcher.quoteReplacement("<" + hex + ">"));
+        }
+        sectionHex.appendTail(sb1);
+        message = sb1.toString();
+
+        // Then: convert &#RRGGBB → <#RRGGBB>
         Matcher matcher = HEX_PATTERN.matcher(message);
         StringBuffer buffer = new StringBuffer();
         while (matcher.find()) {
             String hex = matcher.group(1);
-            matcher.appendReplacement(buffer, "<#" + hex + ">");
+            matcher.appendReplacement(buffer, Matcher.quoteReplacement("<#" + hex + ">"));
         }
         matcher.appendTail(buffer);
         return buffer.toString();

@@ -53,4 +53,8 @@ moderation:
   chat-is-muted: "&cEl chat está desactivado."
   personal-chat-enabled: "&aHas activado el chat global."
   personal-chat-disabled: "&cHas ocultado el chat global."
+  announcements-enabled: "&aAnuncios activados."
+  announcements-disabled: "&cAnuncios desactivados."
+  death-enabled: "&aMensajes de muerte activados."
+  death-disabled: "&cMensajes de muerte desactivados."
   command-cooldown: "&cEspera &e%time%s &cantes de usar otro comando."
