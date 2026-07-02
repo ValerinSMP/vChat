@@ -60,11 +60,6 @@ commands:
     usage: /togglementions
     permission: vchat.togglementions
     permission-message: "&cNo tienes permisos."
-  quiz:
-    description: Sistema de quiz del chat
-    usage: /quiz [start|stop|force|reload|stats|top]
-    aliases: [trivia]
-
 permissions:
   vchat.admin:
     description: Permiso de administrador completo.
@@ -146,15 +141,9 @@ permissions:
   vchat.bypass.commandcooldown:
     description: Evita cooldown global entre comandos.
     default: op
-  vchat.toggleannouncements:
-    description: Permite silenciar anuncios automáticos para uno mismo.
-    default: true
   vchat.toggledeath:
     description: Permite silenciar mensajes de muerte para uno mismo.
     default: true
-  vchat.quiz.admin:
-    description: Administrar el sistema de quiz (start/stop/force/reload).
-    default: op
 
   # Bypass Filters
   vchat.bypass.spam:

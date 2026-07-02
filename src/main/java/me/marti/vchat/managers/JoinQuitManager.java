@@ -70,8 +70,7 @@ public class JoinQuitManager {
             format = format.replace("<player_number>", String.valueOf(playerNumber));
             soundPath = cfg.getString("join.first-join-sound", "");
         } else {
-            format = cfg.getString("join.format",
-                    "<gold>🌊 <lp_prefix><player_name></gold> <yellow>sᴇ ʜᴀ ᴜɴɪᴅᴏ <gold>🌊 <dark_gray>(<online>)");
+            format = getGroupFormat(player, cfg);
             soundPath = getGroupSoundPath(player, cfg);
         }
 
@@ -88,6 +87,16 @@ public class JoinQuitManager {
         // Quit messages suppressed — set to null in the event (done in QuitListener)
     }
 
+    private String getGroupFormat(Player player, FileConfiguration cfg) {
+        User user = plugin.getLuckPerms().getUserManager().getUser(player.getUniqueId());
+        if (user != null) {
+            String groupFormat = cfg.getString("join.group-formats." + user.getPrimaryGroup(), null);
+            if (groupFormat != null && !groupFormat.isBlank()) return groupFormat;
+        }
+        return cfg.getString("join.format",
+                "<gold>🌊 <lp_prefix><player_name></gold> <yellow>sᴇ ʜᴀ ᴜɴɪᴅᴏ <gold>🌊 <dark_gray>(<online>)");
+    }
+
     private String getGroupSoundPath(Player player, FileConfiguration cfg) {
         // Check group-specific sounds first (higher weight first via LuckPerms)
         User user = plugin.getLuckPerms().getUserManager().getUser(player.getUniqueId());
@@ -102,47 +111,49 @@ public class JoinQuitManager {
     }
 
     private void playJoinSound(Player player, String soundConfigPath, FileConfiguration cfg) {
-        // Play to all online players
-        String soundName;
+        String raw;
         if (soundConfigPath.startsWith("join.group-sounds.")) {
             String group = soundConfigPath.substring("join.group-sounds.".length());
-            soundName = cfg.getString("join.group-sounds." + group, "");
+            raw = cfg.getString("join.group-sounds." + group, "");
         } else {
-            soundName = cfg.getString(soundConfigPath, "");
+            raw = cfg.getString(soundConfigPath, "");
         }
-        if (soundName == null || soundName.isBlank()) return;
+        if (raw == null || raw.isBlank()) return;
 
-        org.bukkit.Sound sound = PlatformUtil.resolveSound(soundName);
+        // Format: "SOUND_NAME [volume] [pitch]"
+        String[] parts = raw.trim().split("\\s+");
+        org.bukkit.Sound sound = PlatformUtil.resolveSound(parts[0]);
         if (sound == null) return;
+        float volume = parts.length > 1 ? Float.parseFloat(parts[1]) : 1.0f;
+        float pitch  = parts.length > 2 ? Float.parseFloat(parts[2]) : 1.0f;
 
         for (Player online : Bukkit.getOnlinePlayers()) {
-            online.playSound(online.getLocation(), sound, 1.0f, 1.0f);
+            online.playSound(online.getLocation(), sound, volume, pitch);
         }
     }
 
     private Component buildMessage(Player player, String format) {
-        // Get LuckPerms prefix
         String prefix = "";
         net.luckperms.api.cacheddata.CachedMetaData meta =
                 plugin.getLuckPerms().getPlayerAdapter(Player.class).getMetaData(player);
         if (meta.getPrefix() != null) prefix = meta.getPrefix();
 
-        // PAPI
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             prefix = PlaceholderAPI.setPlaceholders(player, prefix);
             format = PlaceholderAPI.setPlaceholders(player, format);
         }
 
-        Component prefixComp = legacyAmp.deserialize(prefix);
-        Component nameComp = Component.text(player.getName());
-
-        // Translate legacy in format string
+        // Convert prefix from legacy to MiniMessage string and substitute inline,
+        // so MiniMessage parses everything as one string and preserves style context.
+        String prefixMM = miniMessage.serialize(legacyAmp.deserialize(prefix));
         format = translateLegacyHex(format);
         format = translateLegacy(format);
+        format = format
+                .replace("<lp_prefix>", prefixMM)
+                .replace("<player_name>", net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+                        .escapeTags(player.getName()));
 
-        return miniMessage.deserialize(format,
-                net.kyori.adventure.text.minimessage.tag.resolver.Placeholder.component("lp_prefix", prefixComp),
-                net.kyori.adventure.text.minimessage.tag.resolver.Placeholder.component("player_name", nameComp));
+        return miniMessage.deserialize(format);
     }
 
     private void broadcast(Component message) {

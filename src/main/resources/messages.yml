@@ -2,6 +2,8 @@
 # vChat - Mensajes del Sistema
 # ---------------------------------------------------------
 prefix: "&8[&bvChat&8] "
+# Si es false, los mensajes de actionbar se envían como mensaje de chat normal
+use-actionbar: true
 messages:
   reload: "&aConfiguración recargada correctamente."
   no-permission: "&cNo tienes permiso para esto."
@@ -40,12 +42,17 @@ join:
   format: "<gold>🌊 <lp_prefix><player_name></gold> <yellow>sᴇ ʜᴀ ᴜɴɪᴅᴏ <gold>🌊 <dark_gray>(<online>)"
   first-join: "<yellow>⭐ <gold><lp_prefix><player_name></gold> <yellow>sᴇ ᴜɴᴇ ᴘᴏʀ ᴘʀɪᴍᴇʀᴀ ᴠᴇᴢ ⭐ <gold>(#<player_number>)</gold>"
   # Sonido global de entrada (vacío = ninguno)
-  sound: ""
-  # Sonido por grupo — key = nombre del grupo en LuckPerms, value = nombre del sonido
+  sound: ""  # formato: "NOMBRE_SONIDO [volumen] [pitch]"  ej: "ENTITY_PLAYER_LEVELUP 1.0 1.2"
+  # Sonido por grupo — formato: "NOMBRE_SONIDO [volumen] [pitch]"
   # Ejemplo:
   # vip: "ENTITY_PLAYER_LEVELUP"
-  # owner: "UI_TOAST_CHALLENGE_COMPLETE"
+  # owner: "UI_TOAST_CHALLENGE_COMPLETE 2.0 1.5"
   group-sounds: {}
+  # Formato por grupo — si está definido reemplaza 'format' para ese rango
+  # Ejemplo:
+  # owner: "<red>[OWNER] <lp_prefix><player_name></red> <gray>ha entrado al servidor."
+  # admin: "<dark_red>[ADMIN] <lp_prefix><player_name></dark_red> <gray>se ha unido."
+  group-formats: {}
 
 moderation:
   chat-muted: "&cEl chat ha sido desactivado por un administrador."

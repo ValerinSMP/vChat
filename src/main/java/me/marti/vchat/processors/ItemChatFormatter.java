@@ -34,45 +34,35 @@ final class ItemChatFormatter {
     }
 
     private static final boolean HAS_DISPLAY_NAME_COMPONENT;
-    private static final boolean HAS_ITEM_NAME_COMPONENT;
 
     static {
         boolean displayName = false;
-        boolean itemName = false;
         try {
             Method m = ItemMeta.class.getMethod("displayName");
             displayName = m.getReturnType() == Component.class;
         } catch (NoSuchMethodException ignored) {
         }
-        try {
-            Method m = ItemMeta.class.getMethod("itemName");
-            itemName = m.getReturnType() == Component.class;
-        } catch (NoSuchMethodException ignored) {
-        }
         HAS_DISPLAY_NAME_COMPONENT = displayName;
-        HAS_ITEM_NAME_COMPONENT = itemName;
     }
 
     static Component visibleName(ItemStack snapshot) {
         ItemMeta meta = snapshot.getItemMeta();
-        if (meta != null) {
+        // hasDisplayName() is the only reliable "was a custom name actually set?" check:
+        // ItemMeta.displayName()/itemName() never return null on Paper — with no override
+        // they fall back to the item's default *translatable* component (e.g.
+        // "item.minecraft.diamond_sword"), which renders as blank text once embedded as a
+        // literal chat Component instead of a real client-rendered tooltip.
+        if (meta != null && meta.hasDisplayName()) {
             if (HAS_DISPLAY_NAME_COMPONENT) {
                 Component displayName = meta.displayName();
                 if (displayName != null) {
                     return displayName;
                 }
-            } else if (meta.hasDisplayName()) {
+            } else {
                 @SuppressWarnings("deprecation")
                 String legacy = meta.getDisplayName();
                 if (legacy != null && !legacy.isEmpty()) {
                     return LegacyComponentSerializer.legacySection().deserialize(legacy);
-                }
-            }
-
-            if (HAS_ITEM_NAME_COMPONENT) {
-                Component itemName = meta.itemName();
-                if (itemName != null) {
-                    return itemName;
                 }
             }
         }

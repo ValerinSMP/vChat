@@ -65,10 +65,6 @@ public class VChatCommand implements CommandExecutor {
             case "msg_toggle":
             case "togglemsg":
                 return handleMsgToggle(sender);
-            case "toggleannouncements":
-            case "toggleann":
-            case "tann":
-                return handleToggleAnnouncements(sender);
             case "toggledeath":
             case "tdeath":
                 return handleToggleDeath(sender);
@@ -167,26 +163,6 @@ public class VChatCommand implements CommandExecutor {
             return true;
         }
         plugin.getPrivateMessageManager().toggleMsg(player);
-        return true;
-    }
-
-    private boolean handleToggleAnnouncements(CommandSender sender) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("Solo jugadores.");
-            return true;
-        }
-        if (!player.hasPermission("vchat.toggleannouncements") && !player.hasPermission("vchat.admin")) {
-            adminManager.sendConfigMessage(player, "messages.no-permission");
-            return true;
-        }
-        boolean muted = adminManager.toggleAnnouncements(player);
-        if (muted) {
-            adminManager.sendConfigActionBar(player, "messages.announcements-disabled");
-            adminManager.playSound(player, "sounds.toggle-off");
-        } else {
-            adminManager.sendConfigActionBar(player, "messages.announcements-enabled");
-            adminManager.playSound(player, "sounds.toggle-on");
-        }
         return true;
     }
 

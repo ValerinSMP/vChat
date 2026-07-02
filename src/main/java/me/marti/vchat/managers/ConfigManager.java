@@ -34,9 +34,7 @@ public class ConfigManager {
             "formats.yml",
             "mentions.yml",
             "private.yml",
-            "bridge.yml",
-            "announcements.yml",
-            "quiz.yml"
+            "bridge.yml"
         };
 
         for (String file : files) {
@@ -57,7 +55,19 @@ public class ConfigManager {
 
         // Load configuration
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-        
+
+        // Fill any missing keys from the bundled default without touching existing values
+        java.io.InputStream defaultStream = plugin.getResource(fileName);
+        if (defaultStream != null) {
+            FileConfiguration defaults = YamlConfiguration.loadConfiguration(
+                    new java.io.InputStreamReader(defaultStream, java.nio.charset.StandardCharsets.UTF_8));
+            config.setDefaults(defaults);
+            config.options().copyDefaults(true);
+            try { config.save(file); } catch (java.io.IOException e) {
+                plugin.getLogger().warning("Could not save new defaults to " + fileName + ": " + e.getMessage());
+            }
+        }
+
         targetConfigs.put(fileName, config);
         targetFiles.put(fileName, file);
     }

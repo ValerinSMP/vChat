@@ -141,9 +141,30 @@ public class MessageProcessor {
                 "<dark_gray>[</dark_gray><aqua>{amount}x {item}</aqua><dark_gray>]</dark_gray>");
 
         java.util.UUID itemId = plugin.getItemViewManager().cacheItem(snapshot);
-        Component fullItem = ItemChatFormatter.render(format, snapshot);
 
-        net.kyori.adventure.text.event.HoverEvent<?> hover = me.marti.vchat.utils.PlatformUtil.itemHoverEvent(snapshot);
+        // Resolve visible name: use NexoHook for glyph-resolved names when available,
+        // otherwise fall back to reading ItemMeta directly.
+        me.marti.vchat.compat.NexoHook nexo = plugin.getNexoHook();
+        Component visibleName = nexo != null ? nexo.resolveItemDisplayName(snapshot) : null;
+        if (visibleName == null) visibleName = ItemChatFormatter.visibleName(snapshot);
+
+        Component fullItem = ItemChatFormatter.render(format, snapshot.getAmount(), visibleName);
+
+        // eco (EcoItems/EcoEnchants/EcoArmor) renders dynamic lore only into outgoing
+        // inventory packets, never into the item's real NBT/ItemMeta — reading it directly
+        // returns null/incomplete lore. Display.display() is eco's own public entry point
+        // that runs that same rendering pipeline synchronously and hands back a fully
+        // rendered item, so the hover shows the same lore a real inventory would.
+        ItemStack hoverItem = snapshot;
+        me.marti.vchat.compat.EcoDisplayHook ecoDisplay = plugin.getEcoDisplayHook();
+        if (ecoDisplay != null && ecoDisplay.isAvailable()) {
+            hoverItem = ecoDisplay.renderDisplay(snapshot.clone(), viewer);
+        }
+
+        // Beyond that, the hover reads raw NBT/components directly via asHoverEvent() — no
+        // getItemMeta()/setItemMeta() round-trip of our own, since Bukkit's ItemMeta
+        // reconstruction can silently drop non-standard component data.
+        net.kyori.adventure.text.event.HoverEvent<?> hover = me.marti.vchat.utils.PlatformUtil.itemHoverEvent(hoverItem);
         return fullItem.hoverEvent(hover)
                 .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/vchat viewitem " + itemId));
     }
