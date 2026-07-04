@@ -29,6 +29,8 @@ public class DeathListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent event) {
         if (!plugin.getConfigManager().getMessages().getBoolean("death.enabled", true)) return;
+        if (plugin.getConfigManager().getMessages().getStringList("death.disabled-worlds")
+                .contains(event.getEntity().getWorld().getName())) return;
 
         // Suppress vanilla death message — Paper: deathMessage(null), Bukkit: setDeathMessage(null)
         try {

@@ -35,6 +35,8 @@ private:
 
 death:
   enabled: true
+  # Mundos donde NO se muestran mensajes de muerte (nombre exacto del mundo)
+  disabled-worlds: []
   pvp-format: "<color:#FF6961>☠ <lp_victim> <gray>fue asesinado por <color:#FF6961>🗡 <lp_killer>"
   pve-format: "<color:#FF6961>☠ <lp_victim> <gray>ha muerto"
 
