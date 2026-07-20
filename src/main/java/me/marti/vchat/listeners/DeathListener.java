@@ -28,17 +28,19 @@ public class DeathListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent event) {
-        if (!plugin.getConfigManager().getMessages().getBoolean("death.enabled", true)) return;
-        if (plugin.getConfigManager().getMessages().getStringList("death.disabled-worlds")
-                .contains(event.getEntity().getWorld().getName())) return;
+        boolean enabled = plugin.getConfigManager().getMessages().getBoolean("death.enabled", true)
+                && !plugin.getConfigManager().getMessages().getStringList("death.disabled-worlds")
+                        .contains(event.getEntity().getWorld().getName());
 
-        // Suppress vanilla death message — Paper: deathMessage(null), Bukkit: setDeathMessage(null)
+        // Suppress vanilla death message regardless — Paper: deathMessage(null), Bukkit: setDeathMessage(null)
         try {
             event.getClass().getMethod("deathMessage", net.kyori.adventure.text.Component.class)
                     .invoke(event, (Object) null);
         } catch (Exception ignored) {
             event.setDeathMessage(null);
         }
+
+        if (!enabled) return;
 
         Player victim = event.getEntity();
         Entity killerEntity = victim.getKiller();
