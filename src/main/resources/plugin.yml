@@ -7,6 +7,7 @@ depend: [LuckPerms]
 softdepend: [PlaceholderAPI, ProtocolLib, Nexo, CobbleCommands]
 libraries:
   - net.dv8tion:JDA:5.2.1
+  - redis.clients:jedis:5.2.0
 commands:
   vchat:
     description: Main command for vChat

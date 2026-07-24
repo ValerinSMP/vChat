@@ -18,10 +18,10 @@ public class ToggleChatCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-             sender.sendMessage("Consola no puede hacer esto.");
-             return true;
+            plugin.getAdminManager().sendConfigMessage(sender, "messages.players-only");
+            return true;
         }
-        
+
         if (!player.hasPermission("vchat.togglechat")) {
             plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
             return true;

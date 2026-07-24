@@ -1,9 +1,6 @@
 package me.marti.vchat.commands;
 
 import me.marti.vchat.VChat;
-import me.marti.vchat.utils.PlatformUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class PrivateMessageCommand implements CommandExecutor {
 
@@ -30,14 +28,23 @@ public class PrivateMessageCommand implements CommandExecutor {
         }
 
         if (args.length < 2) {
-            PlatformUtil.sendMessage(sender, Component.text("Uso: /msg <jugador> <mensaje>", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(sender, "private.usage");
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null || !target.isOnline()) { // isOnline check just in case getPlayer returns offline player (it
                                                     // shouldn't usually but safest)
-            PlatformUtil.sendMessage(sender, Component.text("Jugador no encontrado.", NamedTextColor.RED));
+            var redis = plugin.getRedisManager();
+            if (redis != null && redis.isEnabled()) {
+                String[] remote = redis.findRemotePlayer(args[0]);
+                if (remote != null) {
+                    String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+                    plugin.getPrivateMessageManager().sendCrossServerMessage(sender, args[0], UUID.fromString(remote[1]), message);
+                    return true;
+                }
+            }
+            plugin.getAdminManager().sendConfigMessage(sender, "messages.player-not-found");
             return true;
         }
 

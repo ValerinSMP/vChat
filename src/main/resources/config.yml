@@ -22,3 +22,21 @@ command-cooldown:
   seconds: 3
   # Comandos exentos (sin /)
   exempt-commands: []
+
+# ---------------------------------------------------------
+# Redis (multiserver) — solo soportado en Paper.
+# Sincroniza chat global, /msg, /reply, SocialSpy y estado de
+# ignore/togglemsg entre todos los servers de este cluster.
+# ---------------------------------------------------------
+redis:
+  enabled: false
+  host: localhost
+  port: 6379
+  user: ""
+  password: ""
+  database: 0
+  use-ssl: false
+  # ID único de ESTE server dentro del network (debe coincidir con el nombre en el proxy).
+  server-id: "server1"
+  # Agrupa servers que comparten el mismo Redis pero deben tratarse como red aparte.
+  cluster-id: "valerin"

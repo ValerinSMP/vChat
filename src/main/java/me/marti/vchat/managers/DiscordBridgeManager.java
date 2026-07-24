@@ -636,6 +636,15 @@ public class DiscordBridgeManager {
             return;
         }
 
+        me.marti.vchat.redis.RedisManager redis = plugin.getRedisManager();
+        if (redis != null && redis.isEnabled()) {
+            long ttlMillis = channelTopicUpdateIntervalSeconds * 1000L * 3;
+            if (!redis.claimTopicLeadership(route.channelId(), ttlMillis)) {
+                debug("Channel topic updater: otro server es el líder para este canal, se salta.");
+                return;
+            }
+        }
+
         TextChannel channel = currentJda.getTextChannelById(route.channelId());
         if (channel == null) {
             debug("Channel topic updater: target channel not found.");
@@ -662,7 +671,13 @@ public class DiscordBridgeManager {
 
     private String renderTopicTemplate() {
         String format = channelTopicFormat == null ? "" : channelTopicFormat;
-        int online = Bukkit.getOnlinePlayers().size();
+
+        // Si Redis está activo, %online% cuenta la red entera (todos los servers del
+        // cluster), no solo este — tiene sentido cuando el tópico es compartido.
+        me.marti.vchat.redis.RedisManager redis = plugin.getRedisManager();
+        long networkOnline = (redis != null && redis.isEnabled()) ? redis.getNetworkOnlineCount() : -1;
+        long online = networkOnline >= 0 ? networkOnline : Bukkit.getOnlinePlayers().size();
+
         int max = Bukkit.getMaxPlayers();
         java.time.LocalTime now = java.time.LocalTime.now();
 

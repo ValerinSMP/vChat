@@ -1,7 +1,8 @@
 package me.marti.vchat.listeners;
 
 import me.marti.vchat.VChat;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import me.marti.vchat.utils.PlatformUtil;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,7 +21,6 @@ public class CommandCooldownListener implements Listener {
 
     private final VChat plugin;
     private final ConcurrentMap<UUID, Long> lastCommandAt = new ConcurrentHashMap<>();
-    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     public CommandCooldownListener(VChat plugin) {
         this.plugin = plugin;
@@ -62,9 +62,9 @@ public class CommandCooldownListener implements Listener {
             event.setCancelled(true);
             double remaining = remainingMs / 1000.0;
             String template = plugin.getConfigManager().getMessages()
-                    .getString("moderation.command-cooldown", "&cEspera %time%s antes de usar otro comando.");
-            me.marti.vchat.utils.PlatformUtil.sendMessage(player, legacySerializer.deserialize(
-                    template.replace("%time%", String.format(Locale.US, "%.1f", remaining))));
+                    .getString("moderation.command-cooldown", "<#FF3300>Espera <white><time>s</white> antes de usar otro comando.");
+            PlatformUtil.sendMini(player, template,
+                    Placeholder.unparsed("time", String.format(Locale.US, "%.1f", remaining)));
             return;
         }
 

@@ -1,9 +1,7 @@
 package me.marti.vchat.commands;
 
 import me.marti.vchat.VChat;
-import me.marti.vchat.utils.PlatformUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,50 +21,47 @@ public class IgnoreCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            PlatformUtil.sendMessage(sender, Component.text("Solo jugadores.", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(sender, "messages.players-only");
             return true;
         }
 
         if (!player.hasPermission("vchat.ignore")) {
-            // Check default perm in plugin.yml usually true for everyone
             plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
             return true;
         }
 
         if (args.length < 1) {
-            PlatformUtil.sendMessage(player, Component.text("Uso: /ignore <jugador>", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(player, "ignore.usage");
             return true;
         }
 
-        // Handle offline players? Persistence supports UUIDs, so we ideally resolve
-        // UUID.
-        // For now, let's require online or use Bukkit.getOfflinePlayer if needed,
-        // sticking to online for simplicity as per previous patterns.
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            PlatformUtil.sendMessage(player, Component.text("Jugador no encontrado.", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(player, "messages.player-not-found");
             return true;
         }
 
         if (target.equals(player)) {
-            PlatformUtil.sendMessage(player, Component.text("No puedes ignorarte a ti mismo.", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(player, "ignore.cant-ignore-self");
             return true;
         }
 
         if (target.hasPermission("vchat.bypass.ignore")) {
-            PlatformUtil.sendMessage(player, Component.text("No puedes ignorar a este jugador.", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(player, "ignore.cant-ignore-target");
             return true;
         }
 
+        var nameResolver = Placeholder.unparsed("player", target.getName());
+
         if (plugin.getIgnoreManager().isIgnored(player.getUniqueId(), target.getUniqueId())) {
             plugin.getIgnoreManager().removeIgnore(player, target.getUniqueId());
-            PlatformUtil.sendActionBar(player, Component.text("Ya no ignoras a " + target.getName(), NamedTextColor.GREEN));
+            plugin.getAdminManager().sendConfigActionBar(player, "ignore.no-longer-ignoring", nameResolver);
             playSound(player, "sounds.unignore");
             return true;
         }
 
         plugin.getIgnoreManager().addIgnore(player, target.getUniqueId());
-        PlatformUtil.sendActionBar(player, Component.text("Ahora ignoras a " + target.getName(), NamedTextColor.RED));
+        plugin.getAdminManager().sendConfigActionBar(player, "ignore.now-ignoring", nameResolver);
         playSound(player, "sounds.ignore");
 
         return true;

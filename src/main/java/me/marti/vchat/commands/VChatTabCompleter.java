@@ -28,6 +28,7 @@ public class VChatTabCompleter implements TabCompleter {
             suggestions.add("spy");
             suggestions.add("msg_toggle");
             suggestions.add("help");
+            suggestions.add("about");
             if (sender.hasPermission("vchat.bridge.admin") || sender.hasPermission("vchat.admin")) {
                 suggestions.add("bridge");
             }

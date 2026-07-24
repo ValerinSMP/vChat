@@ -27,5 +27,16 @@ public class QuitListener implements Listener {
         plugin.getMentionManager().unloadData(event.getPlayer());
         plugin.getPrivateMessageManager().unloadData(event.getPlayer());
         plugin.getIgnoreManager().unloadData(event.getPlayer());
+
+        if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
+            String name = event.getPlayer().getName();
+            String thisServer = plugin.getRedisManager().getServerId();
+            // Delay de gracia: si esto es un salto hub -> survival dentro del mismo cluster,
+            // el server destino ya va a haber sobrescrito la presencia para cuando esto corra.
+            // Sin el delay, este quit borraría esa presencia recién puesta y el join del otro
+            // server jamás vería que el jugador "ya estaba en la red".
+            plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin,
+                    () -> plugin.getRedisManager().clearPlayerIfServerMatches(name, thisServer), 100L);
+        }
     }
 }

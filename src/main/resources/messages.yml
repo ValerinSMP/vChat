@@ -1,44 +1,68 @@
 # ---------------------------------------------------------
-# vChat - Mensajes del Sistema
+# vChat - Mensajes del Sistema (formato MiniMessage)
 # ---------------------------------------------------------
-prefix: "&8[&bvChat&8] "
+# Paleta de marca (estilo William278) — usar estos hex en todo mensaje nuevo:
+#   accent  #00FB9A  comandos / info / links / éxito
+#   error   #FF3300  errores / peligro
+#   warning #FFC43B  advertencias / neutral
+#
+# Placeholders: sintaxis MiniMessage <nombre> (NO %nombre%) — los resuelve
+# Placeholder.unparsed()/component() en Java. Ver AdminManager#sendConfigMessage.
+prefix: "<gray>[<#00FB9A>vChat</#00FB9A><gray>]</gray> "
 # Si es false, los mensajes de actionbar se envían como mensaje de chat normal
 use-actionbar: true
+
 messages:
-  reload: "&aConfiguración recargada correctamente."
-  no-permission: "&cNo tienes permiso para esto."
-  notify-enabled: "&aNotificaciones de admin activadas."
-  notify-disabled: "&cNotificaciones de admin desactivadas."
-  mentions-enabled: "&aHas activado las menciones."
-  mentions-disabled: "&cHas desactivado las menciones."
+  reload: "<#00FB9A>Configuración recargada correctamente."
+  no-permission: "<#FF3300>No tienes permiso para esto."
+  players-only: "<#FF3300>Solo un jugador puede usar este comando."
+  unknown-subcommand: "<#FF3300>Subcomando desconocido: <white>'<input>'</white>. Usa <#00FB9A>/vchat help</#00FB9A>."
+  player-not-found: "<#FF3300>Jugador no encontrado."
+  notify-enabled: "<#00FB9A>Notificaciones de admin activadas."
+  notify-disabled: "<#FF3300>Notificaciones de admin desactivadas."
+  mentions-enabled: "<#00FB9A>Has activado las menciones."
+  mentions-disabled: "<#FF3300>Has desactivado las menciones."
 
 # Formato de notificación admin
 admin-notify:
   - ""
-  - "&#FF6961%player% fue marcado por: %reason%."
-  - "&cMensaje: &r%message%"
+  - "<#FF3300><player> fue marcado por: <reason>."
+  - "<#FF3300>Mensaje: <white><message></white>"
   - ""
 
-count-message: "&e%player% tiene %count% violaciones en esta sesión."
+count-message: "<#FFC43B><player> tiene <count> violaciones en esta sesión."
 
 placeholders:
   enabled: "true"
   disabled: "false"
 
 private:
-  disabled-target: "&c%player% no está aceptando mensajes privados."
-  disabled-self: "&cHas desactivado tus mensajes privados."
-  toggled-on: "&aMensajes privados activados."
-  toggled-off: "&cMensajes privados desactivados."
-  no-reply: "&cNo tienes a nadie a quien responder."
-  no-self: "&cNo puedes enviarte mensajes a ti mismo."
+  disabled-target: "<#FF3300><player> no está aceptando mensajes privados."
+  disabled-self: "<#FF3300>Has desactivado tus mensajes privados."
+  toggled-on: "<#00FB9A>Mensajes privados activados."
+  toggled-off: "<#FF3300>Mensajes privados desactivados."
+  no-reply: "<#FF3300>No tienes a nadie a quien responder."
+  no-self: "<#FF3300>No puedes enviarte mensajes a ti mismo."
+  usage: "<#FF3300>Uso: <white>/msg <jugador> <mensaje></white>"
+  reply-usage: "<#FF3300>Uso: <white>/reply <mensaje></white>"
+  spy-enabled: "<#00FB9A>SpyChat activado."
+  spy-disabled: "<#FF3300>SpyChat desactivado."
+  new-message-notice: "<gray>✉ Nuevo mensaje de <white><player></white></gray>"
+  ignored-you: "<#FF3300>Este jugador te ha ignorado."
+
+ignore:
+  usage: "<#FF3300>Uso: <white>/ignore <jugador></white>"
+  cant-ignore-self: "<#FF3300>No puedes ignorarte a ti mismo."
+  cant-ignore-target: "<#FF3300>No puedes ignorar a este jugador."
+  now-ignoring: "<#FF3300>Ahora ignoras a <white><player></white>."
+  no-longer-ignoring: "<#00FB9A>Ya no ignoras a <white><player></white>."
 
 death:
   enabled: true
   # Mundos donde NO se muestran mensajes de muerte (nombre exacto del mundo)
   disabled-worlds: []
-  pvp-format: "<color:#FF6961>☠ <lp_victim> <gray>fue asesinado por <color:#FF6961>🗡 <lp_killer>"
-  pve-format: "<color:#FF6961>☠ <lp_victim> <gray>ha muerto"
+  pvp-format: "<#FF3300>☠ <lp_victim> <gray>fue asesinado por <#FF3300>🗡 <lp_killer>"
+  pve-format: "<#FF3300>☠ <lp_victim> <gray>ha muerto"
 
 join:
   format: "<gold>🌊 <lp_prefix><player_name></gold> <yellow>sᴇ ʜᴀ ᴜɴɪᴅᴏ <gold>🌊 <dark_gray>(<online>)"
@@ -57,13 +81,72 @@ join:
   group-formats: {}
 
 moderation:
-  chat-muted: "&cEl chat ha sido desactivado por un administrador."
-  chat-unmuted: "&aEl chat ha sido activado por un administrador."
-  chat-is-muted: "&cEl chat está desactivado."
-  personal-chat-enabled: "&aHas activado el chat global."
-  personal-chat-disabled: "&cHas ocultado el chat global."
-  announcements-enabled: "&aAnuncios activados."
-  announcements-disabled: "&cAnuncios desactivados."
-  death-enabled: "&aMensajes de muerte activados."
-  death-disabled: "&cMensajes de muerte desactivados."
-  command-cooldown: "&cEspera &e%time%s &cantes de usar otro comando."
+  chat-muted: "<#FF3300>El chat ha sido desactivado por un administrador."
+  chat-unmuted: "<#00FB9A>El chat ha sido activado por un administrador."
+  chat-is-muted: "<#FF3300>El chat está desactivado."
+  personal-chat-enabled: "<#00FB9A>Has activado el chat global."
+  personal-chat-disabled: "<#FF3300>Has ocultado el chat global."
+  announcements-enabled: "<#00FB9A>Anuncios activados."
+  announcements-disabled: "<#FF3300>Anuncios desactivados."
+  death-enabled: "<#00FB9A>Mensajes de muerte activados."
+  death-disabled: "<#FF3300>Mensajes de muerte desactivados."
+  command-cooldown: "<#FF3300>Espera <white><time>s</white> antes de usar otro comando."
+
+bridge:
+  usage: "<#FF3300>Uso: <white>/vchat bridge <status|reload|block|unblock|list|test></white>"
+  status-header: "<#00FB9A><bold>Discord Bridge</bold></#00FB9A>"
+  status-enabled: "<gray>Activo: <white><enabled></white>"
+  status-server: "<gray>Server ID: <white><server></white>"
+  status-channel: "<gray>Channel ID: <white><channel></white>"
+  status-blocked: "<gray>Bloqueados: <white><count></white>"
+  reloaded: "<#00FB9A>Discord bridge recargado."
+  block-usage: "<#FF3300>Uso: <white>/vchat bridge block <discordUserId></white>"
+  blocked: "<#00FB9A>Usuario bloqueado."
+  already-blocked: "<#FFC43B>Ese usuario ya estaba bloqueado."
+  unblock-usage: "<#FF3300>Uso: <white>/vchat bridge unblock <discordUserId></white>"
+  unblocked: "<#00FB9A>Usuario desbloqueado."
+  not-blocked: "<#FFC43B>Ese usuario no estaba bloqueado."
+  list-empty: "<gray>No hay usuarios bloqueados."
+  list: "<#FFC43B>Usuarios bloqueados: <white><list></white>"
+  test-sent: "<#00FB9A>Test enviado a Discord (webhook)."
+  unknown: "<#FF3300>Subcomando bridge desconocido."
+
+debug:
+  enabled: "<#00FB9A>Debug vChat: <white>ACTIVADO</white>"
+  disabled: "<#FFC43B>Debug vChat: <white>DESACTIVADO</white>"
+
+# Estilo de lista tomado de HuskClaims: dos columnas (comando en acento + itálica,
+# descripción en gris), ambas clickeables/hover, sin iconos de emoji sueltos.
+commands:
+  help:
+    header: "<newline><#00FB9A><bold>vChat</bold></#00FB9A> <#00FB9A>| Comandos:</#00FB9A><newline>"
+    footer: " "
+    # Cada línea trae su click/hover ya embebido (MiniMessage), 'permission' vacío = pública.
+    entries:
+      - line: "<hover:show_text:'<#00FB9A>/msg <jugador> <mensaje>\n<gray>Enviar mensaje privado'><click:suggest_command:'/msg '><#00FB9A><italic>/msg</italic></#00FB9A></click></hover>   <hover:show_text:'<gray>Enviar mensaje privado'><click:suggest_command:'/msg '><gray>Enviar mensaje privado</gray></click></hover>"
+      - line: "<hover:show_text:'<#00FB9A>/reply <mensaje>\n<gray>Responder al último mensaje'><click:suggest_command:'/reply '><#00FB9A><italic>/reply</italic></#00FB9A></click></hover>   <hover:show_text:'<gray>Responder al último mensaje'><click:suggest_command:'/reply '><gray>Responder al último mensaje</gray></click></hover>"
+      - line: "<hover:show_text:'<#00FB9A>/ignore <jugador>\n<gray>Ignorar a un jugador'><click:suggest_command:'/ignore '><#00FB9A><italic>/ignore</italic></#00FB9A></click></hover>   <hover:show_text:'<gray>Ignorar a un jugador'><click:suggest_command:'/ignore '><gray>Ignorar a un jugador</gray></click></hover>"
+      - line: "<hover:show_text:'<#00FB9A>/showitem\n<gray>Mostrar ítem en mano'><click:run_command:'/showitem'><#00FB9A><italic>/showitem</italic></#00FB9A></click></hover>   <hover:show_text:'<gray>Mostrar ítem en mano'><click:run_command:'/showitem'><gray>Mostrar ítem en mano</gray></click></hover>"
+      - line: "<hover:show_text:'<#00FB9A>/togglechat\n<gray>Ocultar/Mostrar chat global'><click:run_command:'/togglechat'><#00FB9A><italic>/togglechat</italic></#00FB9A></click></hover>   <hover:show_text:'<gray>Ocultar/Mostrar chat global'><click:run_command:'/togglechat'><gray>Ocultar/Mostrar chat global</gray></click></hover>"
+      - line: "<hover:show_text:'<#00FB9A>/togglementions\n<gray>Activar/Desactivar menciones'><click:run_command:'/togglementions'><#00FB9A><italic>/togglementions</italic></#00FB9A></click></hover>   <hover:show_text:'<gray>Activar/Desactivar menciones'><click:run_command:'/togglementions'><gray>Activar/Desactivar menciones</gray></click></hover>"
+      - line: "<hover:show_text:'<#00FB9A>/togglemsg\n<gray>Activar/Desactivar mensajes privados'><click:run_command:'/togglemsg'><#00FB9A><italic>/togglemsg</italic></#00FB9A></click></hover>   <hover:show_text:'<gray>Activar/Desactivar mensajes privados'><click:run_command:'/togglemsg'><gray>Activar/Desactivar mensajes privados</gray></click></hover>"
+      - line: "<hover:show_text:'<#FFC43B>/vspy\n<gray>Espiar mensajes privados (SocialSpy)'><click:run_command:'/spychat'><#FFC43B><italic>/vspy</italic></#FFC43B></click></hover>   <hover:show_text:'<gray>Espiar mensajes privados (SocialSpy)'><click:run_command:'/spychat'><gray>Espiar mensajes privados (SocialSpy)</gray></click></hover>"
+        permission: "vchat.spychat"
+      - line: "<hover:show_text:'<#FFC43B>/mutechat\n<gray>Silenciar chat global para todos'><click:run_command:'/mutechat'><#FFC43B><italic>/mutechat</italic></#FFC43B></click></hover>   <hover:show_text:'<gray>Silenciar chat global para todos'><click:run_command:'/mutechat'><gray>Silenciar chat global para todos</gray></click></hover>"
+        permission: "vchat.mutechat"
+      - line: "<hover:show_text:'<#FFC43B>/vchat reload\n<gray>Recargar configuración'><click:suggest_command:'/vchat reload'><#FFC43B><italic>/vchat reload</italic></#FFC43B></click></hover>   <hover:show_text:'<gray>Recargar configuración'><click:suggest_command:'/vchat reload'><gray>Recargar configuración</gray></click></hover>"
+        permission: "vchat.reload"
+      - line: "<hover:show_text:'<#FFC43B>/vchat debug\n<gray>Activar/Desactivar debug de parseo'><click:suggest_command:'/vchat debug'><#FFC43B><italic>/vchat debug</italic></#FFC43B></click></hover>   <hover:show_text:'<gray>Activar/Desactivar debug de parseo'><click:suggest_command:'/vchat debug'><gray>Activar/Desactivar debug de parseo</gray></click></hover>"
+        permission: "vchat.debug"
+      - line: "<hover:show_text:'<#FFC43B>/vchat notify\n<gray>Notificaciones de admin'><click:suggest_command:'/vchat notify'><#FFC43B><italic>/vchat notify</italic></#FFC43B></click></hover>   <hover:show_text:'<gray>Notificaciones de admin'><click:suggest_command:'/vchat notify'><gray>Notificaciones de admin</gray></click></hover>"
+        permission: "vchat.notify"
+      - line: "<hover:show_text:'<#FFC43B>/vchat bridge status\n<gray>Estado del bridge de Discord'><click:suggest_command:'/vchat bridge status'><#FFC43B><italic>/vchat bridge</italic></#FFC43B></click></hover>   <hover:show_text:'<gray>Estado del bridge de Discord'><click:suggest_command:'/vchat bridge status'><gray>Estado del bridge de Discord</gray></click></hover>"
+        permission: "vchat.bridge.admin"
+      - line: "<hover:show_text:'<#00FB9A>/vchat about\n<gray>Información del plugin'><click:run_command:'/vchat about'><#00FB9A><italic>/vchat about</italic></#00FB9A></click></hover>   <hover:show_text:'<gray>Información del plugin'><click:run_command:'/vchat about'><gray>Información del plugin</gray></click></hover>"
+  about:
+    lines:
+      - "<newline><#00FB9A><bold>vChat</bold></#00FB9A> <gray>v<version></gray><newline>"
+      - "<gray>Autor: <white>mtynnn</white></gray>"
+      - "<gray>Servidor: <white>ValerinSMP</white></gray>"
+      - "<gray><click:open_url:'https://github.com/ValerinSMP/vChat'><hover:show_text:'<gray>Click para abrir'><#00FB9A><underlined>GitHub</underlined></#00FB9A></hover></click></gray>"
+      - " "

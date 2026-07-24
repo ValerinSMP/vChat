@@ -58,6 +58,8 @@ dependencies {
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
     compileOnly("com.nexomc:nexo:1.8.0")
     compileOnly("net.dv8tion:JDA:5.2.1")
+    // Redis multiserver — Paper-only, cargado en runtime vía plugin.yml `libraries:` (Paper Library Loader).
+    compileOnly("redis.clients:jedis:5.2.0")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
 
     // Arclight (Spigot 1.21.1, no Paper extras)
@@ -74,6 +76,10 @@ dependencies {
     // Tests
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
     testImplementation("org.mockito:mockito-core:5.12.0")
+    // Jedis es compileOnly en producción (Paper lo carga vía plugin.yml `libraries:`),
+    // pero el classloader del JVM de test necesita las clases resueltas para verificar
+    // RedisManager al cargarlo, aunque el test solo llame a sus métodos estáticos puros.
+    testImplementation("redis.clients:jedis:5.2.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

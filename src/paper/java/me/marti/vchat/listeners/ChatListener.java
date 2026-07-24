@@ -40,8 +40,13 @@ public class ChatListener implements Listener {
         Player player = event.getPlayer();
 
         // Check Global Mute
+        // No usar event.setCancelled(true) acá: con chat firmado (1.19.1+) cancelar el
+        // evento rompe la cadena de acknowledgment "last seen" del cliente -> el próximo
+        // mensaje del mismo jugador desincroniza el checksum y lo expulsa con "Checksum
+        // mismatch on last seen update". Vaciar viewers() completa el protocolo normal
+        // (nadie lo ve) sin romper la firma.
         if (plugin.getAdminManager().isGlobalChatMuted() && !player.hasPermission("vchat.bypass.togglechat")) {
-            event.setCancelled(true);
+            event.viewers().clear();
             plugin.getAdminManager().sendConfigMessage(player, "moderation.chat-muted");
             return;
         }
@@ -70,7 +75,7 @@ public class ChatListener implements Listener {
         // 4. FILTERS (on string result)
         FilterResult result = filterManager.process(player, message);
         if (result.state() == FilterResult.State.BLOCKED) {
-            event.setCancelled(true);
+            event.viewers().clear();
             runSync(() -> {
                 plugin.getAdminManager().playSound(player, "sounds.blocked");
                 if (result.reason() != null) {
@@ -104,6 +109,15 @@ public class ChatListener implements Listener {
                 PlainTextComponentSerializer.plainText().serialize(messageComponent));
 
         event.renderer((source, sourceDisplayName, messageComp, viewer) -> formatted);
+
+        me.marti.vchat.redis.RedisManager redis = plugin.getRedisManager();
+        if (redis != null && redis.isEnabled()) {
+            me.marti.vchat.redis.RedisEvent chatEvent = new me.marti.vchat.redis.RedisEvent();
+            chatEvent.type = me.marti.vchat.redis.RedisEventType.CHAT;
+            chatEvent.senderName = player.getName();
+            chatEvent.componentJson = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(formatted);
+            redis.publish(chatEvent);
+        }
 
         Set<UUID> targetsToNotify = mentionResult.targetsToNotify();
         if (!targetsToNotify.isEmpty()) {

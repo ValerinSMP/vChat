@@ -1,9 +1,6 @@
 package me.marti.vchat.commands;
 
 import me.marti.vchat.VChat;
-import me.marti.vchat.utils.PlatformUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,13 +19,12 @@ public class SocialSpyCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            PlatformUtil.sendMessage(sender, Component.text("Solo jugadores.", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(sender, "messages.players-only");
             return true;
         }
 
         if (!player.hasPermission("vchat.spychat") && !player.hasPermission("vchat.admin")) {
             plugin.getAdminManager().sendConfigMessage(player, "messages.no-permission");
-            plugin.getLogger().info("Permiso vchat.spychat denegado para el jugador: " + player.getName());
             return true;
         }
 

@@ -2,6 +2,8 @@ package me.marti.vchat.utils;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -14,6 +16,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 public final class PlatformUtil {
+
+    /** Único punto de deserialización MiniMessage del plugin — todo mensaje pasa por acá. */
+    public static final MiniMessage MM = MiniMessage.miniMessage();
 
     private static final boolean PAPER_ACTION_BAR;
     private static final boolean PAPER_SENDER_COMPONENT;
@@ -136,6 +141,11 @@ public final class PlatformUtil {
                 ? item.getItemMeta().getDisplayName()
                 : item.getType().name().toLowerCase(java.util.Locale.ROOT).replace('_', ' ');
         return HoverEvent.showText(Component.text(name));
+    }
+
+    public static void sendMini(CommandSender sender, String raw, TagResolver... resolvers) {
+        if (raw == null || raw.isEmpty()) return;
+        sendMessage(sender, MM.deserialize(raw, resolvers));
     }
 
     public static void broadcast(Component component) {

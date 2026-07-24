@@ -25,6 +25,8 @@ public final class VChat extends JavaPlugin {
     private me.marti.vchat.compat.MentionsTabInjector mentionsTabInjector;
     private me.marti.vchat.compat.NexoHook nexoHook;
     private me.marti.vchat.compat.EcoDisplayHook ecoDisplayHook;
+    private me.marti.vchat.redis.RedisManager redisManager;
+    private me.marti.vchat.redis.RedisEventHandler redisEventHandler;
     private int itemCacheCleanupTaskId = -1;
     private volatile boolean debugMode;
     private LuckPerms luckPerms;
@@ -53,6 +55,9 @@ public final class VChat extends JavaPlugin {
         this.ignoreManager = new me.marti.vchat.managers.IgnoreManager(this);
         this.discordBridgeManager = new me.marti.vchat.managers.DiscordBridgeManager(this);
         this.joinQuitManager = new me.marti.vchat.managers.JoinQuitManager(this);
+        this.redisEventHandler = new me.marti.vchat.redis.RedisEventHandler(this);
+        this.redisManager = new me.marti.vchat.redis.RedisManager(this);
+        this.redisManager.enable();
 
         // Register Commands
         registerCommands();
@@ -72,6 +77,15 @@ public final class VChat extends JavaPlugin {
             mentionManager.loadData(online);
             privateMessageManager.loadData(online);
             ignoreManager.loadData(online);
+
+            // Sin esto, un jugador ya conectado antes de un PlugMan reload (o de instalar
+            // esta versión con Redis por primera vez) nunca queda registrado en el hash de
+            // presencia — solo JoinListener lo hace, y ese evento ya no vuelve a disparar.
+            if (redisManager.isEnabled()) {
+                redisManager.setPlayerOnline(online.getUniqueId(), online.getName());
+                redisManager.setMsgToggle(online.getUniqueId(), privateMessageManager.isMsgEnabled(online));
+                redisManager.setIgnoreList(online.getUniqueId(), ignoreManager.getIgnoredPlayers(online));
+            }
         }
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -144,6 +158,14 @@ public final class VChat extends JavaPlugin {
         return joinQuitManager;
     }
 
+    public me.marti.vchat.redis.RedisManager getRedisManager() {
+        return redisManager;
+    }
+
+    public me.marti.vchat.redis.RedisEventHandler getRedisEventHandler() {
+        return redisEventHandler;
+    }
+
     public net.luckperms.api.LuckPerms getLuckPerms() {
         return luckPerms;
     }
@@ -177,6 +199,10 @@ public final class VChat extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (redisManager != null) {
+            redisManager.disable();
+        }
+
         if (logManager != null) {
             logManager.shutdown();
         }
@@ -294,6 +320,18 @@ public final class VChat extends JavaPlugin {
         }
         if (discordBridgeManager != null) {
             discordBridgeManager.reload();
+        }
+        if (redisManager != null) {
+            redisManager.disable();
+            redisManager = new me.marti.vchat.redis.RedisManager(this);
+            redisManager.enable();
+            if (redisManager.isEnabled()) {
+                for (org.bukkit.entity.Player online : getServer().getOnlinePlayers()) {
+                    redisManager.setPlayerOnline(online.getUniqueId(), online.getName());
+                    redisManager.setMsgToggle(online.getUniqueId(), privateMessageManager.isMsgEnabled(online));
+                    redisManager.setIgnoreList(online.getUniqueId(), ignoreManager.getIgnoredPlayers(online));
+                }
+            }
         }
         getLogger().info("Configuration reloaded.");
     }

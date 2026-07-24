@@ -1,7 +1,6 @@
 package me.marti.vchat.managers;
 
 import me.marti.vchat.VChat;
-import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -151,7 +150,8 @@ public class MentionManager {
 
             if (actionMsg != null && !actionMsg.isEmpty()) {
                 String rendered = actionMsg.replace("%player%", sender.getName());
-                PlatformUtil.sendActionBar(target, LegacyComponentSerializer.legacyAmpersand().deserialize(rendered));
+                plugin.getAdminManager().sendActionBarOrChat(target,
+                        LegacyComponentSerializer.legacyAmpersand().deserialize(rendered));
             }
         }
     }

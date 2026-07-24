@@ -45,6 +45,15 @@ public class JoinQuitManager {
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
     }
 
+    /** Contador de red si Redis está activo (número correcto sumando ambos servers), local si no. */
+    private int getPlayerNumber() {
+        if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
+            long n = plugin.getRedisManager().nextNetworkPlayerNumber();
+            if (n > 0) return (int) n;
+        }
+        return incrementPlayerCount();
+    }
+
     private synchronized int incrementPlayerCount() {
         int count = dataConfig.getInt(FIRST_JOIN_KEY, 0) + 1;
         dataConfig.set(FIRST_JOIN_KEY, count);
@@ -59,12 +68,25 @@ public class JoinQuitManager {
     public void handleJoin(Player player) {
         FileConfiguration cfg = plugin.getConfigManager().getMessages();
         boolean isFirstJoin = !player.hasPlayedBefore();
+        // hasPlayedBefore() es local a ESTE server. Si ya jugó en server1 pero nunca en
+        // server2, acá volvía a dar true. markFirstNetworkJoin chequea/agrega contra Redis
+        // (SADD a un set de la red entera) y solo es true la primera vez en TODO el cluster.
+        // SIEMPRE se llama (aunque hasPlayedBefore() ya sea true acá) para hacer backfill:
+        // un jugador viejo que jugó desde antes de este fix nunca quedó registrado en el
+        // set, así que hay que agregarlo la primera vez que se lo vea en CUALQUIER server,
+        // sin que eso dispare el mensaje de "primera vez" si localmente ya se sabía que no lo era.
+        if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
+            boolean firstInNetwork = plugin.getRedisManager().markFirstNetworkJoin(player.getUniqueId());
+            if (isFirstJoin) {
+                isFirstJoin = firstInNetwork;
+            }
+        }
 
         String format;
         String soundPath;
 
         if (isFirstJoin) {
-            int playerNumber = incrementPlayerCount();
+            int playerNumber = getPlayerNumber();
             format = cfg.getString("join.first-join",
                     "<yellow>⭐ <gold><lp_prefix><player_name></gold> <yellow>sᴇ ᴜɴᴇ ᴘᴏʀ ᴘʀɪᴍᴇʀᴀ ᴠᴇᴢ ⭐ <gold>(#<player_number>)</gold>");
             format = format.replace("<player_number>", String.valueOf(playerNumber));
@@ -74,12 +96,12 @@ public class JoinQuitManager {
             soundPath = getGroupSoundPath(player, cfg);
         }
 
-        int online = Bukkit.getOnlinePlayers().size();
-        format = format.replace("<online>", String.valueOf(online));
-
-        Component message = buildMessage(player, format);
-
-        broadcast(message);
+        // format vacío ("" en el yml) = sin anuncio de join para este grupo, a propósito.
+        if (format != null && !format.isBlank()) {
+            int online = Bukkit.getOnlinePlayers().size();
+            format = format.replace("<online>", String.valueOf(online));
+            broadcast(buildMessage(player, format));
+        }
         playJoinSound(player, soundPath, cfg);
     }
 

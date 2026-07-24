@@ -4,7 +4,6 @@ import me.marti.vchat.VChat;
 import me.marti.vchat.processors.MessageProcessor;
 import me.marti.vchat.utils.PlatformUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -31,7 +30,7 @@ public class ShowItemCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            PlatformUtil.sendMessage(sender, Component.text("Only players can use this command.", NamedTextColor.RED));
+            plugin.getAdminManager().sendConfigMessage(sender, "messages.players-only");
             return true;
         }
 
