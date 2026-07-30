@@ -53,7 +53,7 @@ public class JoinListener implements Listener {
     }
 
     private boolean isVanished(Player player) {
-        // CobbleCommands (Arclight-compatible vanish)
+        // CobbleCommands vanish integration.
         try {
             Class<?> api = Class.forName("com.cobble.commands.CobbleAPI");
             return (boolean) api.getMethod("isVanished", Player.class).invoke(null, player);

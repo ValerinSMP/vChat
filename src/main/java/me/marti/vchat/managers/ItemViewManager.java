@@ -60,30 +60,14 @@ public class ItemViewManager {
 
         String title = plugin.getConfigManager().getFormats().getString("item-view-title", "Item View");
         Component titleComp = MiniMessage.miniMessage().deserialize(title);
-        Inventory inv;
-        try {
-            // Paper API: createInventory with Component title
-            inv = (Inventory) Bukkit.class.getMethod("createInventory",
-                    org.bukkit.inventory.InventoryHolder.class,
-                    org.bukkit.event.inventory.InventoryType.class,
-                    Component.class)
-                    .invoke(null, new ItemViewHolder(), org.bukkit.event.inventory.InventoryType.DISPENSER, titleComp);
-        } catch (Exception ignored) {
-            // Bukkit/Arclight fallback: legacy string title
-            String legacyTitle = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-                    .legacySection().serialize(titleComp);
-            inv = Bukkit.createInventory(new ItemViewHolder(), org.bukkit.event.inventory.InventoryType.DISPENSER, legacyTitle);
-        }
+        Inventory inv = Bukkit.createInventory(
+                new ItemViewHolder(),
+                org.bukkit.event.inventory.InventoryType.DISPENSER,
+                titleComp);
 
         ItemStack filler = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
         ItemMeta meta = filler.getItemMeta();
-        try {
-            // Paper API
-            ItemMeta.class.getMethod("displayName", Component.class);
-            meta.displayName(Component.empty());
-        } catch (NoSuchMethodException ignored) {
-            setDisplayNameLegacy(meta);
-        }
+        meta.displayName(Component.empty());
         filler.setItemMeta(meta);
 
         for (int i = 0; i < 9; i++) {
@@ -113,11 +97,6 @@ public class ItemViewManager {
     private boolean isExpired(long createdAt, long now) {
         long ttlSeconds = Math.max(60L, ttlSecondsSupplier.getAsLong());
         return (now - createdAt) > (ttlSeconds * 1000L);
-    }
-
-    @SuppressWarnings("deprecation")
-    private static void setDisplayNameLegacy(ItemMeta meta) {
-        meta.setDisplayName(" ");
     }
 
     public static class ItemViewHolder implements InventoryHolder {

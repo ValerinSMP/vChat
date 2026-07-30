@@ -15,28 +15,38 @@ public class VChatTabCompleter implements TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
             @NotNull String label, @NotNull String[] args) {
         List<String> suggestions = new ArrayList<>();
+        boolean adminRoot = command.getName().equalsIgnoreCase("vchatadmin");
 
         if (args.length == 1) {
-            if (sender.hasPermission("vchat.admin") || sender.hasPermission("vchat.reload")) {
-                suggestions.add("reload");
-            }
-            if (sender.hasPermission("vchat.admin") || sender.hasPermission("vchat.notify")) {
-                suggestions.add("notify");
-            }
-            suggestions.add("mentions");
-            suggestions.add("chat");
-            suggestions.add("spy");
-            suggestions.add("msg_toggle");
             suggestions.add("help");
             suggestions.add("about");
-            if (sender.hasPermission("vchat.bridge.admin") || sender.hasPermission("vchat.admin")) {
-                suggestions.add("bridge");
+            if (adminRoot) {
+                if (sender.hasPermission("vchat.admin") || sender.hasPermission("vchat.reload")) {
+                    suggestions.add("reload");
+                }
+                if (sender.hasPermission("vchat.admin") || sender.hasPermission("vchat.notify")) {
+                    suggestions.add("notify");
+                }
+                if (sender.hasPermission("vchat.admin") || sender.hasPermission("vchat.spychat")) {
+                    suggestions.add("spy");
+                }
+                if (sender.hasPermission("vchat.bridge.admin") || sender.hasPermission("vchat.admin")) {
+                    suggestions.add("bridge");
+                }
+                if (sender.hasPermission("vchat.debug") || sender.hasPermission("vchat.admin")) {
+                    suggestions.add("debug");
+                }
+            } else {
+                suggestions.add("mentions");
+                suggestions.add("chat");
+                suggestions.add("msg_toggle");
+                suggestions.add("toggledeath");
             }
 
             return filter(suggestions, args[0]);
         }
 
-        if (args.length == 2 && args[0].equalsIgnoreCase("bridge")
+        if (adminRoot && args.length == 2 && args[0].equalsIgnoreCase("bridge")
                 && (sender.hasPermission("vchat.bridge.admin") || sender.hasPermission("vchat.admin"))) {
             suggestions.add("status");
             suggestions.add("reload");

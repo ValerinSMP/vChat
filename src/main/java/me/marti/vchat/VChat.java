@@ -1,7 +1,6 @@
 package me.marti.vchat;
 
 import me.marti.vchat.managers.FormatManager;
-import me.marti.vchat.utils.PlatformUtil;
 import me.marti.vchat.processors.MessageProcessor;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.event.Listener;
@@ -33,6 +32,10 @@ public final class VChat extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        long startedAt = System.nanoTime();
+        getLogger().info("Starting vChat v" + getDescription().getVersion() + "...");
+        getLogger().info("Platform: Paper 1.21.11+ | Java 21 bytecode");
+
         // Dependency Check
         if (!setupLuckPerms()) {
             getLogger().severe("LuckPerms not found! Disabling vChat.");
@@ -71,16 +74,13 @@ public final class VChat extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.QuitListener(this), this);
         getServer().getPluginManager().registerEvents(new me.marti.vchat.listeners.CommandCooldownListener(this), this);
 
-        // Load data for online players (for hot-reloads)
+        // Initialize any players already online when the plugin is enabled.
         for (org.bukkit.entity.Player online : getServer().getOnlinePlayers()) {
             adminManager.loadData(online);
             mentionManager.loadData(online);
             privateMessageManager.loadData(online);
             ignoreManager.loadData(online);
 
-            // Sin esto, un jugador ya conectado antes de un PlugMan reload (o de instalar
-            // esta versión con Redis por primera vez) nunca queda registrado en el hash de
-            // presencia — solo JoinListener lo hace, y ese evento ya no vuelve a disparar.
             if (redisManager.isEnabled()) {
                 redisManager.setPlayerOnline(online.getUniqueId(), online.getName());
                 redisManager.setMsgToggle(online.getUniqueId(), privateMessageManager.isMsgEnabled(online));
@@ -94,7 +94,6 @@ public final class VChat extends JavaPlugin {
 
         if (getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
             getLogger().info("Hooking into ProtocolLib for Tab Completion...");
-            me.marti.vchat.utils.PlatformUtil.initProtocolLib(this);
             this.mentionsTabInjector = new me.marti.vchat.compat.MentionsTabInjector(this);
             this.mentionsTabInjector.register();
         }
@@ -115,7 +114,8 @@ public final class VChat extends JavaPlugin {
         startBackgroundMaintenanceTasks();
         discordBridgeManager.start();
 
-        printStartupBanner();
+        long elapsedMs = (System.nanoTime() - startedAt) / 1_000_000L;
+        getLogger().info("Enabled successfully in " + elapsedMs + " ms.");
     }
 
     public me.marti.vchat.managers.ConfigManager getConfigManager() {
@@ -199,6 +199,8 @@ public final class VChat extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        long startedAt = System.nanoTime();
+        getLogger().info("Stopping vChat...");
         if (redisManager != null) {
             redisManager.disable();
         }
@@ -233,11 +235,16 @@ public final class VChat extends JavaPlugin {
         // Cancel all remaining async/sync tasks
         getServer().getScheduler().cancelTasks(this);
 
-        getLogger().info("vChat has been disabled!");
+        long elapsedMs = (System.nanoTime() - startedAt) / 1_000_000L;
+        getLogger().info("Disabled successfully in " + elapsedMs + " ms.");
     }
 
     private void registerCommands() {
         registerCommand("vchat", cmd -> {
+            cmd.setExecutor(new me.marti.vchat.commands.VChatCommand(this, itemViewManager, adminManager));
+            cmd.setTabCompleter(new me.marti.vchat.commands.VChatTabCompleter());
+        });
+        registerCommand("vchatadmin", cmd -> {
             cmd.setExecutor(new me.marti.vchat.commands.VChatCommand(this, itemViewManager, adminManager));
             cmd.setTabCompleter(new me.marti.vchat.commands.VChatTabCompleter());
         });
@@ -265,41 +272,6 @@ public final class VChat extends JavaPlugin {
             return;
         }
         binder.accept(command);
-    }
-
-    private void printStartupBanner() {
-        boolean papi = getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
-        String version = getDescription().getVersion();
-
-        PlatformUtil.sendMessage(getServer().getConsoleSender(),
-                net.kyori.adventure.text.Component.text()
-                .append(net.kyori.adventure.text.Component.newline())
-                .append(net.kyori.adventure.text.Component.text("  vChat v" + version,
-                        net.kyori.adventure.text.format.NamedTextColor.AQUA))
-                .append(net.kyori.adventure.text.Component.newline())
-                .append(net.kyori.adventure.text.Component.text("  Developed by Marti",
-                        net.kyori.adventure.text.format.NamedTextColor.GRAY))
-                .append(net.kyori.adventure.text.Component.newline())
-                .append(net.kyori.adventure.text.Component.newline())
-                .append(net.kyori.adventure.text.Component.text("  Modules: ",
-                        net.kyori.adventure.text.format.NamedTextColor.GRAY))
-                .append(net.kyori.adventure.text.Component
-                        .text("LuckPerms ",
-                                net.kyori.adventure.text.format.NamedTextColor.GREEN)
-                        .append(net.kyori.adventure.text.Component.text("✔",
-                                net.kyori.adventure.text.format.NamedTextColor.GREEN)))
-                .append(net.kyori.adventure.text.Component.text(" | ",
-                        net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY))
-                .append(net.kyori.adventure.text.Component
-                        .text("PAPI ",
-                                papi ? net.kyori.adventure.text.format.NamedTextColor.GREEN
-                                        : net.kyori.adventure.text.format.NamedTextColor.RED)
-                        .append(net.kyori.adventure.text.Component.text(papi ? "✔" : "✖",
-                                papi ? net.kyori.adventure.text.format.NamedTextColor.GREEN
-                                        : net.kyori.adventure.text.format.NamedTextColor.RED)))
-                .append(net.kyori.adventure.text.Component.newline())
-                .build());
-        getLogger().info("vChat has been enabled successfully!");
     }
 
     private boolean setupLuckPerms() {

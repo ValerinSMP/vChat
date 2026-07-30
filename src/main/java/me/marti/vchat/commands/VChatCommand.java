@@ -33,6 +33,7 @@ public class VChatCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
+        boolean adminRoot = command.getName().equalsIgnoreCase("vchatadmin");
 
         if (args.length == 0) {
             sendHelp(sender);
@@ -43,6 +44,7 @@ public class VChatCommand implements CommandExecutor {
 
         switch (subCommand) {
             case "reload", "recargar" -> {
+                if (!adminRoot) break;
                 return handleReload(sender);
             }
             case "help", "ayuda" -> {
@@ -54,30 +56,39 @@ public class VChatCommand implements CommandExecutor {
                 return true;
             }
             case "notify", "notificar", "notificaciones" -> {
+                if (!adminRoot) break;
                 return handleNotify(sender);
             }
             case "spy", "vspy", "spychat", "socialspy" -> {
+                if (!adminRoot) break;
                 return handleSpy(sender);
             }
             case "chat", "togglechat" -> {
+                if (adminRoot) break;
                 return handleChat(sender);
             }
             case "mentions", "menciones", "togglementions" -> {
+                if (adminRoot) break;
                 return handleMentions(sender);
             }
             case "msg", "msg_toggle", "togglemsg" -> {
+                if (adminRoot) break;
                 return handleMsgToggle(sender);
             }
             case "toggledeath", "tdeath" -> {
+                if (adminRoot) break;
                 return handleToggleDeath(sender);
             }
             case "viewitem" -> {
+                if (adminRoot) break;
                 return handleViewItem(sender, args);
             }
             case "bridge" -> {
+                if (!adminRoot) break;
                 return handleBridge(sender, args);
             }
             case "debug" -> {
+                if (!adminRoot) break;
                 return handleDebug(sender);
             }
         }
@@ -183,9 +194,6 @@ public class VChatCommand implements CommandExecutor {
     private boolean handleViewItem(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) return true;
         if (args.length < 2) return true;
-
-        // GUI disabled on Bukkit/Arclight — no Paper inventory Component API
-        if (!PlatformUtil.isPaper()) return true;
 
         try {
             UUID itemId = UUID.fromString(args[1]);

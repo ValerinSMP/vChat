@@ -10,9 +10,13 @@ libraries:
   - redis.clients:jedis:5.2.0
 commands:
   vchat:
-    description: Main command for vChat
+    description: Comandos públicos de vChat
     usage: /vchat help
     aliases: [vc, vcchat]
+  vchatadmin:
+    description: Comandos administrativos de vChat
+    usage: /vchatadmin help
+    aliases: [vcadmin, vca]
   showitem:
     description: Show your item in chat
     usage: /showitem

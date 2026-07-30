@@ -18,7 +18,7 @@ import java.util.UUID;
 
 /**
  * Multiserver via Redis (estilo William278: pool Jedis + hilo suscriptor dedicado
- * + reconexión con backoff fijo). Solo soportado en Paper — en Arclight/Spigot
+ * + reconexión con backoff fijo). El plugin soporta únicamente Paper.
  * ni siquiera se toca una clase de Jedis (isPaper() se chequea antes de cualquier uso).
  */
 public class RedisManager {
