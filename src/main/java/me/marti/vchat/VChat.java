@@ -26,7 +26,10 @@ public final class VChat extends JavaPlugin {
     private me.marti.vchat.compat.EcoDisplayHook ecoDisplayHook;
     private me.marti.vchat.redis.RedisManager redisManager;
     private me.marti.vchat.redis.RedisEventHandler redisEventHandler;
+    private me.marti.vchat.storage.StorageManager storageManager;
+    private java.util.concurrent.ExecutorService ioExecutor;
     private int itemCacheCleanupTaskId = -1;
+    private int redisHeartbeatTaskId = -1;
     private volatile boolean debugMode;
     private LuckPerms luckPerms;
 
@@ -46,6 +49,12 @@ public final class VChat extends JavaPlugin {
         // Initialize Managers
         this.configManager = new me.marti.vchat.managers.ConfigManager(this);
         this.configManager.loadConfigs();
+        this.ioExecutor = java.util.concurrent.Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "vchat:io");
+            thread.setDaemon(true);
+            return thread;
+        });
+        this.storageManager = new me.marti.vchat.storage.StorageManager(this, ioExecutor);
 
         this.logManager = new me.marti.vchat.managers.LogManager(this);
         this.adminManager = new me.marti.vchat.managers.AdminManager(this);
@@ -59,8 +68,8 @@ public final class VChat extends JavaPlugin {
         this.discordBridgeManager = new me.marti.vchat.managers.DiscordBridgeManager(this);
         this.joinQuitManager = new me.marti.vchat.managers.JoinQuitManager(this);
         this.redisEventHandler = new me.marti.vchat.redis.RedisEventHandler(this);
-        this.redisManager = new me.marti.vchat.redis.RedisManager(this);
-        this.redisManager.enable();
+        this.redisManager = new me.marti.vchat.redis.RedisManager(this, ioExecutor);
+        startStorageAndNetwork();
 
         // Register Commands
         registerCommands();
@@ -80,12 +89,7 @@ public final class VChat extends JavaPlugin {
             mentionManager.loadData(online);
             privateMessageManager.loadData(online);
             ignoreManager.loadData(online);
-
-            if (redisManager.isEnabled()) {
-                redisManager.setPlayerOnline(online.getUniqueId(), online.getName());
-                redisManager.setMsgToggle(online.getUniqueId(), privateMessageManager.isMsgEnabled(online));
-                redisManager.setIgnoreList(online.getUniqueId(), ignoreManager.getIgnoredPlayers(online));
-            }
+            loadPlayerState(online);
         }
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -166,6 +170,10 @@ public final class VChat extends JavaPlugin {
         return redisEventHandler;
     }
 
+    public me.marti.vchat.storage.StorageManager getStorageManager() {
+        return storageManager;
+    }
+
     public net.luckperms.api.LuckPerms getLuckPerms() {
         return luckPerms;
     }
@@ -234,6 +242,9 @@ public final class VChat extends JavaPlugin {
 
         // Cancel all remaining async/sync tasks
         getServer().getScheduler().cancelTasks(this);
+        if (ioExecutor != null) {
+            ioExecutor.shutdownNow();
+        }
 
         long elapsedMs = (System.nanoTime() - startedAt) / 1_000_000L;
         getLogger().info("Disabled successfully in " + elapsedMs + " ms.");
@@ -284,8 +295,8 @@ public final class VChat extends JavaPlugin {
         return false;
     }
 
-    public void reload() {
-        configManager.reloadConfigs();
+    public boolean reload() {
+        if (!configManager.reloadConfigs()) return false;
         formatManager.reload();
         if (filterManager != null) {
             filterManager.loadFilters();
@@ -293,19 +304,8 @@ public final class VChat extends JavaPlugin {
         if (discordBridgeManager != null) {
             discordBridgeManager.reload();
         }
-        if (redisManager != null) {
-            redisManager.disable();
-            redisManager = new me.marti.vchat.redis.RedisManager(this);
-            redisManager.enable();
-            if (redisManager.isEnabled()) {
-                for (org.bukkit.entity.Player online : getServer().getOnlinePlayers()) {
-                    redisManager.setPlayerOnline(online.getUniqueId(), online.getName());
-                    redisManager.setMsgToggle(online.getUniqueId(), privateMessageManager.isMsgEnabled(online));
-                    redisManager.setIgnoreList(online.getUniqueId(), ignoreManager.getIgnoredPlayers(online));
-                }
-            }
-        }
         getLogger().info("Configuration reloaded.");
+        return true;
     }
 
     private void startBackgroundMaintenanceTasks() {
@@ -317,6 +317,11 @@ public final class VChat extends JavaPlugin {
                 itemViewManager.purgeExpired();
             }
         }, periodTicks, periodTicks).getTaskId();
+
+        long heartbeatTicks = Math.max(20L, getConfigManager().getMainConfig().getLong("redis.heartbeat-seconds", 10L) * 20L);
+        redisHeartbeatTaskId = getServer().getScheduler().runTaskTimer(this, () -> {
+            if (redisManager != null) redisManager.heartbeat();
+        }, heartbeatTicks, heartbeatTicks).getTaskId();
     }
 
     private void stopBackgroundMaintenanceTasks() {
@@ -324,6 +329,95 @@ public final class VChat extends JavaPlugin {
             getServer().getScheduler().cancelTask(itemCacheCleanupTaskId);
             itemCacheCleanupTaskId = -1;
         }
+        if (redisHeartbeatTaskId != -1) {
+            getServer().getScheduler().cancelTask(redisHeartbeatTaskId);
+            redisHeartbeatTaskId = -1;
+        }
+    }
+
+    private void startStorageAndNetwork() {
+        storageManager.ready().whenComplete((ignored, error) -> {
+            if (error != null) {
+                getLogger().severe("Storage startup failed: " + rootMessage(error));
+                return;
+            }
+            storageManager.loadGlobalMute().thenAccept(muted -> runMain(() -> adminManager.setGlobalChatMuted(muted)))
+                    .exceptionally(loadError -> { getLogger().warning("Could not load global mute: " + rootMessage(loadError)); return null; });
+            redisManager.enable().thenAccept(connected -> {
+                if (!connected) return;
+                runMain(() -> {
+                    for (org.bukkit.entity.Player player : getServer().getOnlinePlayers()) {
+                        loadPlayerState(player, () -> redisManager.registerPresence(
+                                player.getUniqueId(), player.getName(), already -> { }));
+                    }
+                });
+            });
+        });
+    }
+
+    public void loadPlayerState(org.bukkit.entity.Player player) {
+        loadPlayerState(player, () -> { });
+    }
+
+    public void loadPlayerState(org.bukkit.entity.Player player, Runnable afterLoad) {
+        String playerName = player.getName();
+        java.util.UUID playerId = player.getUniqueId();
+        me.marti.vchat.storage.PlayerState legacy = snapshotPlayerState(player);
+        storageManager.loadOrMigrate(playerId, playerName, legacy)
+                .thenAccept(state -> runMain(() -> {
+                    org.bukkit.entity.Player current = getServer().getPlayer(playerId);
+                    if (current != null && current.isOnline()) {
+                        applyPlayerState(current, state);
+                        afterLoad.run();
+                    }
+                }))
+                .exceptionally(error -> { getLogger().warning("Could not load durable state for " + playerName + ": " + rootMessage(error)); return null; });
+    }
+
+    public void savePlayerState(org.bukkit.entity.Player player) {
+        java.util.UUID playerId = player.getUniqueId();
+        String playerName = player.getName();
+        me.marti.vchat.storage.PlayerState state = snapshotPlayerState(player);
+        storageManager.save(playerId, playerName, state).thenRun(() -> {
+            if (redisManager != null && redisManager.isEnabled()) {
+                redisManager.publish(new me.marti.vchat.redis.RedisEvent(me.marti.vchat.redis.RedisEventType.PREFERENCE_INVALIDATE)
+                        .put("playerUuid", playerId.toString()));
+            }
+        }).exceptionally(error -> { getLogger().warning("Could not persist state for " + playerName + ": " + rootMessage(error)); return null; });
+    }
+
+    public void reloadPlayerState(java.util.UUID playerId) {
+        storageManager.load(playerId).thenAccept(state -> runMain(() -> {
+            org.bukkit.entity.Player player = getServer().getPlayer(playerId);
+            if (player != null && player.isOnline()) applyPlayerState(player, state);
+        })).exceptionally(error -> { getLogger().warning("Could not refresh player state: " + rootMessage(error)); return null; });
+    }
+
+    private me.marti.vchat.storage.PlayerState snapshotPlayerState(org.bukkit.entity.Player player) {
+        return new me.marti.vchat.storage.PlayerState(
+                privateMessageManager.isMsgEnabled(player), privateMessageManager.isSpyEnabled(player),
+                adminManager.isPersonalChatMuted(player), mentionManager.areMentionsEnabled(player),
+                adminManager.isDeathMuted(player), adminManager.isNotifyEnabled(player),
+                ignoreManager.getIgnoredPlayers(player));
+    }
+
+    private void applyPlayerState(org.bukkit.entity.Player player, me.marti.vchat.storage.PlayerState state) {
+        privateMessageManager.applyState(player, state.msgEnabled(), state.socialSpy());
+        adminManager.applyState(player, state.personalChatMuted(), state.deathMuted(), state.notifyEnabled());
+        mentionManager.setMentionsEnabled(player, state.mentionsEnabled());
+        ignoreManager.applyState(player, state.ignores());
+    }
+
+    private void runMain(Runnable task) {
+        if (!isEnabled()) return;
+        if (getServer().isPrimaryThread()) task.run();
+        else getServer().getScheduler().runTask(this, task);
+    }
+
+    private static String rootMessage(Throwable error) {
+        Throwable current = error;
+        while (current.getCause() != null) current = current.getCause();
+        return current.getMessage() == null ? current.getClass().getSimpleName() : current.getMessage();
     }
 
     private Listener createChatListener() {

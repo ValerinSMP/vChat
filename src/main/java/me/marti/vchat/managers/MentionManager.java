@@ -65,6 +65,7 @@ public class MentionManager {
     public void toggleMentions(Player player) {
         boolean newState = !areMentionsEnabled(player);
         setMentionsEnabled(player, newState);
+        plugin.savePlayerState(player);
 
         if (newState) {
             plugin.getAdminManager().sendConfigActionBar(player, "messages.mentions-enabled");

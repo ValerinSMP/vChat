@@ -8,12 +8,13 @@
 #
 # Placeholders: sintaxis MiniMessage <nombre> (NO %nombre%) — los resuelve
 # Placeholder.unparsed()/component() en Java. Ver AdminManager#sendConfigMessage.
-prefix: "<gray>[<#00FB9A>vChat</#00FB9A><gray>]</gray> "
+prefix: "<dark_gray>[</dark_gray><#00FB9A>vChat</#00FB9A><dark_gray>]</dark_gray> <reset>"
 # Si es false, los mensajes de actionbar se envían como mensaje de chat normal
 use-actionbar: true
 
 messages:
   reload: "<#00FB9A>Configuración recargada correctamente."
+  reload-failed: "<#FF3300>Reload rechazado; revisa la configuración y la consola."
   no-permission: "<#FF3300>No tienes permiso para esto."
   players-only: "<#FF3300>Solo un jugador puede usar este comando."
   unknown-subcommand: "<#FF3300>Subcomando desconocido: <white>'<input>'</white>. Usa <#00FB9A>/vchat help</#00FB9A>."
@@ -49,6 +50,8 @@ private:
   spy-disabled: "<#FF3300>SpyChat desactivado."
   new-message-notice: "<gray>✉ Nuevo mensaje de <white><player></white></gray>"
   ignored-you: "<#FF3300>Este jugador te ha ignorado."
+  cross-server-unavailable: "<#FFC43B>La mensajería cross-server no está disponible ahora."
+  delivery-failed: "<#FF3300>El mensaje no fue entregado o confirmado."
 
 ignore:
   usage: "<#FF3300>Uso: <white>/ignore <jugador></white>"
@@ -79,6 +82,9 @@ join:
   # owner: "<red>[OWNER] <lp_prefix><player_name></red> <gray>ha entrado al servidor."
   # admin: "<dark_red>[ADMIN] <lp_prefix><player_name></dark_red> <gray>se ha unido."
   group-formats: {}
+
+quit:
+  format: "<gray><player_name> se ha desconectado de la red."
 
 moderation:
   chat-muted: "<#FF3300>El chat ha sido desactivado por un administrador."

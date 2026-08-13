@@ -25,9 +25,20 @@ command-cooldown:
 
 # ---------------------------------------------------------
 # Redis (multiserver) — solo soportado en Paper.
-# Sincroniza chat global, /msg, /reply, SocialSpy y estado de
-# ignore/togglemsg entre todos los servers de este cluster.
+# Transporta chat global, /msg, /reply, SocialSpy, presencia e invalidaciones.
+# Las preferencias e ignores durables permanecen en MySQL.
 # ---------------------------------------------------------
+storage:
+  type: sqlite
+  sqlite-file: "vchat.db"
+  mysql:
+    host: localhost
+    port: 3306
+    database: valerin
+    user: root
+    password: ""
+    use-ssl: false
+
 redis:
   enabled: false
   host: localhost
@@ -39,4 +50,9 @@ redis:
   # ID único de ESTE server dentro del network (debe coincidir con el nombre en el proxy).
   server-id: "server1"
   # Agrupa servers que comparten el mismo Redis pero deben tratarse como red aparte.
-  cluster-id: "valerin"
+  network-id: "valerin"
+  presence-ttl-seconds: 30
+  heartbeat-seconds: 10
+  # Tiempo para distinguir un cambio de backend de una desconexión real.
+  transfer-grace-seconds: 20
+  ack-timeout-millis: 3000

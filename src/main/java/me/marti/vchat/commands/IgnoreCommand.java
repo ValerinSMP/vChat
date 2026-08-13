@@ -35,9 +35,16 @@ public class IgnoreCommand implements CommandExecutor {
             return true;
         }
 
-        Player target = Bukkit.getPlayer(args[0]);
+        Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
-            plugin.getAdminManager().sendConfigMessage(player, "messages.player-not-found");
+            if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
+                plugin.getRedisManager().findPlayer(args[0], presence -> {
+                    if (presence == null) plugin.getAdminManager().sendConfigMessage(player, "messages.player-not-found");
+                    else toggle(player, presence.playerId(), presence.playerName());
+                });
+            } else {
+                plugin.getAdminManager().sendConfigMessage(player, "messages.player-not-found");
+            }
             return true;
         }
 
@@ -51,20 +58,23 @@ public class IgnoreCommand implements CommandExecutor {
             return true;
         }
 
-        var nameResolver = Placeholder.unparsed("player", target.getName());
+        toggle(player, target.getUniqueId(), target.getName());
+        return true;
+    }
 
-        if (plugin.getIgnoreManager().isIgnored(player.getUniqueId(), target.getUniqueId())) {
-            plugin.getIgnoreManager().removeIgnore(player, target.getUniqueId());
+    private void toggle(Player player, java.util.UUID targetId, String targetName) {
+        var nameResolver = Placeholder.unparsed("player", targetName);
+
+        if (plugin.getIgnoreManager().isIgnored(player.getUniqueId(), targetId)) {
+            plugin.getIgnoreManager().removeIgnore(player, targetId);
             plugin.getAdminManager().sendConfigActionBar(player, "ignore.no-longer-ignoring", nameResolver);
             playSound(player, "sounds.unignore");
-            return true;
+            return;
         }
 
-        plugin.getIgnoreManager().addIgnore(player, target.getUniqueId());
+        plugin.getIgnoreManager().addIgnore(player, targetId);
         plugin.getAdminManager().sendConfigActionBar(player, "ignore.now-ignoring", nameResolver);
         playSound(player, "sounds.ignore");
-
-        return true;
     }
 
     private void playSound(Player player, String key) {

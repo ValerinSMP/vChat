@@ -115,7 +115,10 @@ public class VChatCommand implements CommandExecutor {
 
     private boolean handleReload(CommandSender sender) {
         if (!requirePermission(sender, "vchat.admin", "vchat.reload")) return true;
-        plugin.reload();
+        if (!plugin.reload()) {
+            adminManager.sendConfigMessage(sender, "messages.reload-failed");
+            return true;
+        }
         adminManager.sendConfigMessage(sender, "messages.reload");
         if (sender instanceof Player player) {
             adminManager.playSound(player, "sounds.reload");

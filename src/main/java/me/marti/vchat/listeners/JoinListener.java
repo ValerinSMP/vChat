@@ -27,14 +27,16 @@ public class JoinListener implements Listener {
         // Chequear presencia ANTES de sobreescribirla: si ya figuraba online en otro
         // server del cluster, este join es solo un salto de red (hub -> survival, etc),
         // no una conexión nueva — el anuncio de "se unió" ya se mostró en su primer server.
-        boolean alreadyInNetwork = false;
-        if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
-            alreadyInNetwork = plugin.getRedisManager().findRemotePlayer(player.getName()) != null;
-            plugin.getRedisManager().setPlayerOnline(player.getUniqueId(), player.getName());
-            plugin.getRedisManager().setMsgToggle(player.getUniqueId(), plugin.getPrivateMessageManager().isMsgEnabled(player));
-            plugin.getRedisManager().setIgnoreList(player.getUniqueId(), plugin.getIgnoreManager().getIgnoredPlayers(player));
-        }
-        boolean networkTransfer = alreadyInNetwork;
+        plugin.loadPlayerState(player, () -> {
+            if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
+                plugin.getRedisManager().registerPresence(player.getUniqueId(), player.getName(), alreadyInNetwork -> {
+                    if (!player.isOnline() || isVanished(player) || alreadyInNetwork) return;
+                    plugin.getJoinQuitManager().handleJoin(player);
+                });
+            } else if (!isVanished(player)) {
+                plugin.getJoinQuitManager().handleJoin(player);
+            }
+        });
 
         // Suppress vanilla join message — Paper: joinMessage(null), Bukkit: setJoinMessage(null)
         try {
@@ -44,12 +46,6 @@ public class JoinListener implements Listener {
             event.setJoinMessage(null);
         }
 
-        // Delay 1 tick so SuperVanish has time to apply vanish state before we check
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
-            if (isVanished(player)) return;
-            if (networkTransfer) return;
-            plugin.getJoinQuitManager().handleJoin(player);
-        });
     }
 
     private boolean isVanished(Player player) {

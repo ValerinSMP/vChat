@@ -8,6 +8,8 @@ softdepend: [PlaceholderAPI, ProtocolLib, Nexo, CobbleCommands]
 libraries:
   - net.dv8tion:JDA:5.2.1
   - redis.clients:jedis:5.2.0
+  - com.mysql:mysql-connector-j:9.4.0
+  - org.xerial:sqlite-jdbc:3.50.3.0
 commands:
   vchat:
     description: Comandos públicos de vChat

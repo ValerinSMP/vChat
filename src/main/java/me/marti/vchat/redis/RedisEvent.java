@@ -1,15 +1,28 @@
 package me.marti.vchat.redis;
 
-/** Sobre pub/sub. Serializado con Gson, un solo canal por cluster. */
-public class RedisEvent {
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
-    public RedisEventType type;
+/** Versioned event envelope shared by every vChat backend. */
+public final class RedisEvent {
+    public int schemaVersion = 1;
+    public String eventId = UUID.randomUUID().toString();
+    public String networkId;
     public String sourceServer;
-    public String senderName;
-    public String senderUuid;
-    public String targetName;
-    public String targetUuid;
-    /** Component ya renderizado (GsonComponentSerializer) — el receptor no re-formatea. */
-    public String componentJson;
-    public long timestamp;
+    public RedisEventType type;
+    public long createdAt;
+    public Map<String, String> payload = new LinkedHashMap<>();
+
+    public RedisEvent() {
+    }
+
+    public RedisEvent(RedisEventType type) {
+        this.type = type;
+    }
+
+    public RedisEvent put(String key, String value) {
+        if (value != null) payload.put(key, value);
+        return this;
+    }
 }

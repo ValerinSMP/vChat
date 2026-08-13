@@ -112,11 +112,11 @@ public class ChatListener implements Listener {
 
         me.marti.vchat.redis.RedisManager redis = plugin.getRedisManager();
         if (redis != null && redis.isEnabled()) {
-            me.marti.vchat.redis.RedisEvent chatEvent = new me.marti.vchat.redis.RedisEvent();
-            chatEvent.type = me.marti.vchat.redis.RedisEventType.CHAT;
-            chatEvent.senderName = player.getName();
-            chatEvent.componentJson = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(formatted);
-            redis.publish(chatEvent);
+            redis.publish(new me.marti.vchat.redis.RedisEvent(me.marti.vchat.redis.RedisEventType.CHAT)
+                    .put("senderUuid", player.getUniqueId().toString())
+                    .put("senderName", player.getName())
+                    .put("bypassIgnore", String.valueOf(player.hasPermission("vchat.bypass.ignore")))
+                    .put("component", net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(formatted)));
         }
 
         Set<UUID> targetsToNotify = mentionResult.targetsToNotify();

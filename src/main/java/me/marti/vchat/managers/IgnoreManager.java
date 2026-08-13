@@ -41,9 +41,6 @@ public class IgnoreManager {
         // PDC local no viaja entre servers al saltar de red — si el jugador puso /ignore
         // en otro server del cluster, esa lista solo existe en Redis hasta ahora, nunca
         // se leía de vuelta acá. Sin esto, cada salto de server "olvidaba" a quién tenía ignorado.
-        if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
-            ignored.addAll(plugin.getRedisManager().getIgnoreList(player.getUniqueId()));
-        }
         ignoreCache.put(player.getUniqueId(), ignored);
     }
 
@@ -82,8 +79,18 @@ public class IgnoreManager {
                     .collect(Collectors.joining(","));
             player.getPersistentDataContainer().set(ignoreKey, PersistentDataType.STRING, data);
         }
-        if (plugin.getRedisManager() != null) {
-            plugin.getRedisManager().setIgnoreList(player.getUniqueId(), ignores);
+        plugin.savePlayerState(player);
+    }
+
+    public void applyState(Player player, Set<UUID> ignores) {
+        Set<UUID> copy = ConcurrentHashMap.newKeySet();
+        copy.addAll(ignores);
+        ignoreCache.put(player.getUniqueId(), copy);
+        if (copy.isEmpty()) {
+            player.getPersistentDataContainer().remove(ignoreKey);
+        } else {
+            player.getPersistentDataContainer().set(ignoreKey, PersistentDataType.STRING,
+                    copy.stream().map(UUID::toString).collect(Collectors.joining(",")));
         }
     }
 }

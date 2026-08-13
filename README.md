@@ -7,7 +7,9 @@
 [![Paper](https://img.shields.io/badge/Paper-1.21.11%2B-222222?style=for-the-badge)](https://papermc.io/)
 [![Java](https://img.shields.io/badge/Java-21-E76F00?style=for-the-badge&logo=openjdk&logoColor=white)](https://adoptium.net/)
 [![MiniMessage](https://img.shields.io/badge/text-MiniMessage-7B5CFA?style=for-the-badge)](https://docs.advntr.dev/minimessage/)
-[![Version](https://img.shields.io/badge/version-1.0.0-7B5CFA?style=for-the-badge)](https://github.com/ValerinSMP/vChat)
+[![Version](https://img.shields.io/badge/version-1.1.0-7B5CFA?style=for-the-badge)](https://github.com/ValerinSMP/vChat)
+
+[Características](#-características) • [Comandos](#-comandos-principales) • [Configuración](#️-configuración) • [Desarrollo](#️-compilación)
 
 </div>
 
@@ -17,16 +19,12 @@ entre servidores.
 
 ## ⭐ Características
 
-- **Formatos dinámicos:** prefijos y sufijos obtenidos desde LuckPerms.
-- **MiniMessage:** colores HEX, gradientes y componentes interactivos.
-- **Mensajes privados:** `/msg`, respuestas, bloqueo y social spy.
-- **Menciones:** resaltado, sonidos y preferencias por jugador.
-- **Ítems en el chat:** comparte el objeto de la mano con hover interactivo.
-- **Moderación:** filtros de spam, mayúsculas, publicidad y lenguaje.
-- **Control personal:** desactiva mensajes privados, menciones o el chat global.
-- **Discord bridge:** rutas configurables mediante JDA.
-- **Cross-server:** propagación de eventos mediante Redis.
-- **PlaceholderAPI:** estados y preferencias disponibles como placeholders.
+- **⭐ Chat por rangos** — Prefijos, sufijos y formatos obtenidos desde LuckPerms.
+- **⭐ Interacción moderna** — MiniMessage, colores HEX, hover, click e ítems compartidos.
+- **⭐ Comunicación privada** — `/msg`, respuestas, bloqueos, menciones y social spy.
+- **⭐ Moderación configurable** — Filtros de spam, mayúsculas, publicidad y lenguaje.
+- **⭐ Preferencias por jugador** — Controles para chat global, mensajes privados y menciones.
+- **⭐ Red fiable** — Chat, mensajes con ACK, preferencias durables y presencia TTL mediante MySQL + Redis.
 
 ## 💬 Experiencia de chat
 
@@ -69,14 +67,26 @@ Opcionales:
 
 Redis y JDA son necesarios únicamente para sus funciones correspondientes.
 
+## 📦 Instalación
+
+1. Instala LuckPerms y las integraciones opcionales que vayas a utilizar.
+2. Copia `vChat-1.1.0.jar` dentro de `plugins/`.
+3. Reinicia Paper y ajusta los archivos generados.
+4. Usa `/vchatadmin reload` para aplicar cambios compatibles de configuración.
+
 ## ⚙️ Configuración
 
 - `config.yml`: ajustes generales y sonidos.
-- `messages.yml`: textos y feedback.
+- `messages.yml`: textos, feedback y prefijo `<dark_gray>[<#00FB9A>vChat</#00FB9A><dark_gray>]</dark_gray>`.
 - `private.yml`: mensajes privados y social spy.
 - `formats.yml`: formatos por grupo.
 - `filters.yml`: filtros y listas.
 - `mentions.yml`: presentación y sonidos de menciones.
+
+SQLite es el modo local predeterminado. Para varios servidores, configura
+`storage.type: mysql`, un `redis.network-id` común y un `redis.server-id` único por
+backend. Redis transporta eventos y presencia efímera; MySQL conserva preferencias,
+ignores, mute global y el registro de jugadores.
 
 ## 🛠️ Compilación
 
@@ -84,4 +94,9 @@ Redis y JDA son necesarios únicamente para sus funciones correspondientes.
 .\gradlew.bat clean test build
 ```
 
-El build genera `build/libs/vChat-1.0.0.jar`.
+El build genera `build/libs/vChat-1.1.0.jar`.
+
+## 🔗 Enlaces
+
+- [Repositorio](https://github.com/ValerinSMP/vChat)
+- [Organización ValerinSMP](https://github.com/ValerinSMP)

@@ -47,9 +47,7 @@ public class AdminManager {
         boolean newState = !isPersonalChatMuted(player);
         personalChatCache.put(player.getUniqueId(), newState);
         player.getPersistentDataContainer().set(personalChatKey, org.bukkit.persistence.PersistentDataType.BYTE, newState ? (byte) 1 : (byte) 0);
-        if (plugin.getRedisManager() != null) {
-            plugin.getRedisManager().setChatMuteToggle(player.getUniqueId(), newState);
-        }
+        plugin.savePlayerState(player);
 
         if (newState) {
             // Now muted
@@ -67,17 +65,32 @@ public class AdminManager {
     }
 
     public void toggleGlobalChat() {
-        this.globalChatMuted = !this.globalChatMuted;
-        if (globalChatMuted) {
-             broadcastConfigMessage("moderation.chat-muted");
-             for(Player p : Bukkit.getOnlinePlayers()) {
-                 playSound(p, "sounds.toggle-off");
-             }
-        } else {
-             broadcastConfigMessage("moderation.chat-unmuted");
-             for(Player p : Bukkit.getOnlinePlayers()) {
-                 playSound(p, "sounds.toggle-on");
-             }
+        boolean candidate = !this.globalChatMuted;
+        plugin.getStorageManager().saveGlobalMute(candidate).thenRun(() ->
+                Bukkit.getScheduler().runTask(plugin, () -> applyGlobalChatMute(candidate, true, true)))
+                .exceptionally(error -> {
+                    plugin.getLogger().warning("Global mute was not changed because durable storage failed.");
+                    return null;
+                });
+    }
+
+    public void refreshGlobalMute() {
+        plugin.getStorageManager().loadGlobalMute().thenAccept(value ->
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    if (value != globalChatMuted) applyGlobalChatMute(value, true, false);
+                }));
+    }
+
+    private void applyGlobalChatMute(boolean muted, boolean announce, boolean publish) {
+        this.globalChatMuted = muted;
+        if (!announce) return;
+        broadcastConfigMessage(muted ? "moderation.chat-muted" : "moderation.chat-unmuted");
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            playSound(player, muted ? "sounds.toggle-off" : "sounds.toggle-on");
+        }
+        if (publish && plugin.getRedisManager() != null) {
+            plugin.getRedisManager().publish(new me.marti.vchat.redis.RedisEvent(
+                    me.marti.vchat.redis.RedisEventType.GLOBAL_MUTE_INVALIDATE));
         }
     }
 
@@ -135,20 +148,12 @@ public class AdminManager {
         }
         // PDC local no viaja entre servers al saltar de red — Redis (último toggle hecho
         // en cualquier server del cluster) manda si hay dato, si no se queda con el local.
-        if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
-            Boolean remote = plugin.getRedisManager().getRemoteChatMuteToggle(player.getUniqueId());
-            if (remote != null) personalMuted = remote;
-        }
         personalChatCache.put(player.getUniqueId(), personalMuted);
 
         // Load Death messages muted
         boolean deathMuted = false;
         if (player.getPersistentDataContainer().has(deathMutedKey, org.bukkit.persistence.PersistentDataType.BYTE)) {
             deathMuted = player.getPersistentDataContainer().get(deathMutedKey, org.bukkit.persistence.PersistentDataType.BYTE) == 1;
-        }
-        if (plugin.getRedisManager() != null && plugin.getRedisManager().isEnabled()) {
-            Boolean remote = plugin.getRedisManager().getRemoteDeathMuteToggle(player.getUniqueId());
-            if (remote != null) deathMuted = remote;
         }
         deathMutedCache.put(player.getUniqueId(), deathMuted);
     }
@@ -169,9 +174,7 @@ public class AdminManager {
         deathMutedCache.put(player.getUniqueId(), newState);
         player.getPersistentDataContainer().set(deathMutedKey,
                 org.bukkit.persistence.PersistentDataType.BYTE, newState ? (byte) 1 : (byte) 0);
-        if (plugin.getRedisManager() != null) {
-            plugin.getRedisManager().setDeathMuteToggle(player.getUniqueId(), newState);
-        }
+        plugin.savePlayerState(player);
         return newState;
     }
 
@@ -185,8 +188,18 @@ public class AdminManager {
         // Update PDC
         player.getPersistentDataContainer().set(notifyKey, org.bukkit.persistence.PersistentDataType.BYTE,
                 newState ? (byte) 1 : (byte) 0);
+        plugin.savePlayerState(player);
 
         return newState;
+    }
+
+    public void applyState(Player player, boolean personalMuted, boolean deathMuted, boolean notifyEnabled) {
+        personalChatCache.put(player.getUniqueId(), personalMuted);
+        deathMutedCache.put(player.getUniqueId(), deathMuted);
+        notifyCache.put(player.getUniqueId(), notifyEnabled);
+        player.getPersistentDataContainer().set(personalChatKey, org.bukkit.persistence.PersistentDataType.BYTE, personalMuted ? (byte) 1 : (byte) 0);
+        player.getPersistentDataContainer().set(deathMutedKey, org.bukkit.persistence.PersistentDataType.BYTE, deathMuted ? (byte) 1 : (byte) 0);
+        player.getPersistentDataContainer().set(notifyKey, org.bukkit.persistence.PersistentDataType.BYTE, notifyEnabled ? (byte) 1 : (byte) 0);
     }
 
     public void incrementViolation(Player player) {

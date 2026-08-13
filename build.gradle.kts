@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "me.marti"
-version = "1.0.0"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -29,11 +29,15 @@ dependencies {
     compileOnly("com.nexomc:nexo:1.8.0")
     compileOnly("net.dv8tion:JDA:5.2.1")
     compileOnly("redis.clients:jedis:5.2.0")
+    compileOnly("com.mysql:mysql-connector-j:9.4.0")
+    compileOnly("org.xerial:sqlite-jdbc:3.50.3.0")
 
     testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    testImplementation("net.luckperms:api:5.4")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
     testImplementation("org.mockito:mockito-core:5.12.0")
     testImplementation("redis.clients:jedis:5.2.0")
+    testImplementation("org.xerial:sqlite-jdbc:3.50.3.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
